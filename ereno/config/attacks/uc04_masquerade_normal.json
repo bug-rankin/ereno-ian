@@ -1,0 +1,7 @@
+{
+  "attackType": "masquerade_normal",
+  "description": "Masquerade fake normal state attack (UC04) - opposite of UC03",
+  "normalStatus": 2,
+  "maintainTiming": true,
+  "comment": "Attacker sends legitimate-looking messages with normal CB status during actual fault conditions"
+}

@@ -1,0 +1,8 @@
+{
+  "attackType": "grayhole",
+  "description": "Selective message dropping attack (UC08)",
+  "dropProbability": 0.3,
+  "selectiveDropping": true,
+  "randomSeed": 42,
+  "comment": "Drops messages selectively to degrade system reliability"
+}

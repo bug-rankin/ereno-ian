@@ -1,0 +1,9 @@
+{
+  "action": "train_and_test",
+  "actionConfigFile": "config/action_train_and_test_legacy.json",
+  "commonConfig": {
+    "randomSeed": 42,
+    "outputFormat": "arff",
+    "_comment": "This uses the LEGACY attack implementations for comparison"
+  }
+}

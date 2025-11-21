@@ -1,0 +1,87 @@
+{
+  "action": "compare",
+  "description": "Compare benign data with attack dataset to analyze attack implementation",
+  "input": {
+    "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+    "attackDatasetPath": "target/ereno_generated.arff",
+    "verifyFiles": true
+  },
+  "output": {
+    "directory": "target/comparison",
+    "filename": "comparison_report.json",
+    "generateVisualizations": true,
+    "visualizationDirectory": "target/comparison/charts",
+    "generateTextReport": true,
+    "textReportFilename": "comparison_report.txt"
+  },
+  "comparisonMetrics": {
+    "fieldChanges": {
+      "enabled": true,
+      "fields": [
+        "stNum",
+        "sqNum",
+        "timestamp",
+        "cbStatus",
+        "ethSrc",
+        "ethDst",
+        "t"
+      ]
+    },
+    "lineChanges": {
+      "enabled": true,
+      "metrics": [
+        "total_lines_changed",
+        "lines_added",
+        "lines_removed",
+        "change_percentage"
+      ]
+    },
+    "burstMetrics": {
+      "enabled": true,
+      "metrics": [
+        "burst_count",
+        "burst_duration_avg",
+        "burst_duration_max",
+        "burst_intensity",
+        "inter_burst_gap_avg"
+      ],
+      "burstThreshold": {
+        "minMessages": 3,
+        "maxIntervalMs": 100
+      }
+    },
+    "timingAnalysis": {
+      "enabled": true,
+      "metrics": [
+        "average_inter_message_gap",
+        "timing_variance",
+        "anomalous_gaps_count",
+        "timing_distribution"
+      ]
+    },
+    "sequenceAnalysis": {
+      "enabled": true,
+      "metrics": [
+        "sequence_breaks",
+        "stnum_jumps",
+        "sqnum_jumps",
+        "out_of_order_messages"
+      ]
+    },
+    "statisticalAnalysis": {
+      "enabled": true,
+      "metrics": [
+        "mean_comparison",
+        "variance_comparison",
+        "distribution_similarity",
+        "correlation_analysis"
+      ]
+    }
+  },
+  "comparison": {
+    "alignByTimestamp": true,
+    "toleranceMs": 10,
+    "includeContextLines": 5,
+    "highlightAnomalies": true
+  }
+}

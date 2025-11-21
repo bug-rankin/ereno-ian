@@ -1,0 +1,8 @@
+{
+  "attackType": "injection",
+  "description": "Random message injection attack (UC05)",
+  "numInjectedMessages": 50,
+  "randomSeed": 42,
+  "injectionPattern": "random",
+  "comment": "Injects random GOOSE messages between legitimate ones"
+}

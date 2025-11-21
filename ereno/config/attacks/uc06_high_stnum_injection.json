@@ -1,0 +1,20 @@
+{
+  "attackType": "high_stnum_injection",
+  "enabled": true,
+  "count": {
+    "lambda": 400
+  },
+  "jump": {
+    "min": 5,
+    "max": 200
+  },
+  "sqnumResetProb": 0.4,
+  "ttlOverride": {
+    "valuesMs": [100, 200],
+    "prob": 0.3
+  },
+  "padBytes": {
+    "min": 0,
+    "max": 24
+  }
+}

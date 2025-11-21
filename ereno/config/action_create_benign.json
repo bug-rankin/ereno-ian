@@ -1,0 +1,34 @@
+{
+  "action": "create_benign",
+  "description": "Generate benign (legitimate) traffic dataset",
+  "output": {
+    "directory": "target/benign_data",
+    "formats": ["arff", "csv"],
+    "filenamePrefix": null
+  },
+  "generation": {
+    "numberOfMessages": 40000,
+    "faultProbability": 5
+  },
+  "gooseFlow": {
+    "goID": "IntLockA",
+    "ethSrc": "01:0c:cd:01:2f:80",
+    "ethDst": "01:0c:cd:01:2f:81",
+    "ethType": "0x88B8",
+    "gooseAppid": "0x00003001",
+    "TPID": "0x8100",
+    "ndsCom": false,
+    "test": false,
+    "cbstatus": false
+  },
+  "setupIED": {
+    "iedName": "Protection IED",
+    "gocbRef": "LD/LLN0$GO$gcblA",
+    "datSet": "LD/LLN0$IntLockA",
+    "minTime": "4",
+    "maxTime": "1000",
+    "timestamp": "1",
+    "stNum": "1",
+    "sqNum": "1"
+  }
+}

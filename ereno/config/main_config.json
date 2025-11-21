@@ -1,0 +1,8 @@
+{
+  "action": "train_and_test",
+  "actionConfigFile": "config/action_train_and_test.json",
+  "commonConfig": {
+    "randomSeed": 42,
+    "outputFormat": "arff"
+  }
+}
