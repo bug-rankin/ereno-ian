@@ -58,13 +58,13 @@ public class DelayedReplayCreator implements MessageCreator {
         double selectionValue = 0.0;
         int selectionIntervalCounter = 0;
 
-        /*
+        
         for  (int i = 0; i < numDelayInstances; i++) {
             messageStream.get(i).setLabel(GSVDatasetWriter.label[9]);
             ied.addMessage(messageStream.get(i));
         }
-        */
         
+        /*
         for (int i = 0; numDelayInstances > 0 & i < messageStream.size(); i++) {
 
             delayMessage = messageStream.get(i);
@@ -155,7 +155,7 @@ public class DelayedReplayCreator implements MessageCreator {
             // if not faulty, then continue to the next message and check
 
         }
-
+        */
          
 
     }
