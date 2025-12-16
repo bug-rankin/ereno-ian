@@ -83,7 +83,7 @@
       },
       {
         "name": "uc10_delayed_replay",
-        "enabled": false,
+        "enabled": true,
         "attackConfig": "config/attacks/uc10_delayed_replay.json"
       }
     ],
@@ -130,7 +130,7 @@
       },
       {
         "name": "uc10_delayed_replay",
-        "enabled": false,
+        "enabled": true,
         "attackConfig": "config/attacks/uc10_delayed_replay.json"
       }
     ]

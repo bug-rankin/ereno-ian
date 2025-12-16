@@ -293,7 +293,7 @@ public class DatasetWriter {
         write("@attribute tDiff numeric"); // temporal consistency 67
         write("@attribute timeFromLastChange numeric"); // temporal consistency 68
         write("@attribute delay numeric"); // temporal consistency 69
-    String classLine = "@attribute class {" + label[0] + ", " + label[1] + ", " + label[2] + ", " + label[3] + ", " + label[4] + ", " + label[5] + ", " + label[6] + ", " + label[7] + ", " + label[8] + "}";
+    String classLine = "@attribute class {" + label[0] + ", " + label[1] + ", " + label[2] + ", " + label[3] + ", " + label[4] + ", " + label[5] + ", " + label[6] + ", " + label[7] + ", " + label[8] + ", " + label[9] + "}";
 
         write(classLine);
         write("@data");
@@ -331,7 +331,7 @@ public class DatasetWriter {
         write("@attribute timestampDiff numeric"); // temporal consistency 66
         write("@attribute tDiff numeric"); // temporal consistency 67
         write("@attribute timeFromLastChange numeric"); // temporal consistency 68
-    String classLine = "@attribute class {" + label[0] + ", " + label[1] + ", " + label[2] + ", " + label[3] + ", " + label[4] + ", " + label[5] + ", " + label[6] + ", " + label[7] + ", " + label[8] + "}";
+    String classLine = "@attribute class {" + label[0] + ", " + label[1] + ", " + label[2] + ", " + label[3] + ", " + label[4] + ", " + label[5] + ", " + label[6] + ", " + label[7] + ", " + label[8] + ", "+ label[9] + "}";
 
         write(classLine);
         write("@data");

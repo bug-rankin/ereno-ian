@@ -80,7 +80,7 @@
         "name": "uc08_grayhole",
         "enabled": true,
         "attackConfig": "config/attacks/uc08_grayhole.json"
-      }
+      },
       {
         "name": "uc10_delayed_replay",
         "enabled": true,
@@ -145,7 +145,7 @@
     "TPID": "0x8100",
     "ndsCom": false,
     "test": false,
-    "cbstatus": false
+    "cbstatus": true
   },
   "devices": {
     "useLegacy": true,

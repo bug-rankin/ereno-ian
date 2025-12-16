@@ -57,8 +57,14 @@ public class DelayedReplayCreator implements MessageCreator {
          int burstIntervalCounter = 0; // ensures that we have separate bursts. Ensures we maintain the burst interval
         double selectionValue = 0.0;
         int selectionIntervalCounter = 0;
-        
 
+        /*
+        for  (int i = 0; i < numDelayInstances; i++) {
+            messageStream.get(i).setLabel(GSVDatasetWriter.label[9]);
+            ied.addMessage(messageStream.get(i));
+        }
+        */
+        
         for (int i = 0; numDelayInstances > 0 & i < messageStream.size(); i++) {
 
             delayMessage = messageStream.get(i);
@@ -66,7 +72,7 @@ public class DelayedReplayCreator implements MessageCreator {
             // check to see if it is faulty
 
             // if statement to check if we want bursts
-            if (burstMode & delayMessage.getCbStatus() == 1 & !delayMessage.getLabel().equals(Labels.LABELS[9])) { // condense to having one condition statement once behavior is confirmed
+            if (burstMode & delayMessage.getCbStatus() == 1 & !delayMessage.getLabel().equals(GSVDatasetwriter.label[9])) { // condense to having one condition statement once behavior is confirmed
                 // have another condition that grabs a certain amount of faulty messages depending on burst size, checks if the burstIntervalCounter is 0, and checks if the counter is less than burst size
                 // perform further testing to see if we need to account for testing
                 if (burstIntervalCounter == burstInterval) { // once we have waited for the set interval, begin the next burst of messages
@@ -87,15 +93,15 @@ public class DelayedReplayCreator implements MessageCreator {
 
                 if (delayedTimestamp >= closestMessage.getTimestamp()) {
                     delayMessage.setTimestamp(delayedTimestamp);
-                    delayMessage.setLabel(Labels.LABELS[9]);
+                    delayMessage.setLabel(GSVDatasetwriter.label[9]);
 
-                    messageStream.add(closestIndex++, delayMessage);
+                    messageStream.add(closestIndex+1, delayMessage);
                     messageStream.remove(currentIndex);
                 } else if (delayedTimestamp < closestMessage.getTimestamp()) {
                     delayMessage.setTimestamp(delayedTimestamp);
-                    delayMessage.setLabel(Labels.LABELS[9]);
+                    delayMessage.setLabel(GSVDatasetwriter.label[9]);
 
-                    messageStream.add(closestIndex--, delayMessage);
+                    messageStream.add(closestIndex-1, delayMessage);
                     messageStream.remove(currentIndex);
                 }
                 numDelayInstances--;
@@ -130,14 +136,14 @@ public class DelayedReplayCreator implements MessageCreator {
 
                 if (delayedTimestamp >= closestMessage.getTimestamp()) {
                     delayMessage.setTimestamp(delayedTimestamp);
-                    delayMessage.setLabel(Labels.LABELS[9]);
+                    delayMessage.setLabel(GSVDatasetwriter.label[9]);
 
-                    messageStream.add(closestIndex++, delayMessage);
+                    messageStream.add(closestIndex+1, delayMessage);
                     messageStream.remove(currentIndex); // for debugging do not remove, just set a different label
                     //messageStream.get(currentIndex).setLabel("faulty_not_delayed");
                 } else if (delayedTimestamp < closestMessage.getTimestamp()) {
                     delayMessage.setTimestamp(delayedTimestamp);
-                    delayMessage.setLabel(Labels.LABELS[9]);
+                    delayMessage.setLabel(GSVDatasetwriter.label[9]);
 
                     messageStream.set(currentIndex, delayMessage); // for debugging, add the delayed message at the index after currentIndex
                 }
@@ -149,6 +155,9 @@ public class DelayedReplayCreator implements MessageCreator {
             // if not faulty, then continue to the next message and check
 
         }
+
+         
+
     }
 
     private double getNetworkDelay() {
