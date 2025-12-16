@@ -16,6 +16,8 @@ import br.ufu.facom.ereno.attacks.uc07.devices.HighRateStNumInjectorIED;
 import br.ufu.facom.ereno.attacks.uc07.devices.HighRateStNumInjectorIEDC;
 import br.ufu.facom.ereno.attacks.uc08.devices.GrayHoleVictimIED;
 import br.ufu.facom.ereno.attacks.uc08.devices.GrayHoleVictimIEDC;
+import br.ufu.facom.ereno.attacks.uc10.devices.DelayedReplayIED;
+import br.ufu.facom.ereno.attacks.uc10.devices.DelayedReplayIEDC;
 import br.ufu.facom.ereno.config.AttackConfig;
 import br.ufu.facom.ereno.config.ConfigLoader;
 import br.ufu.facom.ereno.dataExtractors.CSVWritter;
@@ -226,6 +228,8 @@ public class CreateTrainingAction {
             return Labels.LABELS[7]; // "poisoned_high_rate"
         } else if (segmentName.startsWith("uc08")) {
             return Labels.LABELS[8]; // "grayhole"
+        } else if (segmentName.startsWith("uc10")) {
+            return Labels.LABELS[9]; // "delayed_replay"
         }
         return Labels.LABELS[0]; // default to "normal"
     }
@@ -354,6 +358,8 @@ public class CreateTrainingAction {
                     // C variant uses config parameters from attack config file
                     return new GrayHoleVictimIEDC(benignIED, attackConfig);
                 }
+            case "delayed_replay":
+                return useLegacy ? new DelayedReplayIED(benignIED) : new DelayedReplayIEDC(benignIED, attackConfig);
                 
             default:
                 throw new IllegalArgumentException("Unknown attack type: " + attackType);

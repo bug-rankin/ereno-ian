@@ -98,7 +98,7 @@ public class TrainAndTestAction {
         }
         
         public static class DevicesConfig {
-            public boolean useLegacy = false;
+            public boolean useLegacy = true;
         }
     }
     
@@ -367,6 +367,8 @@ public class TrainAndTestAction {
             return br.ufu.facom.ereno.util.Labels.LABELS[7]; // "poisoned_high_rate"
         } else if (segmentName.startsWith("uc08")) {
             return br.ufu.facom.ereno.util.Labels.LABELS[8]; // "grayhole"
+        } else if (segmentName.startsWith("uc10")) {
+            return br.ufu.facom.ereno.util.Labels.LABELS[9];
         }
         return br.ufu.facom.ereno.util.Labels.LABELS[0]; // default to "normal"
     }

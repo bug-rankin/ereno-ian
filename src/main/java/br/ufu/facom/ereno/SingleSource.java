@@ -7,6 +7,7 @@ import br.ufu.facom.ereno.attacks.uc05.devices.InjectorIED;
 import br.ufu.facom.ereno.attacks.uc06.devices.HighStNumInjectorIED;
 import br.ufu.facom.ereno.attacks.uc07.devices.HighRateStNumInjectorIED;
 import br.ufu.facom.ereno.attacks.uc08.devices.GrayHoleVictimIED;
+import br.ufu.facom.ereno.attacks.uc10.devices.DelayedReplayIED;
 import br.ufu.facom.ereno.benign.uc00.devices.LegitimateProtectionIED;
 import br.ufu.facom.ereno.benign.uc00.devices.MergingUnit;
 import br.ufu.facom.ereno.attacks.uc01.devices.RandomReplayerIED;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
+import static br.ufu.facom.ereno.dataExtractors.DatasetWriter.Debug.gooseMessages;
 import static br.ufu.facom.ereno.dataExtractors.GSVDatasetWriter.*;
 
 public class SingleSource {
@@ -29,16 +31,17 @@ public class SingleSource {
         ConfigLoader.load();
 
         ConfigLoader.attacks.legitimate = true;
-        ConfigLoader.attacks.randomReplay = true;
+        ConfigLoader.attacks.randomReplay = false;
         ConfigLoader.attacks.masqueradeOutage = true;
         ConfigLoader.attacks.masqueradeDamage = true;
         ConfigLoader.attacks.randomInjection = true;
-        ConfigLoader.attacks.inverseReplay = true;
-        ConfigLoader.attacks.highStNum = true;
-        ConfigLoader.attacks.flooding = true;
+        ConfigLoader.attacks.inverseReplay = false;
+        ConfigLoader.attacks.highStNum = false;
+        ConfigLoader.attacks.flooding = false;
         ConfigLoader.attacks.grayhole = false;
+        ConfigLoader.attacks.delayedReplay = true;
 
-        SingleSource.lightweightDataset(System.getProperty("user.dir") + java.io.File.separator + "target" + java.io.File.separator + "ereno_generated.arff", true, "arff");
+        SingleSource.lightweightDataset(System.getProperty("user.dir") + java.io.File.separator + "target" + java.io.File.separator + "ereno_generated.csv", true, "csv");
     }
 
 
@@ -247,6 +250,27 @@ public class SingleSource {
             }
         }
 
+        if (ConfigLoader.attacks.delayedReplay) {
+            if (ConfigLoader.devices.useCVariants) {
+                br.ufu.facom.ereno.attacks.uc10.devices.DelayedReplayIED uc10c = new br.ufu.facom.ereno.attacks.uc10.devices.DelayedReplayIED(uc00);
+                uc10c.run(ConfigLoader.gooseFlow.numberOfMessages);
+                if (csvMode) {
+                    writeGooseMessagesCsv(uc10c.getMessages(), false);
+                } else {
+                    writeGooseMessagesToFile(uc10c.getMessages(), false);
+                }
+                totalMessageCount += uc10c.getNumberOfMessages();
+            } else {
+                DelayedReplayIED uc10 = new DelayedReplayIED(uc00);
+                uc10.run(ConfigLoader.gooseFlow.numberOfMessages);
+                if (csvMode) {
+                    writeGooseMessagesCsv(uc10.getMessages(), false);
+                } else {
+                    writeGooseMessagesToFile(uc10.getMessages(), false);
+                }
+            }
+        }
+
         // Finish writing
         if (csvMode) {
             br.ufu.facom.ereno.dataExtractors.CSVWritter.finishWriting();
@@ -345,6 +369,13 @@ public class SingleSource {
             uc08c.run(20);
             writeGooseMessagesToFile(uc08c.getMessages(), false);
             totalMessageCount += uc08c.getNumberOfMessages();
+        }
+
+        if (ConfigLoader.attacks.delayedReplay) {
+            br.ufu.facom.ereno.attacks.uc10.devices.DelayedReplayIED uc10c = new br.ufu.facom.ereno.attacks.uc10.devices.DelayedReplayIED(uc00);
+            uc10c.run(ConfigLoader.gooseFlow.numberOfMessages);
+            writeGooseMessagesToFile(uc10c.getMessages(), false);
+            totalMessageCount += uc10c.getNumberOfMessages();
         }
 
         finishWriting();

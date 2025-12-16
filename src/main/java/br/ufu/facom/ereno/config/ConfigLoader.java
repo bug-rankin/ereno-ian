@@ -163,6 +163,9 @@ public class ConfigLoader {
             applied.append("uc08.selectionRate set to 1..100%; ");
         }
 
+        if (attacksParams.uc10 == null) attacksParams.uc10 = new AttacksParams.UC10Config();
+        // add more stuff
+
         // Log applied defaults (if any) to help auditing and debugging of config migrations
         if (applied.length() > 0) {
             java.util.logging.Logger.getLogger("ConfigLoader").info("Applied config defaults: " + applied.toString());
@@ -193,6 +196,7 @@ public class ConfigLoader {
         public UC06Config uc06 = new UC06Config();
         public UC07Config uc07 = new UC07Config();
         public UC08Config uc08 = new UC08Config();
+        public UC10Config uc10 = new UC10Config();
 
         // New, descriptive attack parameter sections (match keys in config/configparams.json)
         public RandomReplayConfig randomReplay = new RandomReplayConfig();
@@ -202,6 +206,7 @@ public class ConfigLoader {
         public HighStNumInjectionConfig highStNumInjection = new HighStNumInjectionConfig();
         public HighRateStNumInjectionConfig highRateStNumInjection = new HighRateStNumInjectionConfig();
         public GreyholeConfig greyhole = new GreyholeConfig();
+        public DelayedReplayConfig delayedRandomReplay = new DelayedReplayConfig();
 
         public static class RangeInt { public int min; public int max; public int defaultValue; }
         public static class RangeMs { public int minMs; public int maxMs; public int defaultMs; }
@@ -233,6 +238,8 @@ public class ConfigLoader {
         public static class UC07Config { public RangeDouble minTimeMultiplier = new RangeDouble(); }
 
         public static class UC08Config { public RangeInt selectionRate = new RangeInt(); }
+
+        public static class UC10Config { public RangeInt selectionRate = new RangeInt();  }
 
         // --- new descriptive configs ---
         public static class RandomReplayConfig {
@@ -319,6 +326,11 @@ public class ConfigLoader {
             public double delayBurstProb = 0.2;
             public RangeDouble delayBurstLen = new RangeDouble();
         }
+
+        public static class DelayedReplayConfig {
+            public boolean enabled = false;
+        }
+
     }
 
     public static class OutputConfig {
@@ -339,6 +351,7 @@ public class ConfigLoader {
         public boolean highStNum;
         public boolean flooding;
         public boolean grayhole;
+        public boolean delayedReplay;
         public boolean stealthyAttack;
     }
 
@@ -368,7 +381,7 @@ public class ConfigLoader {
 
     public static class DevicesConfig {
         /** If true, instantiate the non-destructive C-variant devices (default true). If false, instantiate legacy device classes. */
-        public boolean useCVariants = true;
+        public boolean useCVariants = false;
     }
 
     public static class BenignDataConfig {

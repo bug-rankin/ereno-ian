@@ -1,4 +1,4 @@
-package br.ufu.facom.ereno.redundant.api;
+package br.ufu.facom.ereno.api;
 
 /**
  * Archived Datasets adapter

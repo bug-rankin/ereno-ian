@@ -10,6 +10,7 @@
     "highStNum": true,
     "flooding": true,
     "grayhole": false,
+    "delayedReplay": true,
     "stealthyAttack": false
   },
   "gooseFlow": {
@@ -22,7 +23,7 @@
     "TPID": "0x8100",
     "ndsCom": false,
     "test": false,
-    "cbstatus": false
+    "cbstatus": true
   },
   "randomSeed": 42,
   "output": {
@@ -30,7 +31,7 @@
     "filename": null
   },
   "devices": {
-    "useCVariants": true
+    "useCVariants": false
   },
   "attacksParams": {
     "randomReplay": {

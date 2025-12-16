@@ -43,12 +43,12 @@
     "training": [
       {
         "name": "uc01_random_replay",
-        "enabled": true,
+        "enabled": false,
         "attackConfig": "config/attacks/uc01_random_replay.json"
       },
       {
         "name": "uc02_inverse_replay",
-        "enabled": true,
+        "enabled": false,
         "attackConfig": "config/attacks/uc02_inverse_replay.json"
       },
       {
@@ -68,29 +68,34 @@
       },
       {
         "name": "uc06_high_stnum_injection",
-        "enabled": true,
+        "enabled": false,
         "attackConfig": "config/attacks/uc06_high_stnum_injection.json"
       },
       {
         "name": "uc07_flooding",
-        "enabled": true,
+        "enabled": false,
         "attackConfig": "config/attacks/uc07_flooding.json"
       },
       {
         "name": "uc08_grayhole",
-        "enabled": true,
+        "enabled": false,
         "attackConfig": "config/attacks/uc08_grayhole.json"
+      },
+      {
+        "name": "uc10_delayed_replay",
+        "enabled": false,
+        "attackConfig": "config/attacks/uc10_delayed_replay.json"
       }
     ],
     "testing": [
       {
         "name": "uc01_random_replay",
-        "enabled": true,
+        "enabled": false,
         "attackConfig": "config/attacks/uc01_random_replay.json"
       },
       {
         "name": "uc02_inverse_replay",
-        "enabled": true,
+        "enabled": false,
         "attackConfig": "config/attacks/uc02_inverse_replay.json"
       },
       {
@@ -110,18 +115,23 @@
       },
       {
         "name": "uc06_high_stnum_injection",
-        "enabled": true,
+        "enabled": false,
         "attackConfig": "config/attacks/uc06_high_stnum_injection.json"
       },
       {
         "name": "uc07_flooding",
-        "enabled": true,
+        "enabled": false,
         "attackConfig": "config/attacks/uc07_flooding.json"
       },
       {
         "name": "uc08_grayhole",
-        "enabled": true,
+        "enabled": false,
         "attackConfig": "config/attacks/uc08_grayhole.json"
+      },
+      {
+        "name": "uc10_delayed_replay",
+        "enabled": false,
+        "attackConfig": "config/attacks/uc10_delayed_replay.json"
       }
     ]
   },
@@ -135,10 +145,10 @@
     "TPID": "0x8100",
     "ndsCom": false,
     "test": false,
-    "cbstatus": false
+    "cbstatus": true
   },
   "devices": {
-    "useLegacy": false,
+    "useLegacy": true,
     "_comment": "Set useLegacy to true to use old hardcoded attack implementations. Default (false) uses new C variant config-based implementations."
   }
 }

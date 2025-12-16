@@ -154,6 +154,8 @@ public class CreateTestAction {
             return Labels.LABELS[7]; // "poisoned_high_rate"
         } else if (segmentName.startsWith("uc08")) {
             return Labels.LABELS[8]; // "grayhole"
+        } else if (segmentName.startsWith("uc10")) {
+            return Labels.LABELS[9]; // "delayed_replay"
         }
         return Labels.LABELS[0]; // default to "normal"
     }
