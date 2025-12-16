@@ -1,0 +1,13 @@
+{
+  "action": "compare",
+  "input": {
+    "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+    "verifyBenignData": true,
+    "attackDatasetPath": "target/training/training_dataset.arff",
+    "verifyAttackData": true
+  },
+  "actionConfigFile": "config/action_compare.json",
+  "commonConfig": {
+    "randomSeed": 42
+  }
+}

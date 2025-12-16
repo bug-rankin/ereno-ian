@@ -25,6 +25,8 @@ import weka.core.Instances;
 import weka.core.SerializationHelper;
 import weka.core.converters.ConverterUtils.DataSource;
 
+import br.ufu.facom.ereno.actions.TrainModelAction.Config;
+
 /**
  * Action handler for training machine learning models.
  * 

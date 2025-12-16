@@ -47,7 +47,7 @@ public class DelayedReplayCreator implements MessageCreator {
         int burstSize = 5; // the size of a message burst
         //int spacing; // the spacing between delayed messages (might be redundant due to the amount of delay and the timestamps
         double selectionRate = 0.4; // determines if a certain messages is delayed or not
-        boolean burstMode = false; // determines if we will do bursts of messages or not
+        boolean burstMode = true; // determines if we will do bursts of messages or not
         //int numLegitDelays; // the number of legitimate messages to be delayed // honestly, probably not needed either
         //float delayedFaultProportion; // the proportion of delayed faulty messages to the entirety of the message stream // probably not needed
         //int startOfRange; // start of a specific range to select messages from // may be redundant
@@ -58,13 +58,13 @@ public class DelayedReplayCreator implements MessageCreator {
         double selectionValue = 0.0;
         int selectionIntervalCounter = 0;
 
-        
+       /* 
         for  (int i = 0; i < numDelayInstances; i++) {
             messageStream.get(i).setLabel(GSVDatasetWriter.label[9]);
             ied.addMessage(messageStream.get(i));
         }
+        */
         
-        /*
         for (int i = 0; numDelayInstances > 0 & i < messageStream.size(); i++) {
 
             delayMessage = messageStream.get(i);
@@ -97,12 +97,16 @@ public class DelayedReplayCreator implements MessageCreator {
 
                     messageStream.add(closestIndex+1, delayMessage);
                     messageStream.remove(currentIndex);
+
+                    ied.addMessage(delayMessage);
                 } else if (delayedTimestamp < closestMessage.getTimestamp()) {
                     delayMessage.setTimestamp(delayedTimestamp);
                     delayMessage.setLabel(GSVDatasetWriter.label[9]);
 
                     messageStream.add(closestIndex-1, delayMessage);
                     messageStream.remove(currentIndex);
+
+                    ied.addMessage(delayMessage);
                 }
                 numDelayInstances--;
                 burstMessageCounter++;
@@ -122,9 +126,11 @@ public class DelayedReplayCreator implements MessageCreator {
                 // this will ensure the random between is only called for faulty messages
                 selectionValue = randomBetween(0.0, 1.0);
                 if (selectionValue < selectionRate) {
+                    messageStream.get(i).setLabel(GSVDatasetWriter.label[9]);
+                    ied.addMessage(messageStream.get(i));
+                    numDelayInstances--;
                     continue;
                 }
-
 
                 double networkDelay = getNetworkDelay();
                 int currentIndex = i;
@@ -139,13 +145,18 @@ public class DelayedReplayCreator implements MessageCreator {
                     delayMessage.setLabel(GSVDatasetWriter.label[9]);
 
                     messageStream.add(closestIndex+1, delayMessage);
-                    messageStream.remove(currentIndex); // for debugging do not remove, just set a different label
+                    messageStream.remove(currentIndex);
+                    ied.addMessage(delayMessage);
                     //messageStream.get(currentIndex).setLabel("faulty_not_delayed");
                 } else if (delayedTimestamp < closestMessage.getTimestamp()) {
                     delayMessage.setTimestamp(delayedTimestamp);
                     delayMessage.setLabel(GSVDatasetWriter.label[9]);
 
+                    ied.addMessage(delayMessage);
                     messageStream.set(currentIndex, delayMessage); // for debugging, add the delayed message at the index after currentIndex
+                } else if (delayMessage.getCbStatus() != 1) {
+                    //delayMessage.setLabel(GSVDatasetWriter.label[0]);
+                    //ied.addMessage(delayMessage);
                 }
                 
                 numDelayInstances--;
@@ -155,7 +166,7 @@ public class DelayedReplayCreator implements MessageCreator {
             // if not faulty, then continue to the next message and check
 
         }
-        */
+        
          
 
     }

@@ -16,6 +16,7 @@ import com.google.gson.GsonBuilder;
 
 import br.ufu.facom.ereno.evaluation.support.GenericEvaluation;
 import br.ufu.facom.ereno.evaluation.support.GenericResultado;
+import br.ufu.facom.ereno.actions.EvaluateAction.Config;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 import weka.core.SerializationHelper;
