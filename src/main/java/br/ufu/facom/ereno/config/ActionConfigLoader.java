@@ -1,13 +1,14 @@
 package br.ufu.facom.ereno.config;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.logging.Logger;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 /**
  * New configuration system that supports action-based configuration files.
@@ -19,10 +20,11 @@ public class ActionConfigLoader {
     
     public enum Action {
         CREATE_BENIGN,
-        CREATE_TRAINING,
-        CREATE_TEST,
-        TRAIN_AND_TEST,
+        CREATE_ATTACK_DATASET,
+        TRAIN_MODEL,
+        EVALUATE,
         COMPARE,
+        PIPELINE,
         UNKNOWN
     }
 
@@ -30,6 +32,14 @@ public class ActionConfigLoader {
         public String action;
         public String actionConfigFile;
         public CommonConfig commonConfig;
+        // For pipeline support
+        public List<PipelineStep> pipeline;
+    }
+
+    public static class PipelineStep {
+        public String action;
+        public String actionConfigFile;
+        public String description;
     }
 
     public static class CommonConfig {
@@ -61,15 +71,17 @@ public class ActionConfigLoader {
         currentAction = parseAction(mainConfig.action);
         LOGGER.info("Action type: " + currentAction);
 
-        // Load action-specific config
-        if (mainConfig.actionConfigFile != null && !mainConfig.actionConfigFile.trim().isEmpty()) {
-            LOGGER.info("Loading action config from: " + mainConfig.actionConfigFile);
-            try (FileReader reader = new FileReader(mainConfig.actionConfigFile)) {
-                Gson gson = new Gson();
-                actionConfig = gson.fromJson(reader, JsonObject.class);
+        // Load action-specific config (skip for pipeline actions)
+        if (currentAction != Action.PIPELINE) {
+            if (mainConfig.actionConfigFile != null && !mainConfig.actionConfigFile.trim().isEmpty()) {
+                LOGGER.info("Loading action config from: " + mainConfig.actionConfigFile);
+                try (FileReader reader = new FileReader(mainConfig.actionConfigFile)) {
+                    Gson gson = new Gson();
+                    actionConfig = gson.fromJson(reader, JsonObject.class);
+                }
+            } else {
+                throw new IOException("Action config file path is required in main config");
             }
-        } else {
-            throw new IOException("Action config file path is required in main config");
         }
 
         // Initialize RNG if seed is provided
@@ -89,14 +101,17 @@ public class ActionConfigLoader {
         switch (actionStr.toLowerCase().replace("_", "")) {
             case "createbenign":
                 return Action.CREATE_BENIGN;
-            case "createtraining":
-                return Action.CREATE_TRAINING;
-            case "createtest":
-                return Action.CREATE_TEST;
-            case "trainandtest":
-                return Action.TRAIN_AND_TEST;
+            case "createattackdataset":
+            case "createtraining": // backwards compatibility
+                return Action.CREATE_ATTACK_DATASET;
+            case "trainmodel":
+                return Action.TRAIN_MODEL;
+            case "evaluate":
+                return Action.EVALUATE;
             case "compare":
                 return Action.COMPARE;
+            case "pipeline":
+                return Action.PIPELINE;
             default:
                 return Action.UNKNOWN;
         }

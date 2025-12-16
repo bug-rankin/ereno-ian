@@ -1,0 +1,32 @@
+{
+  "action": "train_model",
+  "description": "Train ML classifiers on attack dataset",
+  "input": {
+    "trainingDatasetPath": "target/training/training_dataset.arff",
+    "verifyDataset": true
+  },
+  "output": {
+    "modelDirectory": "target/models",
+    "saveMetadata": true,
+    "metadataFilename": "training_metadata.json"
+  },
+  "classifiers": [
+    "J48",
+    "RandomForest",
+    "NaiveBayes",
+    "REPTree"
+  ],
+  "classifierParameters": {
+    "j48": {
+      "confidenceFactor": 0.25,
+      "minNumObj": 2
+    },
+    "randomForest": {
+      "numIterations": 100,
+      "numFeatures": 0
+    },
+    "ibk": {
+      "k": 1
+    }
+  }
+}
