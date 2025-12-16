@@ -1,0 +1,39 @@
+{
+  "action": "evaluate",
+  "description": "Evaluate trained models against test dataset",
+  "input": {
+    "models": [
+      {
+        "name": "J48",
+        "modelPath": "target/models/J48_model.model"
+      },
+      {
+        "name": "RandomForest",
+        "modelPath": "target/models/RandomForest_model.model"
+      },
+      {
+        "name": "NaiveBayes",
+        "modelPath": "target/models/NaiveBayes_model.model"
+      },
+      {
+        "name": "REPTree",
+        "modelPath": "target/models/REPTree_model.model"
+      }
+    ],
+    "testDatasetPath": "target/testing/test_dataset.arff",
+    "verifyFiles": true
+  },
+  "output": {
+    "evaluationDirectory": "target/evaluation",
+    "evaluationFilename": "evaluation_results.json",
+    "generateTextReport": true,
+    "textReportFilename": "evaluation_report.txt"
+  },
+  "outputMetrics": [
+    "accuracy",
+    "precision",
+    "recall",
+    "f1",
+    "confusion_matrix"
+  ]
+}

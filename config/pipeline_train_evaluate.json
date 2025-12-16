@@ -1,0 +1,25 @@
+{
+  "action": "pipeline",
+  "description": "Complete ML pipeline: create dataset, train models, and evaluate",
+  "commonConfig": {
+    "randomSeed": 42,
+    "outputFormat": "arff"
+  },
+  "pipeline": [
+    {
+      "action": "create_attack_dataset",
+      "actionConfigFile": "config/action_create_attack_dataset.json",
+      "description": "Generate labeled training dataset with attacks"
+    },
+    {
+      "action": "train_model",
+      "actionConfigFile": "config/action_train_model.json",
+      "description": "Train classifiers on the attack dataset"
+    },
+    {
+      "action": "evaluate",
+      "actionConfigFile": "config/action_evaluate.json",
+      "description": "Evaluate trained models on test dataset"
+    }
+  ]
+}

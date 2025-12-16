@@ -1,0 +1,24 @@
+{
+  "action": "evaluate",
+  "description": "Evaluate trained models",
+  "input": {
+    "models": [
+      {
+        "name": "J48",
+        "modelPath": "target/models_test/J48_model.model"
+      },
+      {
+        "name": "RandomForest",
+        "modelPath": "target/models_test/RandomForest_model.model"
+      }
+    ],
+    "testDatasetPath": "target/training/test_training_dataset.arff",
+    "verifyFiles": true
+  },
+  "output": {
+    "evaluationDirectory": "target/evaluation_test",
+    "evaluationFilename": "evaluation_results.json",
+    "generateTextReport": true,
+    "textReportFilename": "evaluation_report.txt"
+  }
+}

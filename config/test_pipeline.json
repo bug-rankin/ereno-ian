@@ -1,0 +1,29 @@
+{
+  "action": "pipeline",
+  "description": "Test complete pipeline with small dataset",
+  "commonConfig": {
+    "randomSeed": 42
+  },
+  "pipeline": [
+    {
+      "action": "create_benign",
+      "actionConfigFile": "config/action_create_benign_test.json",
+      "description": "Generate benign test data"
+    },
+    {
+      "action": "create_attack_dataset",
+      "actionConfigFile": "config/action_create_attack_dataset_test.json",
+      "description": "Create training dataset"
+    },
+    {
+      "action": "train_model",
+      "actionConfigFile": "config/action_train_model_test.json",
+      "description": "Train classifiers"
+    },
+    {
+      "action": "evaluate",
+      "actionConfigFile": "config/action_evaluate_test.json",
+      "description": "Evaluate models"
+    }
+  ]
+}

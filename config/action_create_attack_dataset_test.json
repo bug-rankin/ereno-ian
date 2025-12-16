@@ -1,0 +1,32 @@
+{
+  "action": "create_attack_dataset",
+  "description": "Generate small attack dataset for testing",
+  "input": {
+    "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+    "verifyBenignData": true
+  },
+  "output": {
+    "directory": "target/training",
+    "filename": "test_training_dataset.arff",
+    "format": "arff"
+  },
+  "datasetStructure": {
+    "messagesPerSegment": 50,
+    "includeBenignSegment": true,
+    "shuffleSegments": false
+  },
+  "attackSegments": [
+    {
+      "name": "uc01_random_replay",
+      "enabled": true,
+      "attackConfig": "config/attacks/uc01_random_replay.json",
+      "description": "Random replay attack"
+    },
+    {
+      "name": "uc05_injection",
+      "enabled": true,
+      "attackConfig": "config/attacks/uc05_injection.json",
+      "description": "Random injection attack"
+    }
+  ]
+}

@@ -1,6 +1,17 @@
 package br.ufu.facom.ereno.actions;
 
-import br.ufu.facom.ereno.benign.uc00.devices.LegitimateProtectionIED;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Logger;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
+import br.ufu.facom.ereno.SubstationNetwork;
 import br.ufu.facom.ereno.attacks.uc01.devices.RandomReplayerIED;
 import br.ufu.facom.ereno.attacks.uc01.devices.RandomReplayerIEDC;
 import br.ufu.facom.ereno.attacks.uc02.devices.InverseReplayerIED;
@@ -16,40 +27,31 @@ import br.ufu.facom.ereno.attacks.uc07.devices.HighRateStNumInjectorIED;
 import br.ufu.facom.ereno.attacks.uc07.devices.HighRateStNumInjectorIEDC;
 import br.ufu.facom.ereno.attacks.uc08.devices.GrayHoleVictimIED;
 import br.ufu.facom.ereno.attacks.uc08.devices.GrayHoleVictimIEDC;
+import br.ufu.facom.ereno.benign.uc00.devices.LegitimateProtectionIED;
 import br.ufu.facom.ereno.config.AttackConfig;
 import br.ufu.facom.ereno.config.ConfigLoader;
 import br.ufu.facom.ereno.dataExtractors.CSVWritter;
-import br.ufu.facom.ereno.dataExtractors.GSVDatasetWriter;
+import static br.ufu.facom.ereno.dataExtractors.DatasetWriter.startWriting;
+import static br.ufu.facom.ereno.dataExtractors.DatasetWriter.write;
+import static br.ufu.facom.ereno.dataExtractors.DatasetWriter.writeGooseMessagesToFile;
+import static br.ufu.facom.ereno.dataExtractors.GSVDatasetWriter.finishWriting;
 import br.ufu.facom.ereno.general.ProtectionIED;
 import br.ufu.facom.ereno.messages.Goose;
 import br.ufu.facom.ereno.util.BenignDataManager;
 import br.ufu.facom.ereno.util.Labels;
-import br.ufu.facom.ereno.SubstationNetwork;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.logging.Logger;
-
-import static br.ufu.facom.ereno.dataExtractors.GSVDatasetWriter.*;
 
 /**
- * Action handler for creating training datasets.
+ * Action handler for creating attack datasets.
  * 
  * This action:
  * 1. Loads benign data from file
  * 2. Generates attack segments based on configuration
- * 3. Combines segments into a unified training dataset
+ * 3. Combines segments into a unified attack dataset
  * 4. Outputs in ARFF or CSV format
  */
-public class CreateTrainingAction {
+public class CreateAttackDatasetAction {
     
-    private static final Logger LOGGER = Logger.getLogger(CreateTrainingAction.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(CreateAttackDatasetAction.class.getName());
     
     public static class Config {
         public String action;
@@ -87,7 +89,7 @@ public class CreateTrainingAction {
     }
     
     public static void execute(String configPath) throws Exception {
-        LOGGER.info("Starting CreateTrainingAction with config: " + configPath);
+        LOGGER.info("Starting CreateAttackDatasetAction with config: " + configPath);
         
         // Load configuration
         Config config = loadConfig(configPath);
@@ -128,7 +130,7 @@ public class CreateTrainingAction {
             CSVWritter.startWriting(outputPath);
         } else {
             startWriting(outputPath);
-            write("@relation ereno_training");
+            write("@relation ereno_attack_dataset");
         }
         
         // Collect all segments
@@ -202,7 +204,7 @@ public class CreateTrainingAction {
             finishWriting();
         }
         
-        LOGGER.info("Training dataset created successfully: " + outputPath);
+        LOGGER.info("Attack dataset created successfully: " + outputPath);
         LOGGER.info("Total messages: " + totalMessages + " across " + segments.size() + " segments");
     }
     

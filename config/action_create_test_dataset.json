@@ -1,0 +1,40 @@
+{
+  "action": "create_attack_dataset",
+  "description": "Generate test dataset for model evaluation",
+  "input": {
+    "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+    "verifyBenignData": true
+  },
+  "output": {
+    "directory": "target/testing",
+    "filename": "test_dataset.arff",
+    "format": "arff"
+  },
+  "datasetStructure": {
+    "messagesPerSegment": 500,
+    "includeBenignSegment": true,
+    "shuffleSegments": true
+  },
+  "attackSegments": [
+    {
+      "name": "uc01_random_replay",
+      "enabled": true,
+      "attackConfig": "config/attacks/uc01_random_replay.json"
+    },
+    {
+      "name": "uc02_inverse_replay",
+      "enabled": true,
+      "attackConfig": "config/attacks/uc02_inverse_replay.json"
+    },
+    {
+      "name": "uc05_injection",
+      "enabled": true,
+      "attackConfig": "config/attacks/uc05_injection.json"
+    },
+    {
+      "name": "uc07_flooding",
+      "enabled": true,
+      "attackConfig": "config/attacks/uc07_flooding.json"
+    }
+  ]
+}
