@@ -165,6 +165,10 @@ public class ConfigLoader {
 
         if (attacksParams.uc10 == null) attacksParams.uc10 = new AttacksParams.UC10Config();
         // add stuff here after asking Ian what the heck this does.
+        if (attacksParams.uc10.selectionInterval == null)
+        if (attacksParams.uc10.burstInterval == null)
+        if (attacksParams.uc10.burstSize == null)
+        if (attacksParams.uc10.selectionRate == null)
 
 
         // Log applied defaults (if any) to help auditing and debugging of config migrations
@@ -336,10 +340,10 @@ public class ConfigLoader {
 
         public static class DelayedReplayConfig { // adjust if necessary
             public boolean enabled = false;
-            public int selectionInterval = 5;
-            public int burstInterval = 5;
-            public int burstSize = 5;
-            public double selectionRate = 0.4;
+            public RangeInt selectionInterval = new RangeInt();
+            public RangeInt burstInterval = new RangeInt();
+            public RangeInt burstSize = new RangeInt();
+            public RangeDouble selectionRate = new RangeDouble();
             public boolean burstMode = false;
         }
 
@@ -393,7 +397,7 @@ public class ConfigLoader {
 
     public static class DevicesConfig {
         /** If true, instantiate the non-destructive C-variant devices (default true). If false, instantiate legacy device classes. */
-        public boolean useCVariants = false;
+        public boolean useCVariants = true;
     }
 
     public static class BenignDataConfig {

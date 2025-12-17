@@ -31,7 +31,7 @@
     "filename": null
   },
   "devices": {
-    "useCVariants": false
+    "useCVariants": true
   },
   "attacksParams": {
     "randomReplay": {

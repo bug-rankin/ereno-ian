@@ -82,6 +82,6 @@
     "cbstatus": true
   },
   "devices": {
-    "useCVariants": false
+    "useCVariants": true
   }
 }

@@ -27,9 +27,9 @@ public class DelayedReplayCreatorC implements MessageCreator {
         // Potentially expand upon these parameters and have ranges for them
         Goose delayMessage; // the potential message to be delayed
         int selectionInterval = randomBetween(config.getNestedInt("selectionInterval", "min", 5), config.getNestedInt("selectionInterval", "max", 25)); // the rate or interval in which messages are selected to be delayed
-        int burstInterval = randomBetween(config.getNestedInt("burstInterval", "min", 5), config.getNestedInt("burstInterval", "max", 25));; // the interval in which bursts of messages are selected and then delayed
-        int burstSize = randomBetween(config.getNestedInt("burstSize", "min", 5), config.getNestedInt("burstSize", "max", 25));; // the size of a message burst
-        double selectionRate = randomBetween(config.getNestedDouble("selectionRate", "min", 0.25), config.getNestedDouble("selectionRate", "max", 0.75));; // determines if a certain messages is delayed or not
+        int burstInterval = randomBetween(config.getNestedInt("burstInterval", "min", 5), config.getNestedInt("burstInterval", "max", 25)); // the interval in which bursts of messages are selected and then delayed
+        int burstSize = randomBetween(config.getNestedInt("burstSize", "min", 5), config.getNestedInt("burstSize", "max", 25)); // the size of a message burst
+        double selectionRate = randomBetween(config.getNestedDouble("selectionRate", "min", 0.25), config.getNestedDouble("selectionRate", "max", 0.75)); // determines if a certain messages is delayed or not
         boolean burstMode = config.getBoolean("burstMode", false); // determines if we will do bursts of messages or not
 
         // counter/tracking variables that are not assigned in the config file
@@ -103,14 +103,11 @@ public class DelayedReplayCreatorC implements MessageCreator {
 
                 // have the randomBetween var here for the selection rate
                 // this will ensure the random between is only called for faulty messages
-                selectionValue = randomBetween(0.0, 1.0);
-                /*
+                //selectionValue = randomBetween(0.0, 1.0);
+                
                 if (selectionValue < selectionRate) {
-                    messageStream.get(i).setLabel(GSVDatasetWriter.label[9]);
-                    ied.addMessage(messageStream.get(i));
-                    numDelayInstances--;
                     continue;
-                }*/
+                }
 
                 double networkDelay = getNetworkDelay();
                 int currentIndex = i;
