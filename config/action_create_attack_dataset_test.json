@@ -18,15 +18,21 @@
   "attackSegments": [
     {
       "name": "uc01_random_replay",
-      "enabled": true,
+      "enabled": false,
       "attackConfig": "config/attacks/uc01_random_replay.json",
       "description": "Random replay attack"
     },
     {
       "name": "uc05_injection",
-      "enabled": true,
+      "enabled": false,
       "attackConfig": "config/attacks/uc05_injection.json",
       "description": "Random injection attack"
+    },
+    {
+      "name": "uc10_delayed_replay",
+      "enabled": true,
+      "attackConfig": "config/attacks/uc10_delayed_replay.json",
+      "description": "Network delay attack"
     }
   ]
 }

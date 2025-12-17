@@ -42,12 +42,12 @@ public class DelayedReplayCreator implements MessageCreator {
 
         // potentially add some variables to help out
         Goose delayMessage; // the potential message to be delayed
-        int selectionInterval = 3; // the rate or interval in which messages are selected to be delayed
+        int selectionInterval = 5; // the rate or interval in which messages are selected to be delayed
         int burstInterval = 5; // the interval in which bursts of messages are selected and then delayed
         int burstSize = 5; // the size of a message burst
         //int spacing; // the spacing between delayed messages (might be redundant due to the amount of delay and the timestamps
         double selectionRate = 0.4; // determines if a certain messages is delayed or not
-        boolean burstMode = true; // determines if we will do bursts of messages or not
+        boolean burstMode = false; // determines if we will do bursts of messages or not
         //int numLegitDelays; // the number of legitimate messages to be delayed // honestly, probably not needed either
         //float delayedFaultProportion; // the proportion of delayed faulty messages to the entirety of the message stream // probably not needed
         //int startOfRange; // start of a specific range to select messages from // may be redundant
@@ -72,7 +72,7 @@ public class DelayedReplayCreator implements MessageCreator {
             // check to see if it is faulty
 
             // if statement to check if we want bursts
-            if (burstMode & delayMessage.getCbStatus() == 1 & !delayMessage.getLabel().equals(GSVDatasetWriter.label[9])) { // condense to having one condition statement once behavior is confirmed
+            if (burstMode == true & delayMessage.getCbStatus() == 1) { // condense to having one condition statement once behavior is confirmed
                 // have another condition that grabs a certain amount of faulty messages depending on burst size, checks if the burstIntervalCounter is 0, and checks if the counter is less than burst size
                 // perform further testing to see if we need to account for testing
                 if (burstIntervalCounter == burstInterval) { // once we have waited for the set interval, begin the next burst of messages
@@ -86,66 +86,76 @@ public class DelayedReplayCreator implements MessageCreator {
                 double networkDelay = getNetworkDelay();
                 int currentIndex = i;
 
-                int closestIndex = getClosestIndex(delayMessage, networkDelay, currentIndex);
-                Goose closestMessage = messageStream.get(closestIndex);
+                //int closestIndex = getClosestIndex(delayMessage, networkDelay, currentIndex);
+                //Goose closestMessage = messageStream.get(closestIndex);
                 
                 double delayedTimestamp = delayMessage.getTimestamp() + networkDelay;
+                delayMessage.setTimestamp(delayedTimestamp);
+                delayMessage.setLabel(GSVDatasetWriter.label[9]);
 
+                ied.addMessage(delayMessage);
+
+                /*
                 if (delayedTimestamp >= closestMessage.getTimestamp()) {
                     delayMessage.setTimestamp(delayedTimestamp);
                     delayMessage.setLabel(GSVDatasetWriter.label[9]);
 
-                    messageStream.add(closestIndex+1, delayMessage);
-                    messageStream.remove(currentIndex);
+                    //messageStream.add(closestIndex+1, delayMessage);
+                    //messageStream.remove(currentIndex);
 
                     ied.addMessage(delayMessage);
                 } else if (delayedTimestamp < closestMessage.getTimestamp()) {
                     delayMessage.setTimestamp(delayedTimestamp);
                     delayMessage.setLabel(GSVDatasetWriter.label[9]);
 
-                    messageStream.add(closestIndex-1, delayMessage);
-                    messageStream.remove(currentIndex);
+                    //messageStream.add(closestIndex-1, delayMessage);
+                    //messageStream.remove(currentIndex);
 
                     ied.addMessage(delayMessage);
                 }
+                 */
                 numDelayInstances--;
                 burstMessageCounter++;
 
-            } else if (!burstMode & delayMessage.getCbStatus() == 1 & !delayMessage.getLabel().equals(GSVDatasetWriter.label[9])) { // if burstmode is false, then grab singular messages
+            } else if (burstMode == false & delayMessage.getCbStatus() == 1) { // if burstmode is false, then grab singular messages
                 // later on potentially include the selection interval in this condition, will check if the interval counter is 0
                 // for the burst, delay each message by a separate amount
 
-                if (selectionIntervalCounter != 0 & selectionIntervalCounter < selectionInterval) {
+                if (selectionIntervalCounter == selectionInterval) {
+                    selectionIntervalCounter = 0;
+                } else if (selectionIntervalCounter < selectionInterval & selectionIntervalCounter >= 1) {
                     selectionIntervalCounter++;
                     continue;
-                } else if (selectionIntervalCounter == selectionInterval) {
-                    selectionIntervalCounter = 0;
                 }
 
                 // have the randomBetween var here for the selection rate
                 // this will ensure the random between is only called for faulty messages
                 selectionValue = randomBetween(0.0, 1.0);
+                /*
                 if (selectionValue < selectionRate) {
                     messageStream.get(i).setLabel(GSVDatasetWriter.label[9]);
                     ied.addMessage(messageStream.get(i));
                     numDelayInstances--;
                     continue;
-                }
+                }*/
 
                 double networkDelay = getNetworkDelay();
                 int currentIndex = i;
                 
-                int closestIndex = getClosestIndex(delayMessage, networkDelay, currentIndex);
-                Goose closestMessage = messageStream.get(closestIndex);
+                //int closestIndex = getClosestIndex(delayMessage, networkDelay, currentIndex);
+                //Goose closestMessage = messageStream.get(closestIndex);
 
                 double delayedTimestamp = delayMessage.getTimestamp() + networkDelay;
-
+                delayMessage.setTimestamp(delayedTimestamp);
+                delayMessage.setLabel(GSVDatasetWriter.label[9]);
+                ied.addMessage(delayMessage);
+                /*
                 if (delayedTimestamp >= closestMessage.getTimestamp()) {
                     delayMessage.setTimestamp(delayedTimestamp);
                     delayMessage.setLabel(GSVDatasetWriter.label[9]);
 
-                    messageStream.add(closestIndex+1, delayMessage);
-                    messageStream.remove(currentIndex);
+                    //messageStream.add(closestIndex+1, delayMessage);
+                    //messageStream.remove(currentIndex);
                     ied.addMessage(delayMessage);
                     //messageStream.get(currentIndex).setLabel("faulty_not_delayed");
                 } else if (delayedTimestamp < closestMessage.getTimestamp()) {
@@ -153,16 +163,12 @@ public class DelayedReplayCreator implements MessageCreator {
                     delayMessage.setLabel(GSVDatasetWriter.label[9]);
 
                     ied.addMessage(delayMessage);
-                    messageStream.set(currentIndex, delayMessage); // for debugging, add the delayed message at the index after currentIndex
-                } else if (delayMessage.getCbStatus() != 1) {
-                    //delayMessage.setLabel(GSVDatasetWriter.label[0]);
-                    //ied.addMessage(delayMessage);
+                    //messageStream.set(currentIndex, delayMessage); // for debugging, add the delayed message at the index after currentIndex
                 }
-                
+                */
                 numDelayInstances--;
                 selectionIntervalCounter++;
-            } 
-
+            }
             // if not faulty, then continue to the next message and check
 
         }

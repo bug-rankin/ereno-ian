@@ -361,7 +361,7 @@ public class CreateAttackDatasetAction {
                     return new GrayHoleVictimIEDC(benignIED, attackConfig);
                 }
             case "delayed_replay":
-                return useLegacy ? new DelayedReplayIED(benignIED) : new DelayedReplayIEDC(benignIED, attackConfig);
+                return new DelayedReplayIED(benignIED);
                 
             default:
                 throw new IllegalArgumentException("Unknown attack type: " + attackType);

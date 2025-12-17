@@ -18,49 +18,49 @@
   "attackSegments": [
     {
       "name": "uc01_random_replay",
-      "enabled": true,
+      "enabled": false,
       "attackConfig": "config/attacks/uc01_random_replay.json",
       "description": "Random replay attack"
     },
     {
       "name": "uc02_inverse_replay",
-      "enabled": true,
+      "enabled": false,
       "attackConfig": "config/attacks/uc02_inverse_replay.json",
       "description": "Inverse replay attack"
     },
     {
       "name": "uc03_masquerade_fault",
-      "enabled": true,
+      "enabled": false,
       "attackConfig": "config/attacks/uc03_masquerade_fault.json",
       "description": "Masquerade fake fault attack"
     },
     {
       "name": "uc04_masquerade_normal",
-      "enabled": true,
+      "enabled": false,
       "attackConfig": "config/attacks/uc04_masquerade_normal.json",
       "description": "Masquerade fake normal attack"
     },
     {
       "name": "uc05_injection",
-      "enabled": true,
+      "enabled": false,
       "attackConfig": "config/attacks/uc05_injection.json",
       "description": "Random injection attack"
     },
     {
       "name": "uc06_high_stnum",
-      "enabled": true,
+      "enabled": false,
       "attackConfig": "config/attacks/uc06_high_stnum_injection.json",
       "description": "High StNum injection attack"
     },
     {
       "name": "uc07_flooding",
-      "enabled": true,
+      "enabled": false,
       "attackConfig": "config/attacks/uc07_flooding.json",
       "description": "Flooding attack"
     },
     {
       "name": "uc08_grayhole",
-      "enabled": true,
+      "enabled": false,
       "attackConfig": "config/attacks/uc08_grayhole.json"
     },
     {
@@ -77,9 +77,9 @@
     "ethType": "0x88B8",
     "gooseAppid": "0x00003001",
     "TPID": "0x8100",
-    "ndsCom": false,
-    "test": false,
-    "cbstatus": false
+    "ndsCom": true,
+    "test": true,
+    "cbstatus": true
   },
   "devices": {
     "useCVariants": false
