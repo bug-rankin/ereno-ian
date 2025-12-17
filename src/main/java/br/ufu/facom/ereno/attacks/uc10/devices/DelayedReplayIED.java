@@ -19,7 +19,7 @@ public class DelayedReplayIED extends ProtectionIED {
     @Override
     public void run(int numOfDelayInstances) {
         Logger.getLogger("DelayedReplayIED").info(
-                "Feeding replayer IED with " + legitimateIED.copyMessages().size() + " legitimate messages");
+                "Feeding delayed replayer IED with " + legitimateIED.copyMessages().size() + " legitimate messages");
         messageCreator = new DelayedReplayCreator(new ArrayList<>(legitimateIED.copyMessages())); // feeds the message creator with legitimate messages
         messageCreator.generate(this, numOfDelayInstances); // pass itself to receive messages from generator
     }

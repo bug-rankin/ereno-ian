@@ -19,4 +19,12 @@ public class DelayedReplayIEDC extends ProtectionIED {
         this.attackConfig = attackConfig;
     }
 
+    @Override
+    public void run(int numOfDelayInstances) {
+        Logger.getLogger("DelayedReplayIEDC").info(
+        "Feeding delayed replayer IED with" + legitimateIED.copyMessages().size() + " legitimate messages");
+        DelayedReplayCreatorC delayedReplayCreatorC = new DelayedReplayCreatorC(legitimateIED.copyMessages(), attackConfig);
+        delayedReplayCreatorC.generate(this, numOfDelayInstances);
+    }
+
 }

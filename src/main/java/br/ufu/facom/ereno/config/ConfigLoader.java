@@ -164,7 +164,8 @@ public class ConfigLoader {
         }
 
         if (attacksParams.uc10 == null) attacksParams.uc10 = new AttacksParams.UC10Config();
-        // add more stuff
+        // add stuff here after asking Ian what the heck this does.
+
 
         // Log applied defaults (if any) to help auditing and debugging of config migrations
         if (applied.length() > 0) {
@@ -239,7 +240,13 @@ public class ConfigLoader {
 
         public static class UC08Config { public RangeInt selectionRate = new RangeInt(); }
 
-        public static class UC10Config { public RangeInt selectionRate = new RangeInt();  }
+        public static class UC10Config { // adjust the config if necessary
+            public RangeDouble selectionRate = new RangeDouble();
+            public RangeInt selectionInterval = new RangeInt();
+            public RangeInt burstInterval = new RangeInt();
+            public RangeInt burstSize = new RangeInt();
+            public boolean burstMode = false;
+        }
 
         // --- new descriptive configs ---
         public static class RandomReplayConfig {
@@ -327,8 +334,13 @@ public class ConfigLoader {
             public RangeDouble delayBurstLen = new RangeDouble();
         }
 
-        public static class DelayedReplayConfig {
+        public static class DelayedReplayConfig { // adjust if necessary
             public boolean enabled = false;
+            public int selectionInterval = 5;
+            public int burstInterval = 5;
+            public int burstSize = 5;
+            public double selectionRate = 0.4;
+            public boolean burstMode = false;
         }
 
     }
