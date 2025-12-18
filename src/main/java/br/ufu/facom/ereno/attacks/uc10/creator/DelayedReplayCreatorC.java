@@ -25,11 +25,26 @@ public class DelayedReplayCreatorC implements MessageCreator {
 
         // config variables
         // Potentially expand upon these parameters and have ranges for them
+
+        // ranges
+        int minInterval = config.getNestedInt("selectionInterval", "min", 5);
+        int maxInterval = config.getNestedInt("selectionInterval", "max", 25);
+
+        int minBurstInterval = config.getNestedInt("burstInterval", "min", 5);
+        int maxBurstInterval = config.getNestedInt("burstInterval", "max", 25);
+
+        int minBurstSize = config.getNestedInt("burstSize", "min", 5);
+        int maxBurstSize = config.getNestedInt("burstSize", "max", 25);
+
+        double minSelectionRate = config.getNestedDouble("selectionRate", "min", 0.25);
+        double maxSelectionRate = config.getNestedDouble("selectionRate", "max", 0.75);
+
         Goose delayMessage; // the potential message to be delayed
-        int selectionInterval = randomBetween(config.getNestedInt("selectionInterval", "min", 5), config.getNestedInt("selectionInterval", "max", 25)); // the rate or interval in which messages are selected to be delayed
-        int burstInterval = randomBetween(config.getNestedInt("burstInterval", "min", 5), config.getNestedInt("burstInterval", "max", 25)); // the interval in which bursts of messages are selected and then delayed
-        int burstSize = randomBetween(config.getNestedInt("burstSize", "min", 5), config.getNestedInt("burstSize", "max", 25)); // the size of a message burst
-        double selectionRate = randomBetween(config.getNestedDouble("selectionRate", "min", 0.25), config.getNestedDouble("selectionRate", "max", 0.75)); // determines if a certain messages is delayed or not
+        int selectionInterval = randomBetween(minInterval, maxInterval); // the rate or interval in which messages are selected to be delayed
+        Logger.getLogger("DelayedReplayCreatorC").info("Selection Interval: " + selectionInterval);
+        int burstInterval = randomBetween(minBurstInterval, maxBurstInterval);// the interval in which bursts of messages are selected and then delayed       
+        int burstSize = randomBetween(minBurstSize, maxBurstSize);
+        //double selectionRate = randomBetween(minSelectionRate, maxSelectionRate); // determines if a certain messages is delayed or not
         boolean burstMode = config.getBoolean("burstMode", false); // determines if we will do bursts of messages or not
 
         // counter/tracking variables that are not assigned in the config file

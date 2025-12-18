@@ -30,9 +30,8 @@
     },
     {
       "name": "uc10_delayed_replay",
-      "enabled": true,
-      "attackConfig": "config/attacks/uc10_delayed_replay.json",
-      "description": "Network delay attack"
+      "enabled": false,
+      "attackConfig": "config/attacks/uc10_delayed_replay.json"
     }
   ]
 }

@@ -106,7 +106,7 @@
     },
     "delayedReplay": {
       "enabled": true,
-      "selectionInterval": {"min": 5, "max": 25},
+      "selectionInterval": {"min": 40, "max": 90},
       "burstInterval": {"min": 5, "max": 25},
       "burstSize": {"min": 5, "max": 25},
       "selectionRate": {"min": 0.25, "max": 0.75},
