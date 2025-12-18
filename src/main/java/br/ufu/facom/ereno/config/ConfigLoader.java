@@ -165,10 +165,34 @@ public class ConfigLoader {
 
         if (attacksParams.uc10 == null) attacksParams.uc10 = new AttacksParams.UC10Config();
         // add stuff here after asking Ian what the heck this does.
-        if (attacksParams.uc10.selectionInterval == null)
-        if (attacksParams.uc10.burstInterval == null)
-        if (attacksParams.uc10.burstSize == null)
-        if (attacksParams.uc10.selectionRate == null)
+        if (attacksParams.uc10.selectionInterval == null) attacksParams.uc10.selectionInterval = new AttacksParams.RangeInt();
+        if (attacksParams.uc10.selectionInterval.min <= 0 || attacksParams.uc10.selectionInterval.max <= 0 ||
+        attacksParams.uc10.selectionInterval.min >= attacksParams.uc10.selectionInterval.max) {
+            attacksParams.uc10.selectionInterval.min = 5;
+            attacksParams.uc10.selectionInterval.max = 25;
+            attacksParams.uc10.selectionInterval.defaultValue = 15;
+        }
+        if (attacksParams.uc10.burstInterval == null)  attacksParams.uc10.burstInterval = new AttacksParams.RangeInt();
+        if (attacksParams.uc10.burstInterval.min <= 0 || attacksParams.uc10.burstInterval.max <= 0 ||
+        attacksParams.uc10.burstInterval.min >= attacksParams.uc10.burstInterval.max) {
+            attacksParams.uc10.burstInterval.min = 5;
+            attacksParams.uc10.burstInterval.max = 25;
+            attacksParams.uc10.burstInterval.defaultValue = 15;
+        }
+        if (attacksParams.uc10.burstSize == null)  attacksParams.uc10.burstSize = new AttacksParams.RangeInt();
+        if (attacksParams.uc10.burstSize.min <= 0 || attacksParams.uc10.burstSize.max <= 0 ||
+        attacksParams.uc10.burstSize.min >= attacksParams.uc10.burstSize.max) {
+            attacksParams.uc10.burstSize.min = 5;
+            attacksParams.uc10.burstSize.max = 25;
+            attacksParams.uc10.burstSize.defaultValue = 15;
+        }
+        if (attacksParams.uc10.selectionRate == null) attacksParams.uc10.selectionRate = new AttacksParams.RangeDouble();
+        if (attacksParams.uc10.selectionRate.min <= 0.0 || attacksParams.uc10.selectionRate.max <= 0.0 ||
+        attacksParams.uc10.selectionRate.min >= attacksParams.uc10.selectionRate.max) {
+            attacksParams.uc10.selectionRate.min = 0.25;
+            attacksParams.uc10.selectionRate.max = 0.75;
+            attacksParams.uc10.selectionRate.defaultValue = 0.5;
+        }
 
 
         // Log applied defaults (if any) to help auditing and debugging of config migrations

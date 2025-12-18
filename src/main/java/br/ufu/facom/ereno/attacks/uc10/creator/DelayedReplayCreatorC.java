@@ -41,6 +41,7 @@ public class DelayedReplayCreatorC implements MessageCreator {
         for (int i = 0; numDelayInstances > 0 & i < messageStream.size(); i++) {
 
             delayMessage = messageStream.get(i);
+            //Logger.getLogger("DelayedReplayCreatorC").info("Captured the legitimate message at " + delayMessage.getTimestamp());
 
             // check to see if it is faulty
 
@@ -104,11 +105,11 @@ public class DelayedReplayCreatorC implements MessageCreator {
                 // have the randomBetween var here for the selection rate
                 // this will ensure the random between is only called for faulty messages
                 //selectionValue = randomBetween(0.0, 1.0);
-                
+                /*
                 if (selectionValue < selectionRate) {
                     continue;
                 }
-
+                */
                 double networkDelay = getNetworkDelay();
                 int currentIndex = i;
 

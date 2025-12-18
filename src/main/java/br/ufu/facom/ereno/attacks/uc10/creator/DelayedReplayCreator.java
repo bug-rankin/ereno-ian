@@ -42,7 +42,7 @@ public class DelayedReplayCreator implements MessageCreator {
 
         // potentially add some variables to help out
         Goose delayMessage; // the potential message to be delayed
-        int selectionInterval = 5; // the rate or interval in which messages are selected to be delayed
+        int selectionInterval = 15; // the rate or interval in which messages are selected to be delayed
         int burstInterval = 5; // the interval in which bursts of messages are selected and then delayed
         int burstSize = 5; // the size of a message burst
         //int spacing; // the spacing between delayed messages (might be redundant due to the amount of delay and the timestamps
