@@ -3,20 +3,19 @@
   "enabled": true,
 
   "selectionInterval": {
-    "min": 25,
-    "max": 50
+    "min": 50,
+    "max": 100
   },
   "burstInterval": {
-    "min": 5,
-    "max": 25
+    "min": 25,
+    "max": 50
   },
   "burstSize": {
     "min": 5,
     "max": 25
   },
-  "selectionRate": {
-    "min": 0.25,
-    "max": 0.75
+  "selectionProb": {
+    "value": 0.25
   },
   "burstMode": false
 }

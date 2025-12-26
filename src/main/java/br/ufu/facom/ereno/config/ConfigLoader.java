@@ -186,13 +186,6 @@ public class ConfigLoader {
             attacksParams.uc10.burstSize.max = 25;
             attacksParams.uc10.burstSize.defaultValue = 15;
         }
-        if (attacksParams.uc10.selectionRate == null) attacksParams.uc10.selectionRate = new AttacksParams.RangeDouble();
-        if (attacksParams.uc10.selectionRate.min <= 0.0 || attacksParams.uc10.selectionRate.max <= 0.0 ||
-        attacksParams.uc10.selectionRate.min >= attacksParams.uc10.selectionRate.max) {
-            attacksParams.uc10.selectionRate.min = 0.25;
-            attacksParams.uc10.selectionRate.max = 0.75;
-            attacksParams.uc10.selectionRate.defaultValue = 0.5;
-        }
 
 
         // Log applied defaults (if any) to help auditing and debugging of config migrations
@@ -269,7 +262,7 @@ public class ConfigLoader {
         public static class UC08Config { public RangeInt selectionRate = new RangeInt(); }
 
         public static class UC10Config { // adjust the config if necessary
-            public RangeDouble selectionRate = new RangeDouble();
+            public double selectionProb = 0.5;
             public RangeInt selectionInterval = new RangeInt();
             public RangeInt burstInterval = new RangeInt();
             public RangeInt burstSize = new RangeInt();
@@ -367,7 +360,7 @@ public class ConfigLoader {
             public RangeInt selectionInterval = new RangeInt();
             public RangeInt burstInterval = new RangeInt();
             public RangeInt burstSize = new RangeInt();
-            public RangeDouble selectionRate = new RangeDouble();
+            public double selectionProb = 0.5;
             public boolean burstMode = false;
         }
 

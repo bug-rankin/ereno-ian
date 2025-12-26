@@ -36,15 +36,12 @@ public class DelayedReplayCreatorC implements MessageCreator {
         int minBurstSize = config.getNestedInt("burstSize", "min", 5);
         int maxBurstSize = config.getNestedInt("burstSize", "max", 25);
 
-        double minSelectionRate = config.getNestedDouble("selectionRate", "min", 0.25);
-        double maxSelectionRate = config.getNestedDouble("selectionRate", "max", 0.75);
-
         Goose delayMessage; // the potential message to be delayed
         int selectionInterval = randomBetween(minInterval, maxInterval); // the rate or interval in which messages are selected to be delayed
         Logger.getLogger("DelayedReplayCreatorC").info("Selection Interval: " + selectionInterval);
         int burstInterval = randomBetween(minBurstInterval, maxBurstInterval);// the interval in which bursts of messages are selected and then delayed       
         int burstSize = randomBetween(minBurstSize, maxBurstSize);
-        //double selectionRate = randomBetween(minSelectionRate, maxSelectionRate); // determines if a certain messages is delayed or not
+        double selectionProb = config.getNestedDouble("selectionProb","value",0.5); // determines if a certain messages is delayed or not
         boolean burstMode = config.getBoolean("burstMode", false); // determines if we will do bursts of messages or not
 
         // counter/tracking variables that are not assigned in the config file
@@ -119,12 +116,12 @@ public class DelayedReplayCreatorC implements MessageCreator {
 
                 // have the randomBetween var here for the selection rate
                 // this will ensure the random between is only called for faulty messages
-                //selectionValue = randomBetween(0.0, 1.0);
-                /*
-                if (selectionValue < selectionRate) {
+                selectionValue = randomBetween(0.0, 1.0);
+                
+                if (selectionValue > selectionProb) {
                     continue;
                 }
-                */
+                
                 double networkDelay = getNetworkDelay();
                 int currentIndex = i;
 

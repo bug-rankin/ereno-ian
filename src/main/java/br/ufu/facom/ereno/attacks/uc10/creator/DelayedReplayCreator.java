@@ -46,7 +46,7 @@ public class DelayedReplayCreator implements MessageCreator {
         int burstInterval = 5; // the interval in which bursts of messages are selected and then delayed
         int burstSize = 5; // the size of a message burst
         //int spacing; // the spacing between delayed messages (might be redundant due to the amount of delay and the timestamps
-        double selectionRate = 0.4; // determines if a certain messages is delayed or not
+        double selectionProb = 0.4; // determines if a certain messages is delayed or not
         boolean burstMode = false; // determines if we will do bursts of messages or not
         //int numLegitDelays; // the number of legitimate messages to be delayed // honestly, probably not needed either
         //float delayedFaultProportion; // the proportion of delayed faulty messages to the entirety of the message stream // probably not needed
@@ -132,7 +132,7 @@ public class DelayedReplayCreator implements MessageCreator {
                 // this will ensure the random between is only called for faulty messages
                 selectionValue = randomBetween(0.0, 1.0);
                 /*
-                if (selectionValue < selectionRate) {
+                if (selectionValue < selectionProb) {
                     messageStream.get(i).setLabel(GSVDatasetWriter.label[9]);
                     ied.addMessage(messageStream.get(i));
                     numDelayInstances--;

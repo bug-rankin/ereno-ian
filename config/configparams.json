@@ -15,7 +15,7 @@
   },
   "gooseFlow": {
     "goID": "IntLockA",
-    "numberOfMessages": 10000,
+    "numberOfMessages": 500000,
     "ethSrc": "01:0c:cd:01:2f:80",
     "ethDst": "01:0c:cd:01:2f:81",
     "ethType": "0x88B8",
@@ -105,11 +105,11 @@
       "delayBurstLen": { "min": 3.0, "max": 40.0 }
     },
     "delayedReplay": {
-      "enabled": true,
+      "enabled": false,
       "selectionInterval": {"min": 40, "max": 90},
       "burstInterval": {"min": 5, "max": 25},
       "burstSize": {"min": 5, "max": 25},
-      "selectionRate": {"min": 0.25, "max": 0.75},
+      "selectionProb": {"value": 0.25},
       "burstMode": false
     }
   },
