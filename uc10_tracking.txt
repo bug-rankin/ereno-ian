@@ -1,0 +1,2 @@
+The selection interval: 79
+Total amount of faulty messages: 21704

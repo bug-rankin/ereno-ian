@@ -8,6 +8,8 @@ import br.ufu.facom.ereno.benign.uc00.creator.MessageCreator;
 
 import java.util.ArrayList;
 import java.util.logging.Logger;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import static br.ufu.facom.ereno.general.IED.randomBetween;
 
@@ -38,7 +40,7 @@ public class DelayedReplayCreatorC implements MessageCreator {
 
         Goose delayMessage; // the potential message to be delayed
         int selectionInterval = randomBetween(minInterval, maxInterval); // the rate or interval in which messages are selected to be delayed
-        Logger.getLogger("DelayedReplayCreatorC").info("Selection Interval: " + selectionInterval);
+        //Logger.getLogger("DelayedReplayCreatorC").info("Selection Interval: " + selectionInterval);
         int burstInterval = randomBetween(minBurstInterval, maxBurstInterval);// the interval in which bursts of messages are selected and then delayed       
         int burstSize = randomBetween(minBurstSize, maxBurstSize);
         double selectionProb = config.getNestedDouble("selectionProb","value",0.5); // determines if a certain messages is delayed or not
@@ -49,6 +51,8 @@ public class DelayedReplayCreatorC implements MessageCreator {
         int burstIntervalCounter = 0; // ensures that we have separate bursts. Ensures we maintain the burst interval
         double selectionValue = 0.0;
         int selectionIntervalCounter = 0;
+
+        int faultCounter = 0;
 
         for (int i = 0; numDelayInstances > 0 & i < messageStream.size(); i++) {
 
@@ -61,6 +65,9 @@ public class DelayedReplayCreatorC implements MessageCreator {
             if (burstMode == true & delayMessage.getCbStatus() == 1) { // condense to having one condition statement once behavior is confirmed
                 // have another condition that grabs a certain amount of faulty messages depending on burst size, checks if the burstIntervalCounter is 0, and checks if the counter is less than burst size
                 // perform further testing to see if we need to account for testing
+
+                faultCounter++;
+
                 if (burstIntervalCounter == burstInterval) { // once we have waited for the set interval, begin the next burst of messages
                     burstMessageCounter = 0;
                     burstIntervalCounter = 0;
@@ -106,6 +113,8 @@ public class DelayedReplayCreatorC implements MessageCreator {
             } else if (burstMode == false & delayMessage.getCbStatus() == 1) { // if burstmode is false, then grab singular messages
                 // later on potentially include the selection interval in this condition, will check if the interval counter is 0
                 // for the burst, delay each message by a separate amount
+
+                faultCounter++;
 
                 if (selectionIntervalCounter == selectionInterval) {
                     selectionIntervalCounter = 0;
@@ -156,6 +165,19 @@ public class DelayedReplayCreatorC implements MessageCreator {
 
         }
 
+        writeToFile(selectionInterval, faultCounter);
+
+    }
+
+    private void writeToFile(int interval, int faults) {
+        try {
+            FileWriter writer = new FileWriter("uc10_tracking.txt", false);
+            writer.write("The selection interval: " + interval + "\n");
+            writer.write("Total amount of faulty messages: " + faults + "\n");
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private double getNetworkDelay() {

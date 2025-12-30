@@ -11,7 +11,7 @@
     "format": "arff"
   },
   "datasetStructure": {
-    "messagesPerSegment": 50000,
+    "messagesPerSegment": 75000,
     "includeBenignSegment": true,
     "shuffleSegments": false
   },
@@ -24,7 +24,7 @@
     },
     {
       "name": "uc02_inverse_replay",
-      "enabled": true,
+      "enabled": false,
       "attackConfig": "config/attacks/uc02_inverse_replay.json",
       "description": "Inverse replay attack"
     },
@@ -42,7 +42,7 @@
     },
     {
       "name": "uc05_injection",
-      "enabled": true,
+      "enabled": false,
       "attackConfig": "config/attacks/uc05_injection.json",
       "description": "Random injection attack"
     },
@@ -54,7 +54,7 @@
     },
     {
       "name": "uc07_flooding",
-      "enabled": true,
+      "enabled": false,
       "attackConfig": "config/attacks/uc07_flooding.json",
       "description": "Flooding attack"
     },
@@ -70,7 +70,7 @@
     }
   ],
   "gooseFlow": {
-    "numberOfMessages": 500000,
+    "numberOfMessages": 150000,
     "goID": "IntLockA",
     "ethSrc": "01:0c:cd:01:2f:80",
     "ethDst": "01:0c:cd:01:2f:81",

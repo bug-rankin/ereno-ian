@@ -7,15 +7,15 @@
     "max": 100
   },
   "burstInterval": {
-    "min": 25,
-    "max": 50
+    "min": 5,
+    "max": 15
   },
   "burstSize": {
     "min": 5,
     "max": 25
   },
   "selectionProb": {
-    "value": 0.25
+    "value": 0.50
   },
   "burstMode": false
 }
