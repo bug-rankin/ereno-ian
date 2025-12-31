@@ -1,0 +1,30 @@
+Total messages in the dataset: 39999
+The selection interval: 84
+Total amount of faulty messages: 5700
+Total messages in the dataset: 39999
+The selection interval: 75
+Total amount of faulty messages: 5700
+Total messages in the dataset: 39999
+The selection interval: 84
+Total amount of faulty messages: 5700
+Total messages in the dataset: 39999
+The selection interval: 75
+Total amount of faulty messages: 5700
+Total messages in the dataset: 39999
+The selection interval: 84
+Total amount of faulty messages: 5700
+Total messages in the dataset: 39999
+The selection interval: 75
+Total amount of faulty messages: 5700
+Total messages in the dataset: 39999
+The selection interval: 84
+Total amount of faulty messages: 5700
+Total messages in the dataset: 39999
+The selection interval: 75
+Total amount of faulty messages: 5700
+Total messages in the dataset: 39999
+The selection interval: 84
+Total amount of faulty messages: 5700
+Total messages in the dataset: 39999
+The selection interval: 75
+Total amount of faulty messages: 5700
