@@ -1,0 +1,81 @@
+{
+  "action": "pipeline",
+  "description": "Loop pipeline with custom parameter variations - tests different dataset configurations",
+  "commonConfig": {
+    "randomSeed": 42,
+    "outputFormat": "arff"
+  },
+  "pipeline": [
+    {
+      "action": "create_benign",
+      "actionConfigFile": "config/action_create_benign.json",
+      "description": "Generate baseline benign traffic data"
+    },
+    {
+      "action": "create_attack_dataset",
+      "actionConfigFile": "config/action_create_attack_dataset.json",
+      "description": "Create baseline test dataset"
+    }
+  ],
+  "loop": {
+    "variationType": "parameters",
+    "values": [
+      {
+        "datasetStructure.messagesPerSegment": 500,
+        "datasetStructure.shuffleSegments": false
+      },
+      {
+        "datasetStructure.messagesPerSegment": 1000,
+        "datasetStructure.shuffleSegments": false
+      },
+      {
+        "datasetStructure.messagesPerSegment": 2000,
+        "datasetStructure.shuffleSegments": false
+      },
+      {
+        "datasetStructure.messagesPerSegment": 1000,
+        "datasetStructure.shuffleSegments": true
+      },
+      {
+        "datasetStructure.messagesPerSegment": 500,
+        "datasetStructure.includeBenignSegment": false
+      }
+    ],
+    "baselineDataset": "target/training/training_dataset.arff",
+    "steps": [
+      {
+        "action": "create_attack_dataset",
+        "actionConfigFile": "config/action_create_attack_dataset.json",
+        "description": "Create training dataset with parameter variations",
+        "parameterOverrides": {
+          "output": {
+            "directory": "target/training_variations",
+            "filename": "training_dataset_params_${iteration}.arff"
+          }
+        }
+      },
+      {
+        "action": "train_model",
+        "actionConfigFile": "config/action_train_model.json",
+        "description": "Train models on varied dataset structure",
+        "parameterOverrides": {
+          "output": {
+            "directory": "target/models_variations/params_${iteration}",
+            "filename": "training_metadata_params_${iteration}.json"
+          }
+        }
+      },
+      {
+        "action": "evaluate",
+        "actionConfigFile": "config/action_evaluate.json",
+        "description": "Evaluate models trained with different parameters",
+        "parameterOverrides": {
+          "output": {
+            "directory": "target/evaluation_variations/params_${iteration}",
+            "filename": "evaluation_results_params_${iteration}.json"
+          }
+        }
+      }
+    ]
+  }
+}

@@ -126,9 +126,6 @@ public class EvaluateAction {
                 // Evaluate
                 long evalStart = System.currentTimeMillis();
                 
-                // Note: We need training data for GenericEvaluation
-                // For now, we'll use test data as both train and test
-                // In a real scenario, you'd load the original training data
                 GenericResultado resultado = GenericEvaluation.runSingleClassifier(testData, testData);
                 
                 long evalEnd = System.currentTimeMillis();

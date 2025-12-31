@@ -1,0 +1,69 @@
+{
+  "action": "pipeline",
+  "description": "Loop pipeline with attack segment variations - tests different attack combinations",
+  "commonConfig": {
+    "randomSeed": 42,
+    "outputFormat": "arff"
+  },
+  "pipeline": [
+    {
+      "action": "create_benign",
+      "actionConfigFile": "config/action_create_benign.json",
+      "description": "Generate baseline benign traffic data"
+    },
+    {
+      "action": "create_attack_dataset",
+      "actionConfigFile": "config/action_create_attack_dataset.json",
+      "description": "Create baseline test dataset with all attacks"
+    }
+  ],
+  "loop": {
+    "variationType": "attackSegments",
+    "values": [
+      ["uc01_random_replay", "uc02_inverse_replay"],
+      ["uc03_masquerade_fault", "uc04_masquerade_normal"],
+      ["uc05_injection", "uc06_high_stnum"],
+      ["uc07_flooding"],
+      ["uc08_grayhole"],
+      ["uc10_delayed_replay"],
+      ["uc01_random_replay", "uc05_injection", "uc07_flooding"],
+      ["uc02_inverse_replay", "uc03_masquerade_fault", "uc10_delayed_replay"]
+    ],
+    "baselineDataset": "target/training/training_dataset.arff",
+    "steps": [
+      {
+        "action": "create_attack_dataset",
+        "actionConfigFile": "config/action_create_attack_dataset.json",
+        "description": "Create training dataset with specific attack combination",
+        "parameterOverrides": {
+          "output": {
+            "directory": "target/training_variations",
+            "filename": "training_dataset_attacks_${iteration}.arff"
+          }
+        }
+      },
+      {
+        "action": "train_model",
+        "actionConfigFile": "config/action_train_model.json",
+        "description": "Train models on attack-specific dataset",
+        "parameterOverrides": {
+          "output": {
+            "directory": "target/models_variations/attacks_${iteration}",
+            "filename": "training_metadata_attacks_${iteration}.json"
+          }
+        }
+      },
+      {
+        "action": "evaluate",
+        "actionConfigFile": "config/action_evaluate.json",
+        "description": "Evaluate specialized models",
+        "parameterOverrides": {
+          "output": {
+            "directory": "target/evaluation_variations/attacks_${iteration}",
+            "filename": "evaluation_results_attacks_${iteration}.json"
+          }
+        }
+      }
+    ]
+  }
+}
