@@ -34,12 +34,35 @@ public class ActionConfigLoader {
         public CommonConfig commonConfig;
         // For pipeline support
         public List<PipelineStep> pipeline;
+        // For loop support
+        public LoopConfig loop;
     }
 
     public static class PipelineStep {
         public String action;
         public String actionConfigFile;
         public String description;
+        // For loop overrides
+        public ParameterOverrides parameterOverrides;
+    }
+
+    public static class LoopConfig {
+        public String variationType; // "randomSeed", "attackSegments", "parameters"
+        public List<Object> values; // List of values to iterate over
+        public List<PipelineStep> steps; // Steps to repeat for each iteration
+        public String baselineDataset; // Path to baseline test dataset for evaluation
+    }
+
+    public static class ParameterOverrides {
+        public Long randomSeed;
+        public OutputOverrides output;
+        public List<String> enabledAttackSegments;
+        public java.util.Map<String, Object> customParameters;
+    }
+
+    public static class OutputOverrides {
+        public String directory;
+        public String filename;
     }
 
     public static class CommonConfig {
