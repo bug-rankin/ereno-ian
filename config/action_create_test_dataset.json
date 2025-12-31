@@ -11,7 +11,7 @@
     "format": "arff"
   },
   "datasetStructure": {
-    "messagesPerSegment": 75000,
+    "messagesPerSegment": 10000,
     "includeBenignSegment": true,
     "shuffleSegments": true
   },

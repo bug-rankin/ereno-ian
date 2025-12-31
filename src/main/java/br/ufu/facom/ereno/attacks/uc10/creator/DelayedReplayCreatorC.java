@@ -165,13 +165,14 @@ public class DelayedReplayCreatorC implements MessageCreator {
 
         }
 
-        writeToFile(selectionInterval, faultCounter);
+        writeToFile(selectionInterval, faultCounter, messageStream.size());
 
     }
 
-    private void writeToFile(int interval, int faults) {
+    private void writeToFile(int interval, int faults, int totalMessages) {
         try {
-            FileWriter writer = new FileWriter("uc10_tracking.txt", false);
+            FileWriter writer = new FileWriter("uc10_tracking.txt", true);
+            writer.write("Total messages in the dataset: " + totalMessages + "\n");
             writer.write("The selection interval: " + interval + "\n");
             writer.write("Total amount of faulty messages: " + faults + "\n");
             writer.close();

@@ -22,7 +22,8 @@ public class ConfigLoader {
     // optional global seed for deterministic runs (null -> use system time)
     public static Long randomSeed = null;
     // shared RNG used across the codebase
-    public static java.util.Random RNG = new java.util.Random(System.nanoTime());
+    //public static java.util.Random RNG = new java.util.Random(System.nanoTime());
+    public static java.util.Random RNG;
 
     public static void load() throws IOException {
         load("config/configparams.json");
