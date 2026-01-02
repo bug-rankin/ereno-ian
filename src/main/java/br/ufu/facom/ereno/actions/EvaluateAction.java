@@ -17,9 +17,7 @@ import com.google.gson.GsonBuilder;
 import br.ufu.facom.ereno.evaluation.support.GenericEvaluation;
 import br.ufu.facom.ereno.evaluation.support.GenericResultado;
 import br.ufu.facom.ereno.tracking.ExperimentTracker;
-import weka.classifiers.Classifier;
 import weka.core.Instances;
-import weka.core.SerializationHelper;
 import weka.core.converters.ConverterUtils.DataSource;
 
 /**
@@ -101,17 +99,17 @@ public class EvaluateAction {
         File evalDir = new File(config.output.evaluationDirectory);
         if (!evalDir.exists()) {
             evalDir.mkdirs();
-            LOGGER.info("Created evaluation directory: " + config.output.evaluationDirectory);
+            LOGGER.info(() -> "Created evaluation directory: " + config.output.evaluationDirectory);
         }
         
         // Load test dataset
-        LOGGER.info("Loading test dataset: " + config.input.testDatasetPath);
+        LOGGER.info(() -> "Loading test dataset: " + config.input.testDatasetPath);
         DataSource testSource = new DataSource(config.input.testDatasetPath);
         Instances testData = testSource.getDataSet();
         if (testData.classIndex() == -1) {
             testData.setClassIndex(testData.numAttributes() - 1);
         }
-        LOGGER.info("Loaded test data: " + testData.numInstances() + " instances");
+        LOGGER.info(() -> "Loaded test data: " + testData.numInstances() + " instances");
         
         // Initialize results
         EvaluationResults results = new EvaluationResults();
@@ -121,13 +119,11 @@ public class EvaluateAction {
         
         // Evaluate each model
         for (Config.InputConfig.ModelInput modelInput : config.input.models) {
-            LOGGER.info("Evaluating model: " + modelInput.name);
+            LOGGER.info(() -> "Evaluating model: " + modelInput.name);
             
             try {
                 // Load model
-                LOGGER.info("Loading model from: " + modelInput.modelPath);
-                Classifier classifier = (Classifier) SerializationHelper.read(modelInput.modelPath);
-                
+                LOGGER.info(() -> "Loading model from: " + modelInput.modelPath);
                 // Evaluate
                 long evalStart = System.currentTimeMillis();
                 
@@ -163,8 +159,7 @@ public class EvaluateAction {
                 }
                 
             } catch (Exception e) {
-                LOGGER.severe("Failed to evaluate model " + modelInput.name + ": " + e.getMessage());
-                e.printStackTrace();
+                LOGGER.severe(() -> "Failed to evaluate model " + modelInput.name + ": " + e.getMessage());
                 throw e;
             }
         }
@@ -173,18 +168,18 @@ public class EvaluateAction {
         String jsonPath = new File(config.output.evaluationDirectory, 
             config.output.evaluationFilename).getAbsolutePath();
         saveResultsJson(results, jsonPath);
-        LOGGER.info("Evaluation results saved to: " + jsonPath);
+        LOGGER.info(() -> "Evaluation results saved to: " + jsonPath);
         
         // Generate text report if configured
         if (config.output.generateTextReport) {
             String textPath = new File(config.output.evaluationDirectory, 
                 config.output.textReportFilename).getAbsolutePath();
             generateTextReport(results, textPath);
-            LOGGER.info("Text report saved to: " + textPath);
+            LOGGER.info(() -> "Text report saved to: " + textPath);
         }
         
         LOGGER.info("=== Evaluate Action Completed Successfully ===");
-        LOGGER.info("Evaluated " + results.modelResults.size() + " models");
+        LOGGER.info(() -> "Evaluated " + results.modelResults.size() + " models");
     }
     
     private static Config loadConfig(String path) throws IOException {
@@ -208,7 +203,7 @@ public class EvaluateAction {
             if (!modelFile.exists()) {
                 throw new IOException("Model file not found: " + model.modelPath);
             }
-            LOGGER.info("Verified model exists: " + model.name);
+            LOGGER.info(() -> "Verified model exists: " + model.name);
         }
     }
     
@@ -310,7 +305,7 @@ public class EvaluateAction {
                 "Evaluated " + modelInput.name + " on " + config.input.testDatasetPath
             );
             
-            LOGGER.info("Result tracked with ID: " + resultId);
+            LOGGER.info(() -> "Result tracked with ID: " + resultId);
             
             // Complete experiment if we created it
             if (config.output.experimentId == null || config.output.experimentId.isEmpty()) {
@@ -318,7 +313,7 @@ public class EvaluateAction {
             }
             
         } catch (Exception e) {
-            LOGGER.warning("Failed to track evaluation result: " + e.getMessage());
+            LOGGER.warning(() -> "Failed to track evaluation result: " + e.getMessage());
             // Don't fail the action if tracking fails
         }
     }

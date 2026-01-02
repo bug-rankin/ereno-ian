@@ -1,7 +1,10 @@
 package br.ufu.facom.ereno;
 
-import br.ufu.facom.ereno.config.ConfigLoader;
-import br.ufu.facom.ereno.attacks.uc02.devices.InverseReplayerIED;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.logging.Logger;
+
+import br.ufu.facom.ereno.attacks.uc01.devices.RandomReplayerIED;
 import br.ufu.facom.ereno.attacks.uc03.devices.MasqueradeFakeFaultIED;
 import br.ufu.facom.ereno.attacks.uc05.devices.InjectorIED;
 import br.ufu.facom.ereno.attacks.uc06.devices.HighStNumInjectorIED;
@@ -9,16 +12,15 @@ import br.ufu.facom.ereno.attacks.uc07.devices.HighRateStNumInjectorIED;
 import br.ufu.facom.ereno.attacks.uc08.devices.GrayHoleVictimIED;
 import br.ufu.facom.ereno.benign.uc00.devices.LegitimateProtectionIED;
 import br.ufu.facom.ereno.benign.uc00.devices.MergingUnit;
-import br.ufu.facom.ereno.attacks.uc01.devices.RandomReplayerIED;
+import br.ufu.facom.ereno.config.ConfigLoader;
+import static br.ufu.facom.ereno.dataExtractors.DatasetWriter.startWriting;
+import static br.ufu.facom.ereno.dataExtractors.DatasetWriter.write;
+import static br.ufu.facom.ereno.dataExtractors.DatasetWriter.writeGooseMessagesToFile;
+import static br.ufu.facom.ereno.dataExtractors.DatasetWriter.writeSvMessagesToFile;
+import static br.ufu.facom.ereno.dataExtractors.GSVDatasetWriter.finishWriting;
 import br.ufu.facom.ereno.messages.Goose;
 import br.ufu.facom.ereno.messages.Sv;
 import br.ufu.facom.ereno.util.BenignDataManager;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.logging.Logger;
-
-import static br.ufu.facom.ereno.dataExtractors.GSVDatasetWriter.*;
 
 public class SingleSource {
 
@@ -45,7 +47,7 @@ public class SingleSource {
     public static void lightweightDataset(String datasetOutputLocation, boolean generateSV, String format) throws IOException {
         long beginTime = System.currentTimeMillis();
 
-        Logger.getLogger("Extractor").info(datasetOutputLocation + " writting...");
+        Logger.getLogger("Extractor").info(() -> datasetOutputLocation + " writting...");
         boolean csvMode = "csv".equalsIgnoreCase(format);
 
         // Start writing using the appropriate writer
@@ -65,10 +67,11 @@ public class SingleSource {
             if (ConfigLoader.benignData.importBenignDataPath != null && 
                 !ConfigLoader.benignData.importBenignDataPath.trim().isEmpty()) {
                 // Load benign data from file
-                Logger.getLogger("BenignData").info("Loading benign data from: " + 
+                Logger.getLogger("BenignData").info(() -> "Loading benign data from: " + 
                     ConfigLoader.benignData.importBenignDataPath);
                 uc00 = BenignDataManager.loadBenignData(ConfigLoader.benignData.importBenignDataPath);
-                Logger.getLogger("BenignData").info("Loaded " + uc00.getNumberOfMessages() + 
+                final LegitimateProtectionIED finalUc00 = uc00;
+                Logger.getLogger("BenignData").info(() -> "Loaded " + finalUc00.getNumberOfMessages() + 
                     " benign messages from file.");
             } else {
                 // Generate new benign data
@@ -255,7 +258,8 @@ public class SingleSource {
         }
 
         long endTime = System.currentTimeMillis();
-        Logger.getLogger("Time").info("Tempo gasto para gerar " + Integer.valueOf(totalMessageCount) + " mensagens: " + (endTime - beginTime));
+        final int finalMessageCount = totalMessageCount;
+        Logger.getLogger("Time").info(() -> "Tempo gasto para gerar " + finalMessageCount + " mensagens: " + (endTime - beginTime));
     }
 
     private static void writeGooseMessagesCsv(ArrayList<Goose> gooseMessages, boolean printHeader) throws IOException {
@@ -283,7 +287,7 @@ public class SingleSource {
         long beginTime = System.currentTimeMillis();
 
         // Start writing
-        Logger.getLogger("Extractor").info(datasetOutputLocation + " writting...");
+        Logger.getLogger("Extractor").info(() -> datasetOutputLocation + " writting...");
         startWriting(datasetOutputLocation);
         int totalMessageCount = 0;
         write("@relation goose_traffic");
@@ -349,7 +353,8 @@ public class SingleSource {
 
         finishWriting();
         long endTime = System.currentTimeMillis();
-        Logger.getLogger("Time").info("Tempo gasto para gerar " + Integer.valueOf(totalMessageCount) + " mensagens: " + (endTime - beginTime));
+        final int finalTotalMessageCount = totalMessageCount;
+        Logger.getLogger("Time").info(() -> "Tempo gasto para gerar " + finalTotalMessageCount + " mensagens: " + (endTime - beginTime));
     }
 
     public static void scriptForSV(String[] svData, String datasetLocation) throws IOException { // Generates only SV data

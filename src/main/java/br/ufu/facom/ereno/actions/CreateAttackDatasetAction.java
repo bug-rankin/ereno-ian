@@ -94,7 +94,7 @@ public class CreateAttackDatasetAction {
     }
     
     public static void execute(String configPath) throws Exception {
-        LOGGER.info("Starting CreateAttackDatasetAction with config: " + configPath);
+        LOGGER.info(() -> "Starting CreateAttackDatasetAction with config: " + configPath);
         
         // Load configuration
         Config config = loadConfig(configPath);
@@ -105,26 +105,26 @@ public class CreateAttackDatasetAction {
             if (!benignFile.exists()) {
                 throw new IOException("Benign data file not found: " + config.input.benignDataPath);
             }
-            LOGGER.info("Verified benign data file exists: " + config.input.benignDataPath);
+            LOGGER.info(() -> "Verified benign data file exists: " + config.input.benignDataPath);
         }
         
         // Ensure output directory exists
         File outputDir = new File(config.output.directory);
         if (!outputDir.exists()) {
             outputDir.mkdirs();
-            LOGGER.info("Created output directory: " + config.output.directory);
+            LOGGER.info(() -> "Created output directory: " + config.output.directory);
         }
         
         // Load benign data
-        LOGGER.info("Loading benign data from: " + config.input.benignDataPath);
+        LOGGER.info(() -> "Loading benign data from: " + config.input.benignDataPath);
         LegitimateProtectionIED benignIED = BenignDataManager.loadBenignData(config.input.benignDataPath);
-        LOGGER.info("Loaded " + benignIED.getNumberOfMessages() + " benign messages");
+        LOGGER.info(() -> "Loaded " + benignIED.getNumberOfMessages() + " benign messages");
         
         // Set up SubstationNetwork with benign messages for attack simulations
         SubstationNetwork network = new SubstationNetwork();
         network.stationBusMessages.addAll(benignIED.getMessages());
         benignIED.setSubstationNetwork(network);
-        LOGGER.info("Initialized SubstationNetwork with " + network.stationBusMessages.size() + " messages");
+        LOGGER.info(() -> "Initialized SubstationNetwork with " + network.stationBusMessages.size() + " messages");
         
         // Prepare output file
         String outputPath = new File(config.output.directory, config.output.filename).getAbsolutePath();
@@ -147,26 +147,26 @@ public class CreateAttackDatasetAction {
             benignSegment.name = "benign";
             benignSegment.messages = extractMessages(benignIED, config.datasetStructure.messagesPerSegment);
             segments.add(benignSegment);
-            LOGGER.info("Added benign segment with " + benignSegment.messages.size() + " messages");
+            LOGGER.info(() -> "Added benign segment with " + benignSegment.messages.size() + " messages");
         }
         
         // Generate attack segments
         for (Config.AttackSegmentConfig attackSegment : config.attackSegments) {
             if (!attackSegment.enabled) {
-                LOGGER.info("Skipping disabled attack segment: " + attackSegment.name);
+                LOGGER.info(() -> "Skipping disabled attack segment: " + attackSegment.name);
                 continue;
             }
             
             // Check if this is a combination attack
             if (attackSegment.attacks != null && !attackSegment.attacks.isEmpty()) {
                 // Handle attack combination
-                LOGGER.info("Generating combination attack segment: " + attackSegment.name);
+                LOGGER.info(() -> "Generating combination attack segment: " + attackSegment.name);
                 SegmentData combinedSegment = generateCombinationSegment(
                     attackSegment, benignIED, config.datasetStructure.messagesPerSegment, false);
                 segments.add(combinedSegment);
             } else {
                 // Single attack
-                LOGGER.info("Generating attack segment: " + attackSegment.name);
+                LOGGER.info(() -> "Generating attack segment: " + attackSegment.name);
                 SegmentData segment = generateAttackSegment(
                     attackSegment, benignIED, config.datasetStructure.messagesPerSegment, false);
                 segments.add(segment);
@@ -183,7 +183,7 @@ public class CreateAttackDatasetAction {
         int totalMessages = 0;
         boolean isFirstSegment = true;
         for (SegmentData segment : segments) {
-            LOGGER.info("Writing segment '" + segment.name + "' with " + segment.messages.size() + " messages");
+            LOGGER.info(() -> "Writing segment '" + segment.name + "' with " + segment.messages.size() + " messages");
             
             // Ensure all messages in this segment have the correct label
             String segmentLabel = getLabelForSegmentName(segment.name);
@@ -209,8 +209,10 @@ public class CreateAttackDatasetAction {
             finishWriting();
         }
         
-        LOGGER.info("Attack dataset created successfully: " + outputPath);
-        LOGGER.info("Total messages: " + totalMessages + " across " + segments.size() + " segments");
+        LOGGER.info(() -> "Attack dataset created successfully: " + outputPath);
+        final int finalTotalMessages = totalMessages;
+        final int finalSegmentSize = segments.size();
+        LOGGER.info(() -> "Total messages: " + finalTotalMessages + " across " + finalSegmentSize + " segments");
         
         // Track dataset creation
         if (config.output.enableTracking) {
@@ -279,7 +281,7 @@ public class CreateAttackDatasetAction {
                 "Attack dataset with " + totalMessages + " messages"
             );
             
-            LOGGER.info("Dataset tracked with ID: " + datasetId);
+            LOGGER.info(() -> "Dataset tracked with ID: " + datasetId);
             
             // Complete experiment if we created it
             if (config.output.experimentId == null || config.output.experimentId.isEmpty()) {
@@ -287,7 +289,7 @@ public class CreateAttackDatasetAction {
             }
             
         } catch (Exception e) {
-            LOGGER.warning("Failed to track dataset creation: " + e.getMessage());
+            LOGGER.warning(() -> "Failed to track dataset creation: " + e.getMessage());
             // Don't fail the action if tracking fails
         }
     }
@@ -349,7 +351,7 @@ public class CreateAttackDatasetAction {
         segment.name = segmentConfig.name;
         segment.messages = attackIED.copyMessages();
         
-        LOGGER.info("Generated " + segment.messages.size() + " messages for attack: " + segmentConfig.name);
+        LOGGER.info(() -> "Generated " + segment.messages.size() + " messages for attack: " + segmentConfig.name);
         
         return segment;
     }
@@ -383,7 +385,7 @@ public class CreateAttackDatasetAction {
             attackIED.run(count);
             combinedSegment.messages.addAll(attackIED.copyMessages());
             
-            LOGGER.info("Added " + count + " messages for attack '" + attackName + 
+            LOGGER.info(() -> "Added " + count + " messages for attack '" + attackName + 
                 "' in combination '" + segmentConfig.name + "'");
         }
         

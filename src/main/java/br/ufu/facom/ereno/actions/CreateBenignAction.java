@@ -78,14 +78,14 @@ public class CreateBenignAction {
         File outDir = new File(config.output.directory);
         if (!outDir.exists()) {
             outDir.mkdirs();
-            LOGGER.info("Created output directory: " + config.output.directory);
+            LOGGER.info(() -> "Created output directory: " + config.output.directory);
         }
 
         // Generate benign data
-        LOGGER.info("Generating " + config.generation.numberOfMessages + " benign messages...");
+        LOGGER.info(() -> "Generating " + config.generation.numberOfMessages + " benign messages...");
         LegitimateProtectionIED ied = new LegitimateProtectionIED();
         ied.run(config.generation.numberOfMessages);
-        LOGGER.info("Generated " + ied.getNumberOfMessages() + " benign messages");
+        LOGGER.info(() -> "Generated " + ied.getNumberOfMessages() + " benign messages");
 
         // Set fault probability for filename
         ConfigLoader.benignData.faultProbability = config.generation.faultProbability;
@@ -93,10 +93,10 @@ public class CreateBenignAction {
 
         // Save in requested formats
         for (String format : config.output.formats) {
-            LOGGER.info("Saving benign data in " + format.toUpperCase() + " format...");
+            LOGGER.info(() -> "Saving benign data in " + format.toUpperCase() + " format...");
             BenignDataManager.saveBenignData(ied.copyMessages(), format);
             String savedPath = BenignDataManager.getBenignDataPath(format);
-            LOGGER.info("Saved to: " + savedPath);
+            LOGGER.info(() -> "Saved to: " + savedPath);
             
             // Track dataset creation
             if (config.output.enableTracking) {
@@ -134,7 +134,7 @@ public class CreateBenignAction {
                 "Benign dataset, fault probability: " + config.generation.faultProbability + "%"
             );
             
-            LOGGER.info("Benign dataset tracked with ID: " + datasetId);
+            LOGGER.info(() -> "Benign dataset tracked with ID: " + datasetId);
             
             // Complete experiment if we created it
             if (config.output.experimentId == null || config.output.experimentId.isEmpty()) {
@@ -142,7 +142,7 @@ public class CreateBenignAction {
             }
             
         } catch (Exception e) {
-            LOGGER.warning("Failed to track benign dataset: " + e.getMessage());
+            LOGGER.warning(() -> "Failed to track benign dataset: " + e.getMessage());
             // Don't fail the action if tracking fails
         }
     }

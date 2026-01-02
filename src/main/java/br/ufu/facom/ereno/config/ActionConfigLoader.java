@@ -78,7 +78,7 @@ public class ActionConfigLoader {
      * Loads the main configuration file and the action-specific configuration.
      */
     public void load(String mainConfigPath) throws IOException {
-        LOGGER.info("Loading main configuration from: " + mainConfigPath);
+        LOGGER.info(() -> "Loading main configuration from: " + mainConfigPath);
         
         // Load main config
         try (FileReader reader = new FileReader(mainConfigPath)) {
@@ -92,12 +92,12 @@ public class ActionConfigLoader {
 
         // Parse action type
         currentAction = parseAction(mainConfig.action);
-        LOGGER.info("Action type: " + currentAction);
+        LOGGER.info(() -> "Action type: " + currentAction);
 
         // Load action-specific config (skip for pipeline actions)
         if (currentAction != Action.PIPELINE) {
             if (mainConfig.actionConfigFile != null && !mainConfig.actionConfigFile.trim().isEmpty()) {
-                LOGGER.info("Loading action config from: " + mainConfig.actionConfigFile);
+                LOGGER.info(() -> "Loading action config from: " + mainConfig.actionConfigFile);
                 try (FileReader reader = new FileReader(mainConfig.actionConfigFile)) {
                     Gson gson = new Gson();
                     actionConfig = gson.fromJson(reader, JsonObject.class);
@@ -111,7 +111,7 @@ public class ActionConfigLoader {
         if (mainConfig.commonConfig != null && mainConfig.commonConfig.randomSeed != null) {
             ConfigLoader.randomSeed = mainConfig.commonConfig.randomSeed;
             ConfigLoader.RNG = new java.util.Random(mainConfig.commonConfig.randomSeed);
-            LOGGER.info("Random seed set to: " + mainConfig.commonConfig.randomSeed);
+            LOGGER.info(() -> "Random seed set to: " + mainConfig.commonConfig.randomSeed);
         }
     }
 
@@ -145,21 +145,21 @@ public class ActionConfigLoader {
      */
     public static boolean verifyFile(String path, String description) {
         if (path == null || path.trim().isEmpty()) {
-            LOGGER.warning(description + " path is null or empty");
+            LOGGER.warning(() -> description + " path is null or empty");
             return false;
         }
         
         if (!Files.exists(Paths.get(path))) {
-            LOGGER.severe(description + " file not found: " + path);
+            LOGGER.severe(() -> description + " file not found: " + path);
             return false;
         }
         
         if (!Files.isReadable(Paths.get(path))) {
-            LOGGER.severe(description + " file is not readable: " + path);
+            LOGGER.severe(() -> description + " file is not readable: " + path);
             return false;
         }
         
-        LOGGER.info(description + " file verified: " + path);
+        LOGGER.info(() -> description + " file verified: " + path);
         return true;
     }
 

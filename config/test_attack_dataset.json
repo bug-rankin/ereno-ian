@@ -1,7 +1,0 @@
-{
-  "action": "create_attack_dataset",
-  "actionConfigFile": "config/action_create_attack_dataset_test.json",
-  "commonConfig": {
-    "randomSeed": 42
-  }
-}

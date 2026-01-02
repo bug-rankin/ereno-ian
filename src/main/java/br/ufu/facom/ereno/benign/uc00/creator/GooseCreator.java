@@ -5,22 +5,21 @@
  */
 package br.ufu.facom.ereno.benign.uc00.creator;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import br.ufu.facom.ereno.dataExtractors.GSVDatasetWriter;
 import br.ufu.facom.ereno.general.IED;
 import br.ufu.facom.ereno.general.ProtectionIED;
 import br.ufu.facom.ereno.messages.Goose;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  * @author silvio
  */
 public class GooseCreator implements MessageCreator {
-    int count;
     private ProtectionIED protectionIED;
     private Goose previousGoose;
-    private String label;
+    private final String label;
     private Goose seedMessage;
 
     public GooseCreator(String label) {
@@ -30,18 +29,16 @@ public class GooseCreator implements MessageCreator {
     @Override
     public void generate(IED ied, int normalMessages) {
         this.protectionIED = (ProtectionIED) ied;
-        this.count = normalMessages;
         int faultProbability = 5;
 
         // Generating the default seed message (it will not be written to dataset)
         generateSeedGoose();
 
-        int i = 0;
         // Generate faults and normal randomly
         while (((ProtectionIED) ied).getMessages().size() < normalMessages) {
             System.out.println(((ProtectionIED) ied).getMessages().size() + " < " + normalMessages);
-            int percentage = ied.randomBetween(1, 100); // decide whether it will be fault or normal
-            if (((ProtectionIED) ied).getMessages().size() > 0) {
+            int percentage = IED.randomBetween(1, 100); // decide whether it will be fault or normal
+            if (!((ProtectionIED) ied).getMessages().isEmpty()) {
                 if (percentage > faultProbability) {
                     generateNormalGoose();
                 } else { // Generates fault and recovery events
@@ -57,10 +54,10 @@ public class GooseCreator implements MessageCreator {
     private void generateFaultAndRecovery() {
         double lastPeriodicMessage = protectionIED.getMessages().get(protectionIED.getNumberOfMessages() - 1).getTimestamp();
         reportEventAt(((int) lastPeriodicMessage) + 0.5); // fault at middle of the second
-        Logger.getLogger("ProtectionIED.run()").info("Reporting fault at " + lastPeriodicMessage + 0.5);
+        Logger.getLogger("ProtectionIED.run()").info(() -> "Reporting fault at " + (lastPeriodicMessage + 0.5));
         protectionIED.getMessages().remove(protectionIED.getNumberOfMessages() - 1); // need to remove the message after 100ms
         reportEventAt(((int) lastPeriodicMessage) + 0.6); // fault recovery 100ms later
-        Logger.getLogger("ProtectionIED.run()").info("Reporting normal operation at " + (((int) lastPeriodicMessage) + 0.6));
+        Logger.getLogger("ProtectionIED.run()").info(() -> "Reporting normal operation at " + (((int) lastPeriodicMessage) + 0.6));
     }
 
     private void generateNormalGoose() {
@@ -98,7 +95,7 @@ public class GooseCreator implements MessageCreator {
 
     public void reportEventAt(double eventTimestamp) {
         if (GSVDatasetWriter.Debug.gooseMessages) {
-            Logger.getLogger("GooseCreator").log(Level.INFO, "Reporting an event at " + eventTimestamp + "!");
+            Logger.getLogger("GooseCreator").log(Level.INFO, () -> "Reporting an event at " + eventTimestamp + "!");
         }
 
         protectionIED.setFirstGooseTime(

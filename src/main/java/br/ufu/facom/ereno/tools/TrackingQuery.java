@@ -121,9 +121,8 @@ public class TrackingQuery {
                     printUsage();
                     System.exit(1);
             }
-        } catch (Exception e) {
+        } catch (IOException | IllegalArgumentException e) {
             System.err.println("Error: " + e.getMessage());
-            e.printStackTrace();
             System.exit(1);
         }
     }

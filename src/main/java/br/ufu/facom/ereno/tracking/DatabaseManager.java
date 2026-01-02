@@ -1,9 +1,16 @@
 package br.ufu.facom.ereno.tracking;
 
-import java.io.*;
-import java.nio.file.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
 import java.util.logging.Logger;
 
 /**
@@ -58,7 +65,7 @@ public class DatabaseManager {
             File dir = new File(databaseDirectory);
             if (!dir.exists()) {
                 dir.mkdirs();
-                LOGGER.info("Created tracking database directory: " + databaseDirectory);
+                LOGGER.info(() -> "Created tracking database directory: " + databaseDirectory);
             }
             
             // Initialize experiments database
@@ -86,7 +93,7 @@ public class DatabaseManager {
             }
             
         } catch (IOException e) {
-            LOGGER.severe("Failed to initialize databases: " + e.getMessage());
+            LOGGER.severe(() -> "Failed to initialize databases: " + e.getMessage());
             throw new RuntimeException("Database initialization failed", e);
         }
     }
@@ -181,7 +188,7 @@ public class DatabaseManager {
         entry.notes = notes;
         
         appendEntry(experimentsDbPath, entry.toValues());
-        LOGGER.info("Logged experiment: " + experimentId);
+        LOGGER.info(() -> "Logged experiment: " + experimentId);
         
         return experimentId;
     }
@@ -205,7 +212,7 @@ public class DatabaseManager {
         
         // Write back
         Files.write(Paths.get(experimentsDbPath), lines);
-        LOGGER.info("Updated experiment " + experimentId + " status to: " + status);
+        LOGGER.info(() -> "Updated experiment " + experimentId + " status to: " + status);
     }
     
     // ==================== DATASET TRACKING ====================
@@ -266,7 +273,7 @@ public class DatabaseManager {
         }
         
         appendEntry(datasetsDbPath, entry.toValues());
-        LOGGER.info("Logged dataset: " + entry.datasetId + " at " + entry.filePath);
+        LOGGER.info(() -> "Logged dataset: " + entry.datasetId + " at " + entry.filePath);
         
         return entry.datasetId;
     }
@@ -320,7 +327,7 @@ public class DatabaseManager {
         }
         
         appendEntry(modelsDbPath, entry.toValues());
-        LOGGER.info("Logged model: " + entry.modelId + " (" + entry.classifierName + ")");
+        LOGGER.info(() -> "Logged model: " + entry.modelId + " (" + entry.classifierName + ")");
         
         return entry.modelId;
     }
@@ -390,7 +397,7 @@ public class DatabaseManager {
         }
         
         appendEntry(resultsDbPath, entry.toValues());
-        LOGGER.info("Logged result: " + entry.resultId);
+        LOGGER.info(() -> "Logged result: " + entry.resultId);
         
         return entry.resultId;
     }
@@ -505,6 +512,6 @@ public class DatabaseManager {
             writer.println("  Results: " + resultsDbPath);
         }
         
-        LOGGER.info("Exported summary report to: " + outputPath);
+        LOGGER.info(() -> "Exported summary report to: " + outputPath);
     }
 }

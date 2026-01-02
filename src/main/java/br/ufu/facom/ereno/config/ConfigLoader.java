@@ -1,10 +1,10 @@
 package br.ufu.facom.ereno.config;
 
-import com.google.gson.Gson;
-import com.google.gson.annotations.SerializedName;
-
 import java.io.FileReader;
 import java.io.IOException;
+
+import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
 
 /**
  * Simple configuration loader for the merged config file `config/configparams.json`.
@@ -165,7 +165,7 @@ public class ConfigLoader {
 
         // Log applied defaults (if any) to help auditing and debugging of config migrations
         if (applied.length() > 0) {
-            java.util.logging.Logger.getLogger("ConfigLoader").info("Applied config defaults: " + applied.toString());
+            java.util.logging.Logger.getLogger("ConfigLoader").info(() -> "Applied config defaults: " + applied.toString());
         } else {
             java.util.logging.Logger.getLogger("ConfigLoader").info("No config defaults applied; config looked healthy.");
         }

@@ -36,10 +36,10 @@ public class ExperimentTracker {
     public String startExperiment(String experimentType, String description, String pipelineConfigPath, String notes) {
         try {
             currentExperimentId = dbManager.logExperiment(experimentType, description, pipelineConfigPath, notes);
-            LOGGER.info("Started tracking experiment: " + currentExperimentId);
+            LOGGER.info(() -> "Started tracking experiment: " + currentExperimentId);
             return currentExperimentId;
         } catch (IOException e) {
-            LOGGER.warning("Failed to start experiment tracking: " + e.getMessage());
+            LOGGER.warning(() -> "Failed to start experiment tracking: " + e.getMessage());
             return null;
         }
     }
@@ -50,9 +50,9 @@ public class ExperimentTracker {
     public void completeExperiment(String experimentId) {
         try {
             dbManager.updateExperimentStatus(experimentId, "completed");
-            LOGGER.info("Completed experiment: " + experimentId);
+            LOGGER.info(() -> "Completed experiment: " + experimentId);
         } catch (IOException e) {
-            LOGGER.warning("Failed to update experiment status: " + e.getMessage());
+            LOGGER.warning(() -> "Failed to update experiment status: " + e.getMessage());
         }
     }
     
@@ -62,9 +62,9 @@ public class ExperimentTracker {
     public void failExperiment(String experimentId, String reason) {
         try {
             dbManager.updateExperimentStatus(experimentId, "failed");
-            LOGGER.warning("Marked experiment as failed: " + experimentId + " - " + reason);
+            LOGGER.warning(() -> "Marked experiment as failed: " + experimentId + " - " + reason);
         } catch (IOException e) {
-            LOGGER.warning("Failed to update experiment status: " + e.getMessage());
+            LOGGER.warning(() -> "Failed to update experiment status: " + e.getMessage());
         }
     }
     
@@ -93,15 +93,15 @@ public class ExperimentTracker {
                 entry.numAttributes = data.numAttributes();
             } catch (Exception e) {
                 entry.numAttributes = -1; // Unknown
-                LOGGER.fine("Could not read attributes from dataset: " + e.getMessage());
+                LOGGER.fine(() -> "Could not read attributes from dataset: " + e.getMessage());
             }
             
             String datasetId = dbManager.logDataset(entry);
-            LOGGER.info("Tracked benign dataset: " + datasetId);
+            LOGGER.info(() -> "Tracked benign dataset: " + datasetId);
             return datasetId;
             
         } catch (IOException e) {
-            LOGGER.warning("Failed to track benign dataset: " + e.getMessage());
+            LOGGER.warning(() -> "Failed to track benign dataset: " + e.getMessage());
             return null;
         }
     }
@@ -135,15 +135,15 @@ public class ExperimentTracker {
             } catch (Exception e) {
                 entry.numInstances = -1;
                 entry.numAttributes = -1;
-                LOGGER.fine("Could not read dataset info: " + e.getMessage());
+                LOGGER.fine(() -> "Could not read dataset info: " + e.getMessage());
             }
             
             String datasetId = dbManager.logDataset(entry);
-            LOGGER.info("Tracked attack dataset: " + datasetId);
+            LOGGER.info(() -> "Tracked attack dataset: " + datasetId);
             return datasetId;
             
         } catch (IOException e) {
-            LOGGER.warning("Failed to track attack dataset: " + e.getMessage());
+            LOGGER.warning(() -> "Failed to track attack dataset: " + e.getMessage());
             return null;
         }
     }
@@ -177,11 +177,11 @@ public class ExperimentTracker {
             }
             
             String datasetId = dbManager.logDataset(entry);
-            LOGGER.info("Tracked test dataset: " + datasetId);
+            LOGGER.info(() -> "Tracked test dataset: " + datasetId);
             return datasetId;
             
         } catch (IOException e) {
-            LOGGER.warning("Failed to track test dataset: " + e.getMessage());
+            LOGGER.warning(() -> "Failed to track test dataset: " + e.getMessage());
             return null;
         }
     }
@@ -204,11 +204,11 @@ public class ExperimentTracker {
             entry.notes = notes;
             
             String modelId = dbManager.logModel(entry);
-            LOGGER.info("Tracked model: " + modelId);
+            LOGGER.info(() -> "Tracked model: " + modelId);
             return modelId;
             
         } catch (IOException e) {
-            LOGGER.warning("Failed to track model: " + e.getMessage());
+            LOGGER.warning(() -> "Failed to track model: " + e.getMessage());
             return null;
         }
     }
@@ -239,11 +239,11 @@ public class ExperimentTracker {
             entry.notes = notes;
             
             String resultId = dbManager.logResult(entry);
-            LOGGER.info("Tracked result: " + resultId);
+            LOGGER.info(() -> "Tracked result: " + resultId);
             return resultId;
             
         } catch (IOException e) {
-            LOGGER.warning("Failed to track result: " + e.getMessage());
+            LOGGER.warning(() -> "Failed to track result: " + e.getMessage());
             return null;
         }
     }
@@ -269,7 +269,7 @@ public class ExperimentTracker {
         try {
             dbManager.exportSummaryReport(outputPath);
         } catch (IOException e) {
-            LOGGER.warning("Failed to export summary report: " + e.getMessage());
+            LOGGER.warning(() -> "Failed to export summary report: " + e.getMessage());
         }
     }
     

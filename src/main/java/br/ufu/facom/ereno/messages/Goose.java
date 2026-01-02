@@ -7,8 +7,6 @@ package br.ufu.facom.ereno.messages;
 
 import br.ufu.facom.ereno.config.ConfigLoader;
 
-import java.text.DecimalFormat;
-
 /**
  * @author silvio
  */
@@ -20,7 +18,7 @@ public class Goose extends EthernetFrame {
     private int sqNum;                      // DYNAMICALLY GENERATED 
     private double t;                       // DYNAMICALLY GENERATED - Last Goose Change
     private int gooseTimeAllowedtoLive = 11000;
-    private int numDatSetEntries = 25;
+    private final int numDatSetEntries = 25;
     private int confRev = 1;
     public static String ethDst = "01:0c:cd:01:2f:77";
     public static String ethSrc = "01:0c:cd:01:2f:78";

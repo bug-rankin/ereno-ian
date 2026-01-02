@@ -5,17 +5,17 @@
  */
 package br.ufu.facom.ereno.evaluation.support;
 
-import weka.clusterers.SimpleKMeans;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Normalize;
-
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import weka.clusterers.SimpleKMeans;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Normalize;
 
 /**
  * @author silvio
@@ -263,7 +263,6 @@ public class Util {
         float FN = 0;
         float VN = 0;
         float FP = 0;
-        double avgTime = 0;
         double acuracia = 0;
         double recall = 0;
         double precision = 0;
@@ -286,7 +285,7 @@ public class Util {
         } catch (NullPointerException e) {
             return new GenericResultado();
         }
-        avgTime = totalMicroTime / results.length;
+        double avgTime = totalMicroTime / results.length;
 
         GenericResultado compilledResult = new GenericResultado(results[0].getCx(), VP, FN, VN, FP, avgTime, acuracia, recall, precision, f1score, results[0].usedFS);
 //        System.out.println("getResultAverage: " + results[0].getCx() + " -> " + Arrays.toString(results[0].usedFS));
@@ -300,17 +299,17 @@ public class Util {
         float FN = 0;
         float VN = 0;
         float FP = 0;
-        double avgTime = 0;
         double acuracia = 0;
         double recall = 0;
         double precision = 0;
         double f1score = 0;
         double[] times = new double[foldResults.length];
-        double stdDvTime = 0;
-        double varianceTime = 0;
-        double loConfIntTime = 0;
-        double hiConfIntTime = 0;
         double totalMicroTime = 0;
+        double stdDvTime;
+        double varianceTime;
+        double loConfIntTime;
+        double hiConfIntTime;
+        double avgTime;
 
         try {
             int pos = 0;

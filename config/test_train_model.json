@@ -1,7 +1,0 @@
-{
-  "action": "train_model",
-  "actionConfigFile": "config/action_train_model_test.json",
-  "commonConfig": {
-    "randomSeed": 42
-  }
-}

@@ -1,7 +1,0 @@
-{
-  "action": "evaluate",
-  "actionConfigFile": "config/action_evaluate_test.json",
-  "commonConfig": {
-    "randomSeed": 42
-  }
-}
