@@ -1,0 +1,40 @@
+{
+  "action": "create_benign",
+  "description": "Create benign dataset for experiment tracking demonstration",
+  
+  "output": {
+    "directory": "target/benign_data",
+    "formats": ["arff"],
+    "filenamePrefix": "demo",
+    "enableTracking": true,
+    "experimentId": ""
+  },
+  
+  "generation": {
+    "numberOfMessages": 1000,
+    "faultProbability": 5
+  },
+  
+  "gooseFlow": {
+    "goID": "GOOSE_SV",
+    "ethSrc": "01:0C:CD:01:00:01",
+    "ethDst": "01:0C:CD:01:00:FF",
+    "ethType": "88B8",
+    "gooseAppid": "0001",
+    "TPID": "8100",
+    "ndsCom": true,
+    "test": false,
+    "cbstatus": false
+  },
+  
+  "setupIED": {
+    "iedName": "IED1",
+    "gocbRef": "IED1$GO$GoCB01",
+    "datSet": "IED1$CTRL$DS1",
+    "minTime": "4",
+    "maxTime": "2000",
+    "timestamp": "2024-01-01T00:00:00",
+    "stNum": "0",
+    "sqNum": "0"
+  }
+}

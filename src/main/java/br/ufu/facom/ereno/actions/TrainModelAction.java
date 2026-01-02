@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import br.ufu.facom.ereno.tracking.ExperimentTracker;
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.lazy.IBk;
@@ -54,6 +55,9 @@ public class TrainModelAction {
             public String modelDirectory = "target/models";
             public boolean saveMetadata = true;
             public String metadataFilename = "training_metadata.json";
+            public boolean enableTracking = true;
+            public String experimentId; // Optional: link to existing experiment
+            public String trainingDatasetId; // Optional: link to tracked dataset
         }
         
         public static class ClassifierParameters {
@@ -163,6 +167,12 @@ public class TrainModelAction {
                 modelMeta.parameters = getClassifierParameters(classifier, config.classifierParameters);
                 metadata.models.put(classifierName, modelMeta);
                 
+                // Track model if enabled
+                if (config.output.enableTracking) {
+                    trackModelTraining(config, classifierName, modelPath, trainingTime, 
+                                      modelMeta.parameters, configPath);
+                }
+                
             } catch (Exception e) {
                 LOGGER.severe("Failed to train classifier " + classifierName + ": " + e.getMessage());
                 e.printStackTrace();
@@ -255,6 +265,49 @@ public class TrainModelAction {
         
         try (FileWriter writer = new FileWriter(path)) {
             gson.toJson(metadata, writer);
+        }
+    }
+    
+    private static void trackModelTraining(Config config, String classifierName, String modelPath,
+                                          long trainingTime, Map<String, Object> parameters,
+                                          String configPath) {
+        try {
+            ExperimentTracker tracker = new ExperimentTracker();
+            
+            // Determine experiment ID
+            String experimentId = config.output.experimentId;
+            if (experimentId == null || experimentId.isEmpty()) {
+                // Create a new standalone experiment
+                experimentId = tracker.startExperiment(
+                    "model_training",
+                    "Train model: " + classifierName,
+                    configPath,
+                    "Standalone model training"
+                );
+            }
+            
+            // Track the model
+            String modelId = tracker.trackModel(
+                experimentId,
+                config.output.trainingDatasetId,
+                classifierName,
+                modelPath,
+                trainingTime,
+                parameters,
+                configPath,
+                "Trained on " + config.input.trainingDatasetPath
+            );
+            
+            LOGGER.info("Model tracked with ID: " + modelId);
+            
+            // Complete experiment if we created it
+            if (config.output.experimentId == null || config.output.experimentId.isEmpty()) {
+                tracker.completeExperiment(experimentId);
+            }
+            
+        } catch (Exception e) {
+            LOGGER.warning("Failed to track model training: " + e.getMessage());
+            // Don't fail the action if tracking fails
         }
     }
 }

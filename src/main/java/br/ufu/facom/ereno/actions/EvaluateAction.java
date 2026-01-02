@@ -16,6 +16,7 @@ import com.google.gson.GsonBuilder;
 
 import br.ufu.facom.ereno.evaluation.support.GenericEvaluation;
 import br.ufu.facom.ereno.evaluation.support.GenericResultado;
+import br.ufu.facom.ereno.tracking.ExperimentTracker;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 import weka.core.SerializationHelper;
@@ -48,6 +49,7 @@ public class EvaluateAction {
             public static class ModelInput {
                 public String name;
                 public String modelPath;
+                public String modelId; // Optional: tracked model ID for cross-referencing
             }
         }
         
@@ -56,6 +58,9 @@ public class EvaluateAction {
             public String evaluationFilename = "evaluation_results.json";
             public boolean generateTextReport = true;
             public String textReportFilename = "evaluation_report.txt";
+            public boolean enableTracking = true;
+            public String experimentId; // Optional: link to existing experiment
+            public String testDatasetId; // Optional: link to tracked test dataset
         }
     }
     
@@ -151,6 +156,11 @@ public class EvaluateAction {
                 LOGGER.info(String.format("%s - Accuracy: %.2f%%, Precision: %.4f, Recall: %.4f, F1: %.4f",
                     modelInput.name, modelEval.accuracy, modelEval.precision, 
                     modelEval.recall, modelEval.f1Score));
+                
+                // Track result if enabled
+                if (config.output.enableTracking) {
+                    trackEvaluationResult(config, modelInput, modelEval, configPath);
+                }
                 
             } catch (Exception e) {
                 LOGGER.severe("Failed to evaluate model " + modelInput.name + ": " + e.getMessage());
@@ -261,6 +271,55 @@ public class EvaluateAction {
         
         try (FileWriter writer = new FileWriter(path)) {
             writer.write(report.toString());
+        }
+    }
+    
+    private static void trackEvaluationResult(Config config, Config.InputConfig.ModelInput modelInput,
+                                             EvaluationResults.ModelEvaluation eval, String configPath) {
+        try {
+            ExperimentTracker tracker = new ExperimentTracker();
+            
+            // Determine experiment ID
+            String experimentId = config.output.experimentId;
+            if (experimentId == null || experimentId.isEmpty()) {
+                // Create a new standalone experiment
+                experimentId = tracker.startExperiment(
+                    "model_evaluation",
+                    "Evaluate model: " + modelInput.name,
+                    configPath,
+                    "Standalone model evaluation"
+                );
+            }
+            
+            // Track the result
+            String resultId = tracker.trackResult(
+                experimentId,
+                modelInput.modelId,
+                config.output.testDatasetId,
+                eval.accuracy,
+                eval.precision,
+                eval.recall,
+                eval.f1Score,
+                eval.truePositives,
+                eval.trueNegatives,
+                eval.falsePositives,
+                eval.falseNegatives,
+                eval.evaluationTimeMs,
+                eval.confusionMatrix,
+                configPath,
+                "Evaluated " + modelInput.name + " on " + config.input.testDatasetPath
+            );
+            
+            LOGGER.info("Result tracked with ID: " + resultId);
+            
+            // Complete experiment if we created it
+            if (config.output.experimentId == null || config.output.experimentId.isEmpty()) {
+                tracker.completeExperiment(experimentId);
+            }
+            
+        } catch (Exception e) {
+            LOGGER.warning("Failed to track evaluation result: " + e.getMessage());
+            // Don't fail the action if tracking fails
         }
     }
 }

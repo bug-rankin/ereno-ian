@@ -1,16 +1,15 @@
 package br.ufu.facom.ereno.actions;
 
-import br.ufu.facom.ereno.benign.uc00.devices.LegitimateProtectionIED;
-import br.ufu.facom.ereno.config.ActionConfigLoader;
-import br.ufu.facom.ereno.config.ConfigLoader;
-import br.ufu.facom.ereno.util.BenignDataManager;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.logging.Logger;
+
+import com.google.gson.Gson;
+
+import br.ufu.facom.ereno.benign.uc00.devices.LegitimateProtectionIED;
+import br.ufu.facom.ereno.config.ConfigLoader;
+import br.ufu.facom.ereno.tracking.ExperimentTracker;
+import br.ufu.facom.ereno.util.BenignDataManager;
 
 /**
  * Action runner for creating benign datasets.
@@ -31,6 +30,8 @@ public class CreateBenignAction {
             public String directory = "target/benign_data";
             public String[] formats = {"arff"};
             public String filenamePrefix;
+            public boolean enableTracking = true;
+            public String experimentId; // Optional: link to existing experiment
         }
 
         public static class GenerationConfig {
@@ -96,9 +97,53 @@ public class CreateBenignAction {
             BenignDataManager.saveBenignData(ied.copyMessages(), format);
             String savedPath = BenignDataManager.getBenignDataPath(format);
             LOGGER.info("Saved to: " + savedPath);
+            
+            // Track dataset creation
+            if (config.output.enableTracking) {
+                trackBenignDataset(config, savedPath, ied.getNumberOfMessages(), configPath);
+            }
         }
 
             LOGGER.info("=== Create Benign Data Action Completed Successfully ===");
+        }
+    }
+    
+    private static void trackBenignDataset(Config config, String savedPath, 
+                                           int numMessages, String configPath) {
+        try {
+            ExperimentTracker tracker = new ExperimentTracker();
+            
+            // Determine experiment ID
+            String experimentId = config.output.experimentId;
+            if (experimentId == null || experimentId.isEmpty()) {
+                // Create a new standalone experiment
+                experimentId = tracker.startExperiment(
+                    "benign_dataset_creation",
+                    "Create benign dataset with " + numMessages + " messages",
+                    configPath,
+                    "Standalone benign dataset creation"
+                );
+            }
+            
+            // Track the dataset
+            String datasetId = tracker.trackBenignDataset(
+                experimentId,
+                savedPath,
+                configPath,
+                numMessages,
+                "Benign dataset, fault probability: " + config.generation.faultProbability + "%"
+            );
+            
+            LOGGER.info("Benign dataset tracked with ID: " + datasetId);
+            
+            // Complete experiment if we created it
+            if (config.output.experimentId == null || config.output.experimentId.isEmpty()) {
+                tracker.completeExperiment(experimentId);
+            }
+            
+        } catch (Exception e) {
+            LOGGER.warning("Failed to track benign dataset: " + e.getMessage());
+            // Don't fail the action if tracking fails
         }
     }
 

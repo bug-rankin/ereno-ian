@@ -5,7 +5,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import com.google.gson.Gson;
@@ -37,6 +39,7 @@ import static br.ufu.facom.ereno.dataExtractors.DatasetWriter.writeGooseMessages
 import static br.ufu.facom.ereno.dataExtractors.GSVDatasetWriter.finishWriting;
 import br.ufu.facom.ereno.general.ProtectionIED;
 import br.ufu.facom.ereno.messages.Goose;
+import br.ufu.facom.ereno.tracking.ExperimentTracker;
 import br.ufu.facom.ereno.util.BenignDataManager;
 import br.ufu.facom.ereno.util.Labels;
 
@@ -69,6 +72,8 @@ public class CreateAttackDatasetAction {
             public String directory;
             public String filename;
             public String format = "arff";
+            public boolean enableTracking = true;
+            public String experimentId; // Optional: link to existing experiment
         }
         
         public static class DatasetStructureConfig {
@@ -206,6 +211,85 @@ public class CreateAttackDatasetAction {
         
         LOGGER.info("Attack dataset created successfully: " + outputPath);
         LOGGER.info("Total messages: " + totalMessages + " across " + segments.size() + " segments");
+        
+        // Track dataset creation
+        if (config.output.enableTracking) {
+            trackDatasetCreation(config, outputPath, totalMessages, segments, configPath);
+        }
+    }
+    
+    private static void trackDatasetCreation(Config config, String outputPath, 
+                                            int totalMessages, List<SegmentData> segments,
+                                            String configPath) {
+        try {
+            ExperimentTracker tracker = new ExperimentTracker();
+            
+            // Determine experiment ID
+            String experimentId = config.output.experimentId;
+            if (experimentId == null || experimentId.isEmpty()) {
+                // Create a new standalone experiment
+                experimentId = tracker.startExperiment(
+                    "attack_dataset_creation",
+                    "Create attack dataset: " + config.output.filename,
+                    configPath,
+                    "Standalone attack dataset creation"
+                );
+            }
+            
+            // Collect attack types
+            List<String> attackTypes = new ArrayList<>();
+            for (Config.AttackSegmentConfig segment : config.attackSegments) {
+                if (segment.enabled) {
+                    if (segment.attacks != null && !segment.attacks.isEmpty()) {
+                        attackTypes.addAll(segment.attacks);
+                    } else {
+                        attackTypes.add(segment.name);
+                    }
+                }
+            }
+            
+            // Build dataset structure info
+            Map<String, Object> structureInfo = new HashMap<>();
+            structureInfo.put("messagesPerSegment", config.datasetStructure.messagesPerSegment);
+            structureInfo.put("includeBenignSegment", config.datasetStructure.includeBenignSegment);
+            structureInfo.put("shuffleSegments", config.datasetStructure.shuffleSegments);
+            structureInfo.put("totalSegments", segments.size());
+            structureInfo.put("segmentNames", segments.stream()
+                .map(s -> s.name)
+                .collect(java.util.stream.Collectors.toList()));
+            
+            // Get random seed from ConfigLoader if available
+            String randomSeed = "unknown";
+            try {
+                if (ConfigLoader.RNG != null) {
+                    randomSeed = "from_RNG";
+                }
+            } catch (Exception e) {
+                // Random seed not available
+            }
+            
+            // Track the dataset
+            String datasetId = tracker.trackAttackDataset(
+                experimentId,
+                outputPath,
+                configPath,
+                String.join(", ", attackTypes),
+                randomSeed,
+                structureInfo,
+                "Attack dataset with " + totalMessages + " messages"
+            );
+            
+            LOGGER.info("Dataset tracked with ID: " + datasetId);
+            
+            // Complete experiment if we created it
+            if (config.output.experimentId == null || config.output.experimentId.isEmpty()) {
+                tracker.completeExperiment(experimentId);
+            }
+            
+        } catch (Exception e) {
+            LOGGER.warning("Failed to track dataset creation: " + e.getMessage());
+            // Don't fail the action if tracking fails
+        }
     }
     
     private static String getLabelForSegmentName(String segmentName) {
