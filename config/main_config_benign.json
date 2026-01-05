@@ -1,7 +1,0 @@
-{
-  "action": "create_benign",
-  "actionConfigFile": "config/action_create_benign.json",
-  "commonConfig": {
-    "randomSeed": 42
-  }
-}

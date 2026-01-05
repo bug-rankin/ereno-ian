@@ -8,12 +8,12 @@
   "pipeline": [
     {
       "action": "create_benign",
-      "actionConfigFile": "config/action_create_benign.json",
+      "actionConfigFile": "config/actions/action_create_benign.json",
       "description": "Generate baseline benign traffic data"
     },
     {
       "action": "create_attack_dataset",
-      "actionConfigFile": "config/action_create_attack_dataset.json",
+      "actionConfigFile": "config/actions/action_create_attack_dataset.json",
       "description": "Create baseline test dataset"
     }
   ],
@@ -45,7 +45,7 @@
     "steps": [
       {
         "action": "create_attack_dataset",
-        "actionConfigFile": "config/action_create_attack_dataset.json",
+        "actionConfigFile": "config/actions/action_create_attack_dataset.json",
         "description": "Create training dataset with parameter variations",
         "parameterOverrides": {
           "output": {
@@ -56,7 +56,7 @@
       },
       {
         "action": "train_model",
-        "actionConfigFile": "config/action_train_model.json",
+        "actionConfigFile": "config/actions/action_train_model.json",
         "description": "Train models on varied dataset structure",
         "parameterOverrides": {
           "output": {
@@ -67,7 +67,7 @@
       },
       {
         "action": "evaluate",
-        "actionConfigFile": "config/action_evaluate.json",
+        "actionConfigFile": "config/actions/action_evaluate.json",
         "description": "Evaluate models trained with different parameters",
         "parameterOverrides": {
           "output": {

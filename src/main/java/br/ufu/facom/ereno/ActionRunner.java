@@ -66,7 +66,7 @@ public class ActionRunner {
             ActionConfigLoader actionLoader = new ActionConfigLoader();
             actionLoader.load(mainConfigPath);
 
-            LOGGER.info("Loaded configuration for action: " + actionLoader.getCurrentAction());
+            LOGGER.info(() -> "Loaded configuration for action: " + actionLoader.getCurrentAction());
 
             // Dispatch to appropriate action handler
             switch (actionLoader.getCurrentAction()) {
@@ -104,7 +104,7 @@ public class ActionRunner {
 
                 case UNKNOWN:
                 default:
-                    LOGGER.severe("Unknown action: " + actionLoader.getMainConfig().action);
+                    LOGGER.severe(() -> "Unknown action: " + actionLoader.getMainConfig().action);
                     System.err.println("Unknown action: " + actionLoader.getMainConfig().action);
                     System.err.println("Valid actions: create_benign, create_attack_dataset, train_model, evaluate, compare, pipeline");
                     System.exit(1);
@@ -113,12 +113,10 @@ public class ActionRunner {
             LOGGER.info("Action completed successfully");
 
         } catch (IOException e) {
-            LOGGER.severe("Configuration error: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.severe(() -> "Configuration error: " + e.getMessage());
             System.exit(2);
         } catch (Exception e) {
-            LOGGER.severe("Execution error: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.severe(() -> "Execution error: " + e.getMessage());
             System.exit(3);
         }
     }
@@ -134,22 +132,24 @@ public class ActionRunner {
         }
         
         LOGGER.info("=== Starting Pipeline Execution ===");
-        LOGGER.info("Pipeline contains " + mainConfig.pipeline.size() + " steps");
+        LOGGER.info(() -> "Pipeline contains " + mainConfig.pipeline.size() + " steps");
         
         for (int i = 0; i < mainConfig.pipeline.size(); i++) {
             ActionConfigLoader.PipelineStep step = mainConfig.pipeline.get(i);
+            final int stepNum = i + 1;
+            final int totalSteps = mainConfig.pipeline.size();
             
-            LOGGER.info("\n--- Pipeline Step " + (i + 1) + "/" + mainConfig.pipeline.size() + " ---");
-            LOGGER.info("Action: " + step.action);
+            LOGGER.info(() -> "\n--- Pipeline Step " + stepNum + "/" + totalSteps + " ---");
+            LOGGER.info(() -> "Action: " + step.action);
             if (step.description != null && !step.description.isEmpty()) {
-                LOGGER.info("Description: " + step.description);
+                LOGGER.info(() -> "Description: " + step.description);
             }
             
             // Create a temporary ActionConfigLoader for this step
             // For pipeline steps, we execute actions directly with their config files
             executeActionFromConfigFile(step.action, step.actionConfigFile);
             
-            LOGGER.info("Step " + (i + 1) + " completed successfully");
+            LOGGER.info(() -> "Step " + stepNum + " completed successfully");
         }
         
         LOGGER.info("\n=== Pipeline Execution Completed Successfully ===");
@@ -171,49 +171,55 @@ public class ActionRunner {
         }
         
         LOGGER.info("=== Starting Pipeline with Loop Execution ===");
-        LOGGER.info("Loop variation type: " + loop.variationType);
-        LOGGER.info("Number of iterations: " + loop.values.size());
-        LOGGER.info("Steps per iteration: " + loop.steps.size());
+        LOGGER.info(() -> "Loop variation type: " + loop.variationType);
+        LOGGER.info(() -> "Number of iterations: " + loop.values.size());
+        LOGGER.info(() -> "Steps per iteration: " + loop.steps.size());
         
         // Execute pre-loop pipeline steps if any
         if (mainConfig.pipeline != null && !mainConfig.pipeline.isEmpty()) {
             LOGGER.info("\n--- Executing Pre-Loop Steps ---");
             for (int i = 0; i < mainConfig.pipeline.size(); i++) {
                 ActionConfigLoader.PipelineStep step = mainConfig.pipeline.get(i);
-                LOGGER.info("Pre-Loop Step " + (i + 1) + "/" + mainConfig.pipeline.size() + ": " + step.action);
+                final int preStepNum = i + 1;
+                final int preTotalSteps = mainConfig.pipeline.size();
+                LOGGER.info(() -> "Pre-Loop Step " + preStepNum + "/" + preTotalSteps + ": " + step.action);
                 executeActionFromConfigFile(step.action, step.actionConfigFile);
-                LOGGER.info("Pre-Loop Step " + (i + 1) + " completed successfully");
+                LOGGER.info(() -> "Pre-Loop Step " + preStepNum + " completed successfully");
             }
         }
         
         // Execute loop iterations
         for (int iteration = 0; iteration < loop.values.size(); iteration++) {
             Object currentValue = loop.values.get(iteration);
+            final int iterNum = iteration + 1;
+            final int totalIters = loop.values.size();
             
             LOGGER.info("\n========================================");
-            LOGGER.info("=== Loop Iteration " + (iteration + 1) + "/" + loop.values.size() + " ===");
-            LOGGER.info("Current value: " + currentValue);
+            LOGGER.info(() -> "=== Loop Iteration " + iterNum + "/" + totalIters + " ===");
+            LOGGER.info(() -> "Current value: " + currentValue);
             LOGGER.info("========================================");
             
             // Execute each step in the loop with parameter overrides
             for (int stepIdx = 0; stepIdx < loop.steps.size(); stepIdx++) {
                 ActionConfigLoader.PipelineStep step = loop.steps.get(stepIdx);
+                final int loopStepNum = stepIdx + 1;
+                final int loopTotalSteps = loop.steps.size();
                 
-                LOGGER.info("\n--- Loop Step " + (stepIdx + 1) + "/" + loop.steps.size() + " ---");
-                LOGGER.info("Action: " + step.action);
+                LOGGER.info(() -> "\n--- Loop Step " + loopStepNum + "/" + loopTotalSteps + " ---");
+                LOGGER.info(() -> "Action: " + step.action);
                 if (step.description != null && !step.description.isEmpty()) {
-                    LOGGER.info("Description: " + step.description);
+                    LOGGER.info(() -> "Description: " + step.description);
                 }
                 
                 // Apply parameter overrides based on variation type and iteration
                 executeActionWithOverrides(step, loop.variationType, currentValue, iteration + 1, loop);
                 
-                LOGGER.info("Loop Step " + (stepIdx + 1) + " completed successfully");
+                LOGGER.info(() -> "Loop Step " + loopStepNum + " completed successfully");
             }
         }
         
         LOGGER.info("\n=== Pipeline with Loop Execution Completed Successfully ===");
-        LOGGER.info("Total iterations: " + loop.values.size());
+        LOGGER.info(() -> "Total iterations: " + loop.values.size());
     }
     
     /**
@@ -245,7 +251,7 @@ public class ActionRunner {
                 applyCustomParametersOverride(configJson, currentValue, iterationNumber);
                 break;
             default:
-                LOGGER.warning("Unknown variation type: " + variationType + ", using base config");
+                LOGGER.warning(() -> "Unknown variation type: " + variationType + ", using base config");
         }
         
         // Apply step-specific overrides if present
@@ -268,11 +274,11 @@ public class ActionRunner {
     /**
      * Apply random seed override to config.
      */
-    private static void applyRandomSeedOverride(JsonObject config, Object value, int iteration) {
+    private static void applyRandomSeedOverride(JsonObject config, Object value, @SuppressWarnings("unused") int iteration) {
         Long seed = convertToLong(value);
         if (seed != null) {
             config.addProperty("randomSeed", seed);
-            LOGGER.info("Applied randomSeed override: " + seed);
+            LOGGER.info(() -> "Applied randomSeed override: " + seed);
             
             // Also update ConfigLoader for attack generation
             ConfigLoader.randomSeed = seed;
@@ -283,7 +289,7 @@ public class ActionRunner {
     /**
      * Apply attack segments override to config.
      */
-    private static void applyAttackSegmentsOverride(JsonObject config, Object value, int iteration) {
+    private static void applyAttackSegmentsOverride(JsonObject config, Object value, @SuppressWarnings("unused") int iteration) {
         if (value instanceof List) {
             @SuppressWarnings("unchecked")
             List<String> enabledAttacks = (List<String>) value;
@@ -307,7 +313,7 @@ public class ActionRunner {
                     }
                 }
                 
-                LOGGER.info("Applied attackSegments override: " + enabledAttacks);
+                LOGGER.info(() -> "Applied attackSegments override: " + enabledAttacks);
             }
         }
     }
@@ -315,7 +321,7 @@ public class ActionRunner {
     /**
      * Apply custom parameters override to config.
      */
-    private static void applyCustomParametersOverride(JsonObject config, Object value, int iteration) {
+    private static void applyCustomParametersOverride(JsonObject config, Object value, @SuppressWarnings("unused") int iteration) {
         if (value instanceof java.util.Map) {
             @SuppressWarnings("unchecked")
             java.util.Map<String, Object> params = (java.util.Map<String, Object>) value;
@@ -339,12 +345,12 @@ public class ActionRunner {
                     current.addProperty(lastKey, (Number) val);
                 } else if (val instanceof Boolean) {
                     current.addProperty(lastKey, (Boolean) val);
-                } else {
+                } else if (val != null) {
                     current.addProperty(lastKey, val.toString());
                 }
             }
             
-            LOGGER.info("Applied custom parameters override: " + params.keySet());
+            LOGGER.info(() -> "Applied custom parameters override: " + params.keySet());
         }
     }
     
@@ -408,8 +414,10 @@ public class ActionRunner {
                 if (!trainingPath.contains("training_variations")) {
                     trainingPath = prevOutputDir.substring(0, prevOutputDir.lastIndexOf('/')) + "/training_variations";
                 }
+                final String finalTrainingPath = trainingPath;
+                final String finalPrevFilename = prevFilename;
                 input.addProperty("trainingDatasetPath", trainingPath + "/" + prevFilename);
-                LOGGER.info("Updated training dataset path: " + trainingPath + "/" + prevFilename);
+                LOGGER.info(() -> "Updated training dataset path: " + finalTrainingPath + "/" + finalPrevFilename);
             }
             
             // For evaluate, update test dataset and model paths
@@ -422,7 +430,7 @@ public class ActionRunner {
                 // Use baseline dataset for evaluation if specified
                 if (loopConfig.baselineDataset != null) {
                     input.addProperty("testDatasetPath", loopConfig.baselineDataset);
-                    LOGGER.info("Using baseline test dataset for evaluation: " + loopConfig.baselineDataset);
+                    LOGGER.info(() -> "Using baseline test dataset for evaluation: " + loopConfig.baselineDataset);
                 }
                 
                 // Update model paths to point to models trained in this iteration
@@ -437,7 +445,7 @@ public class ActionRunner {
                             model.addProperty("modelPath", modelDir + "/" + modelName + "_model.model");
                         }
                     }
-                    LOGGER.info("Updated model paths to: " + modelDir);
+                    LOGGER.info(() -> "Updated model paths to: " + modelDir);
                 }
             }
         }
@@ -457,7 +465,7 @@ public class ActionRunner {
             gson.toJson(config, writer);
         }
         
-        LOGGER.fine("Created temporary config: " + tempPath);
+        LOGGER.fine(() -> "Created temporary config: " + tempPath);
         return tempPath;
     }
     
@@ -469,7 +477,7 @@ public class ActionRunner {
             return ((Number) value).longValue();
         } else if (value instanceof String) {
             try {
-                return Long.parseLong((String) value);
+                return Long.valueOf((String) value);
             } catch (NumberFormatException e) {
                 return null;
             }

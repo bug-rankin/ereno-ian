@@ -6,48 +6,42 @@
 ```
 ### 2. Run the Application
 ```powershell
-java -jar target\ERENO-1.0-SNAPSHOT-uber.jar config\pipeline_complete.json
+java -jar target\ERENO-1.0-SNAPSHOT-uber.jar config\pipelines\pipeline_complete.json
 ```
 
 ## Available Actions:
 
-### 1. Train and Test
-**Main Config:** `config\main_config.json`  
-**Action Config:** `config\action_train_and_test.json`
-
-**What it does:**
-- Generates benign data (if missing)
-- Creates training dataset with attack segments
-- Creates test dataset
-- Trains ML models (J48, RandomForest, NaiveBayes, REPTree)
-- Evaluates models and saves results
-
-### 2. Create Benign Data
-**Action Config:** `config\action_create_benign.json`
+### 1. Create Benign Data
+**Action Config:** `config\actions\action_create_benign.json`
 
 **What it does:**
 - Generates legitimate GOOSE traffic
 - Simulates normal operation with optional faults (configurable probability)
 
-### 3. Create Training Dataset
-**Action Config:** `config\action_create_training.json`
+### 2. Create Attack Dataset
+**Action Config:** `config\actions\action_create_attack_dataset.json`
 
 **What it does:**
 - Loads benign data
 - Generates attack segments
-- Combines into labeled training dataset
+- Combines into labeled training/test dataset
 
-### 4. Create Test Dataset
-**Action Config:** `config\action_create_test.json`
+### 3. Train Models
+**Action Config:** `config\actions\action_train_model.json`
 
 **What it does:**
-- Creates test dataset with attack segments
-- Evaluates against existing trained models
+- Trains ML models (J48, RandomForest, NaiveBayes, REPTree)
+- Saves trained models to disk
+
+### 4. Evaluate Models
+**Action Config:** `config\actions\action_evaluate.json`
+
+**What it does:**
+- Evaluates trained models against test dataset
 - Generates performance metrics
 
-
 ### 5. Compare Datasets
-**Action Config:** `config\action_compare.json`
+**Action Config:** `config\actions\action_compare.json`
 
 **What it does:**
 - Compares benign vs attack datasets
@@ -57,7 +51,7 @@ java -jar target\ERENO-1.0-SNAPSHOT-uber.jar config\pipeline_complete.json
 ## Pipeline Execution
 
 ### Standard Pipeline
-**Config:** `config\pipeline_complete.json`
+**Config:** `config\pipelines\pipeline_complete.json`
 
 Executes all actions sequentially:
 1. Create benign data
@@ -67,7 +61,7 @@ Executes all actions sequentially:
 5. Evaluate models
 
 ```powershell
-java -jar target\ERENO-1.0-SNAPSHOT-uber.jar config\pipeline_complete.json
+java -jar target\ERENO-1.0-SNAPSHOT-uber.jar config\pipelines\pipeline_complete.json
 ```
 
 ### Loop Pipelines
@@ -75,7 +69,7 @@ java -jar target\ERENO-1.0-SNAPSHOT-uber.jar config\pipeline_complete.json
 Loop pipelines allow you to create multiple training datasets with variations and evaluate them systematically.
 
 #### Random Seed Variation
-**Config:** `config\pipeline_loop_random_seeds.json`
+**Config:** `config\pipelines\pipeline_loop_random_seeds.json`
 
 Creates multiple datasets using different random seeds for attack generation:
 - Generates baseline benign data and test dataset (iteration 1)
@@ -88,11 +82,11 @@ Creates multiple datasets using different random seeds for attack generation:
 **Use case:** Study impact of randomness in attack generation on model performance
 
 ```powershell
-java -jar target\ERENO-1.0-SNAPSHOT-uber.jar config\pipeline_loop_random_seeds.json
+java -jar target\ERENO-1.0-SNAPSHOT-uber.jar config\pipelines\pipeline_loop_random_seeds.json
 ```
 
 #### Attack Segment Variation
-**Config:** `config\pipeline_loop_attack_segments.json`
+**Config:** `config\pipelines\pipeline_loop_attack_segments.json`
 
 Creates datasets with different combinations of attack types:
 - Tests specific attack combinations (e.g., replay attacks only, injection attacks, mixed scenarios)
@@ -102,11 +96,11 @@ Creates datasets with different combinations of attack types:
 **Use case:** Train and compare specialized vs. generalized attack detectors
 
 ```powershell
-java -jar target\ERENO-1.0-SNAPSHOT-uber.jar config\pipeline_loop_attack_segments.json
+java -jar target\ERENO-1.0-SNAPSHOT-uber.jar config\pipelines\pipeline_loop_attack_segments.json
 ```
 
 #### Parameter Variation
-**Config:** `config\pipeline_loop_parameters.json`
+**Config:** `config\pipelines\pipeline_loop_parameters.json`
 
 Varies dataset structure parameters:
 - Messages per segment (500, 1000, 2000)
@@ -116,7 +110,7 @@ Varies dataset structure parameters:
 **Use case:** Optimize dataset structure for best model performance
 
 ```powershell
-java -jar target\ERENO-1.0-SNAPSHOT-uber.jar config\pipeline_loop_parameters.json
+java -jar target\ERENO-1.0-SNAPSHOT-uber.jar config\pipelines\pipeline_loop_parameters.json
 ```
 
 ### Loop Configuration Structure
@@ -134,7 +128,7 @@ java -jar target\ERENO-1.0-SNAPSHOT-uber.jar config\pipeline_loop_parameters.jso
     "steps": [
       {
         "action": "create_attack_dataset",
-        "actionConfigFile": "config/action_create_attack_dataset.json",
+        "actionConfigFile": "config/actions/action_create_attack_dataset.json",
         "parameterOverrides": {
           "output": {
             "directory": "target/training_variations",

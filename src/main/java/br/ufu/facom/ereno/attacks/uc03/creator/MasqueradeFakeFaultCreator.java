@@ -5,29 +5,26 @@
  */
 package br.ufu.facom.ereno.attacks.uc03.creator;
 
-import br.ufu.facom.ereno.attacks.uc03.devices.MasqueradeFakeFaultIED;
-import br.ufu.facom.ereno.benign.uc00.creator.MessageCreator;
-import br.ufu.facom.ereno.benign.uc00.devices.LegitimateProtectionIED;
-import br.ufu.facom.ereno.general.IED;
-import br.ufu.facom.ereno.general.ProtectionIED;
-import br.ufu.facom.ereno.messages.Goose;
-import br.ufu.facom.ereno.dataExtractors.GSVDatasetWriter;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import br.ufu.facom.ereno.attacks.uc03.devices.MasqueradeFakeFaultIED;
+import br.ufu.facom.ereno.benign.uc00.creator.MessageCreator;
+import br.ufu.facom.ereno.benign.uc00.devices.LegitimateProtectionIED;
+import br.ufu.facom.ereno.dataExtractors.GSVDatasetWriter;
+import br.ufu.facom.ereno.general.IED;
 import static br.ufu.facom.ereno.general.IED.randomBetween;
+import br.ufu.facom.ereno.general.ProtectionIED;
+import br.ufu.facom.ereno.messages.Goose;
 
 /**
  * @author silvio
  */
 public class MasqueradeFakeFaultCreator implements MessageCreator {
-    int count;
     private MasqueradeFakeFaultIED attacker;
     private Goose previousGoose;
-    private String label;
+    private final String label;
     private Goose seedMessage;
-    private Goose firstSeedMessage;
 
     public MasqueradeFakeFaultCreator(String label) {
         this.label = label;
@@ -36,17 +33,16 @@ public class MasqueradeFakeFaultCreator implements MessageCreator {
     @Override
     public void generate(IED ied, int normalMessages) {
         this.attacker = (MasqueradeFakeFaultIED) ied;
-        this.count = normalMessages;
         int faultProbability = 5;
 
         //This uses a legitimate message as seed
         generateSeedGoose(attacker.getVictimIED()); // uncomment it to generate a new seedMessage
-        Logger.getLogger("getSeedMessage()").info("Seed message sent at: " + seedMessage.getTimestamp());
+        Logger.getLogger("getSeedMessage()").info(() -> "Seed message sent at: " + seedMessage.getTimestamp());
 
         // Generate faults and normal randomly
         while (((ProtectionIED) ied).getMessages().size() < normalMessages) {
             int percentage = randomBetween(1, 100); // decide whether it will be fault or normal
-            if (((ProtectionIED) ied).getMessages().size() > 0) {
+            if (!((ProtectionIED) ied).getMessages().isEmpty()) {
                 if (percentage > faultProbability) {
                     generateFakePeriodicGoose();
                 } else { // Generates fault and recovery events
@@ -61,8 +57,8 @@ public class MasqueradeFakeFaultCreator implements MessageCreator {
     }
 
     private void generateFakeFault() {
-        double lastPeriodicMessage = 0;
-        if (attacker.getMessages().size() > 0) {
+        double lastPeriodicMessage;
+        if (!attacker.getMessages().isEmpty()) {
             lastPeriodicMessage = attacker.getMessages().get(attacker.getNumberOfMessages() - 1).getTimestamp();
         } else {
             lastPeriodicMessage = getSeedMessage().getTimestamp();
@@ -73,7 +69,7 @@ public class MasqueradeFakeFaultCreator implements MessageCreator {
             msFault = randomBetween(1, 1000);
         }
         reportEventAt(((int) lastPeriodicMessage) + msFault / 1000); // fault at the beggin of the second
-        Logger.getLogger("ProtectionIED.run()").info("Reporting fault at " + lastPeriodicMessage);
+        Logger.getLogger("ProtectionIED.run()").info(() -> "Reporting fault at " + lastPeriodicMessage);
         previousGoose = attacker.getMessages().get(attacker.getNumberOfMessages()-1);
     }
 
@@ -100,7 +96,7 @@ public class MasqueradeFakeFaultCreator implements MessageCreator {
         seedMessage = masqueradeSeed.copy();
         seedMessage.setLabel(this.label);
         previousGoose = seedMessage.copy();
-        Logger.getLogger("MasqueradeFakeFaultIED").info("Seed message sent at: " + seedMessage.getTimestamp());
+        Logger.getLogger("MasqueradeFakeFaultIED").info(() -> "Seed message sent at: " + seedMessage.getTimestamp());
     }
 
     private double getNetworkDelay() {
@@ -109,7 +105,7 @@ public class MasqueradeFakeFaultCreator implements MessageCreator {
 
     public void reportEventAt(double eventTimestamp) {
         if (GSVDatasetWriter.Debug.gooseMessages) {
-            Logger.getLogger("GooseCreator").log(Level.INFO, "Reporting an event at " + eventTimestamp + "!");
+            Logger.getLogger("GooseCreator").log(Level.INFO, () -> "Reporting an event at " + eventTimestamp + "!");
         }
 
         attacker.setFirstGooseTime(seedMessage.getTimestamp());

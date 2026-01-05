@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import br.ufu.facom.ereno.tracking.ExperimentTracker;
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.lazy.IBk;
@@ -56,6 +57,9 @@ public class TrainModelAction {
             public String modelDirectory = "target/models";
             public boolean saveMetadata = true;
             public String metadataFilename = "training_metadata.json";
+            public boolean enableTracking = true;
+            public String experimentId; // Optional: link to existing experiment
+            public String trainingDatasetId; // Optional: link to tracked dataset
         }
         
         public static class ClassifierParameters {
@@ -107,24 +111,24 @@ public class TrainModelAction {
             if (!datasetFile.exists()) {
                 throw new IOException("Training dataset not found: " + config.input.trainingDatasetPath);
             }
-            LOGGER.info("Verified training dataset exists: " + config.input.trainingDatasetPath);
+            LOGGER.info(() -> "Verified training dataset exists: " + config.input.trainingDatasetPath);
         }
         
         // Create output directory
         File modelDir = new File(config.output.modelDirectory);
         if (!modelDir.exists()) {
             modelDir.mkdirs();
-            LOGGER.info("Created model directory: " + config.output.modelDirectory);
+            LOGGER.info(() -> "Created model directory: " + config.output.modelDirectory);
         }
         
         // Load training dataset
-        LOGGER.info("Loading training dataset: " + config.input.trainingDatasetPath);
+        LOGGER.info(() -> "Loading training dataset: " + config.input.trainingDatasetPath);
         DataSource source = new DataSource(config.input.trainingDatasetPath);
         Instances trainData = source.getDataSet();
         if (trainData.classIndex() == -1) {
             trainData.setClassIndex(trainData.numAttributes() - 1);
         }
-        LOGGER.info("Loaded training data: " + trainData.numInstances() + " instances, " + 
+        LOGGER.info(() -> "Loaded training data: " + trainData.numInstances() + " instances, " + 
             trainData.numAttributes() + " attributes");
         
         // Initialize metadata
@@ -136,7 +140,7 @@ public class TrainModelAction {
         
         // Train each classifier
         for (String classifierName : config.classifiers) {
-            LOGGER.info("Training classifier: " + classifierName);
+            LOGGER.info(() -> "Training classifier: " + classifierName);
             
             try {
                 // Create classifier
@@ -148,13 +152,13 @@ public class TrainModelAction {
                 long trainEnd = System.currentTimeMillis();
                 long trainingTime = trainEnd - trainStart;
                 
-                LOGGER.info(classifierName + " training completed in " + trainingTime + "ms");
+                LOGGER.info(() -> classifierName + " training completed in " + trainingTime + "ms");
                 
                 // Save model
                 String modelFilename = classifierName + "_model.model";
                 String modelPath = new File(config.output.modelDirectory, modelFilename).getAbsolutePath();
                 SerializationHelper.write(modelPath, classifier);
-                LOGGER.info("Model saved to: " + modelPath);
+                LOGGER.info(() -> "Model saved to: " + modelPath);
                 
                 // Store metadata
                 TrainingMetadata.ModelMetadata modelMeta = new TrainingMetadata.ModelMetadata();
@@ -162,12 +166,17 @@ public class TrainModelAction {
                 modelMeta.modelPath = modelPath;
                 modelMeta.trainingTimeMs = trainingTime;
                 modelMeta.timestamp = new Date();
-                modelMeta.parameters = getClassifierParameters(classifier, config.classifierParameters);
+                modelMeta.parameters = getClassifierParameters(classifier);
                 metadata.models.put(classifierName, modelMeta);
                 
+                // Track model if enabled
+                if (config.output.enableTracking) {
+                    trackModelTraining(config, classifierName, modelPath, trainingTime, 
+                                      modelMeta.parameters, configPath);
+                }
+                
             } catch (Exception e) {
-                LOGGER.severe("Failed to train classifier " + classifierName + ": " + e.getMessage());
-                e.printStackTrace();
+                LOGGER.severe(() -> "Failed to train classifier " + classifierName + ": " + e.getMessage());
                 throw e;
             }
         }
@@ -177,11 +186,11 @@ public class TrainModelAction {
             String metadataPath = new File(config.output.modelDirectory, 
                 config.output.metadataFilename).getAbsolutePath();
             saveMetadata(metadata, metadataPath);
-            LOGGER.info("Training metadata saved to: " + metadataPath);
+            LOGGER.info(() -> "Training metadata saved to: " + metadataPath);
         }
         
         LOGGER.info("=== Train Model Action Completed Successfully ===");
-        LOGGER.info("Trained " + metadata.models.size() + " classifiers");
+        LOGGER.info(() -> "Trained " + metadata.models.size() + " classifiers");
     }
     
     private static Config loadConfig(String path) throws IOException {
@@ -228,8 +237,7 @@ public class TrainModelAction {
         }
     }
     
-    private static Map<String, Object> getClassifierParameters(Classifier classifier, 
-            Config.ClassifierParameters params) {
+    private static Map<String, Object> getClassifierParameters(Classifier classifier) {
         Map<String, Object> parameters = new HashMap<>();
         
         if (classifier instanceof J48) {
@@ -257,6 +265,49 @@ public class TrainModelAction {
         
         try (FileWriter writer = new FileWriter(path)) {
             gson.toJson(metadata, writer);
+        }
+    }
+    
+    private static void trackModelTraining(Config config, String classifierName, String modelPath,
+                                          long trainingTime, Map<String, Object> parameters,
+                                          String configPath) {
+        try {
+            ExperimentTracker tracker = new ExperimentTracker();
+            
+            // Determine experiment ID
+            String experimentId = config.output.experimentId;
+            if (experimentId == null || experimentId.isEmpty()) {
+                // Create a new standalone experiment
+                experimentId = tracker.startExperiment(
+                    "model_training",
+                    "Train model: " + classifierName,
+                    configPath,
+                    "Standalone model training"
+                );
+            }
+            
+            // Track the model
+            String modelId = tracker.trackModel(
+                experimentId,
+                config.output.trainingDatasetId,
+                classifierName,
+                modelPath,
+                trainingTime,
+                parameters,
+                configPath,
+                "Trained on " + config.input.trainingDatasetPath
+            );
+            
+            LOGGER.info(() -> "Model tracked with ID: " + modelId);
+            
+            // Complete experiment if we created it
+            if (config.output.experimentId == null || config.output.experimentId.isEmpty()) {
+                tracker.completeExperiment(experimentId);
+            }
+            
+        } catch (Exception e) {
+            LOGGER.warning(() -> "Failed to track model training: " + e.getMessage());
+            // Don't fail the action if tracking fails
         }
     }
 }
