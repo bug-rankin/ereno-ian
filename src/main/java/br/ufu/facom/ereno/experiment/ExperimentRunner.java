@@ -1,22 +1,16 @@
 package br.ufu.facom.ereno.experiment;
 
-import br.ufu.facom.ereno.config.ConfigLoader;
-import br.ufu.facom.ereno.SingleSource;
-import weka.classifiers.Classifier;
-import weka.classifiers.bayes.NaiveBayes;
-import weka.classifiers.trees.J48;
-import weka.classifiers.trees.RandomForest;
-import weka.classifiers.trees.RandomTree;
-import weka.classifiers.trees.REPTree;
-import br.ufu.facom.ereno.evaluation.support.GenericEvaluation;
-import br.ufu.facom.ereno.evaluation.support.GenericResultado;
-import weka.core.Instances;
-import weka.core.converters.ConverterUtils.DataSource;
-import weka.core.converters.ArffSaver;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
+
+import br.ufu.facom.ereno.SingleSource;
+import br.ufu.facom.ereno.config.ConfigLoader;
+import br.ufu.facom.ereno.evaluation.support.GenericEvaluation;
+import br.ufu.facom.ereno.evaluation.support.GenericResultado;
+import weka.core.Instances;
+import weka.core.converters.ArffSaver;
+import weka.core.converters.ConverterUtils.DataSource;
 
 /**
  * Small experiment runner used by optimization loops.
@@ -82,7 +76,7 @@ public class ExperimentRunner {
                     ensureArffNominalTokens(generated);
                     // If a baseline train file is provided, also ensure its nominal tokens are present
                     if (baselineTrainFile != null && !baselineTrainFile.isEmpty()) {
-                        try { ensureArffNominalTokens(baselineTrainFile); } catch (Exception ex) { /* ignore */ }
+                        try { ensureArffNominalTokens(baselineTrainFile); } catch (IOException ex) { /* ignore */ }
                     }
                 } catch (IOException ex) {
                     System.err.println("Warning: failed to validate/fix ARFF nominal tokens: " + ex.getMessage());
@@ -182,7 +176,7 @@ public class ExperimentRunner {
         System.out.println(outJson);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error during experiment execution: " + e.getMessage());
             System.exit(2);
         }
     }
@@ -303,16 +297,5 @@ public class ExperimentRunner {
         saver.setInstances(data);
         saver.setFile(new File(path));
         saver.writeBatch();
-    }
-
-    private static Classifier buildClassifier(String name) {
-        switch (name.toLowerCase()) {
-            case "j48": return new J48();
-            case "naivebayes": return new NaiveBayes();
-            case "randomforest": return new RandomForest();
-            case "randomtree": return new RandomTree();
-            case "reptree": return new REPTree();
-            default: return new J48();
-        }
     }
 }

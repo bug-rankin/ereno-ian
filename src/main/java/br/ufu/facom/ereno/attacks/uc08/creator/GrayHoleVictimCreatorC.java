@@ -1,16 +1,14 @@
 package br.ufu.facom.ereno.attacks.uc08.creator;
 
-import br.ufu.facom.ereno.config.AttackConfig;
-import br.ufu.facom.ereno.general.ProtectionIED;
-import br.ufu.facom.ereno.benign.uc00.creator.MessageCreator;
-import br.ufu.facom.ereno.dataExtractors.GSVDatasetWriter;
-import br.ufu.facom.ereno.general.IED;
-import br.ufu.facom.ereno.messages.Goose;
-
 import java.util.ArrayList;
 import java.util.Collections;
 
-import static br.ufu.facom.ereno.general.IED.randomBetween;
+import br.ufu.facom.ereno.benign.uc00.creator.MessageCreator;
+import br.ufu.facom.ereno.config.AttackConfig;
+import br.ufu.facom.ereno.dataExtractors.GSVDatasetWriter;
+import br.ufu.facom.ereno.general.IED;
+import br.ufu.facom.ereno.general.ProtectionIED;
+import br.ufu.facom.ereno.messages.Goose;
 
 public class GrayHoleVictimCreatorC implements MessageCreator {
 
