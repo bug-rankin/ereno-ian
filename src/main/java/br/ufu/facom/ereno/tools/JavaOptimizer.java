@@ -24,10 +24,6 @@ import br.ufu.facom.ereno.tracking.OptimizerDatabase.OptimizerResult;
 
 /**
  * Java optimizer with a simple hill-climb stage.
- * - trial 0: baseline (no parameter changes)
- * - randomInit trials: random sampling
- * - remaining trials: mutate current best (greedy hill-climb)
- *
  * Uses a fixed dataset randomSeed so only attack parameters change.
  */
 public class JavaOptimizer {

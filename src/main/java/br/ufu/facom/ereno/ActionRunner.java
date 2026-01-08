@@ -18,6 +18,7 @@ import br.ufu.facom.ereno.actions.EvaluateAction;
 import br.ufu.facom.ereno.actions.TrainModelAction;
 import br.ufu.facom.ereno.config.ActionConfigLoader;
 import br.ufu.facom.ereno.config.ConfigLoader;
+import br.ufu.facom.ereno.utils.ProgressTracker;
 
 /**
  * Main entry point for the new action-based configuration system.
@@ -134,24 +135,28 @@ public class ActionRunner {
         LOGGER.info("=== Starting Pipeline Execution ===");
         LOGGER.info(() -> "Pipeline contains " + mainConfig.pipeline.size() + " steps");
         
+        // Initialize progress tracker
+        ProgressTracker tracker = new ProgressTracker("Pipeline Execution", mainConfig.pipeline.size());
+        tracker.start();
+        
         for (int i = 0; i < mainConfig.pipeline.size(); i++) {
             ActionConfigLoader.PipelineStep step = mainConfig.pipeline.get(i);
             final int stepNum = i + 1;
-            final int totalSteps = mainConfig.pipeline.size();
             
-            LOGGER.info(() -> "\n--- Pipeline Step " + stepNum + "/" + totalSteps + " ---");
-            LOGGER.info(() -> "Action: " + step.action);
-            if (step.description != null && !step.description.isEmpty()) {
-                LOGGER.info(() -> "Description: " + step.description);
-            }
+            String stepDescription = String.format("%s - %s", 
+                step.action, 
+                step.description != null ? step.description : "");
+            
+            tracker.incrementStep(stepDescription);
             
             // Create a temporary ActionConfigLoader for this step
             // For pipeline steps, we execute actions directly with their config files
             executeActionFromConfigFile(step.action, step.actionConfigFile);
             
-            LOGGER.info(() -> "Step " + stepNum + " completed successfully");
+            tracker.completeCurrentStep("Step " + stepNum + " completed");
         }
         
+        tracker.complete();
         LOGGER.info("\n=== Pipeline Execution Completed Successfully ===");
     }
     
@@ -175,48 +180,64 @@ public class ActionRunner {
         LOGGER.info(() -> "Number of iterations: " + loop.values.size());
         LOGGER.info(() -> "Steps per iteration: " + loop.steps.size());
         
+        // Calculate total steps
+        int preLoopSteps = (mainConfig.pipeline != null) ? mainConfig.pipeline.size() : 0;
+        int loopSteps = loop.values.size() * loop.steps.size();
+        int totalSteps = preLoopSteps + loopSteps;
+        
+        // Initialize main progress tracker
+        ProgressTracker mainTracker = new ProgressTracker("Pipeline with Loop", totalSteps);
+        mainTracker.start();
+        
         // Execute pre-loop pipeline steps if any
         if (mainConfig.pipeline != null && !mainConfig.pipeline.isEmpty()) {
             LOGGER.info("\n--- Executing Pre-Loop Steps ---");
             for (int i = 0; i < mainConfig.pipeline.size(); i++) {
                 ActionConfigLoader.PipelineStep step = mainConfig.pipeline.get(i);
-                final int preStepNum = i + 1;
-                final int preTotalSteps = mainConfig.pipeline.size();
-                LOGGER.info(() -> "Pre-Loop Step " + preStepNum + "/" + preTotalSteps + ": " + step.action);
+                
+                String stepDesc = String.format("Pre-Loop: %s - %s", 
+                    step.action,
+                    step.description != null ? step.description : "");
+                mainTracker.incrementStep(stepDesc);
+                
                 executeActionFromConfigFile(step.action, step.actionConfigFile);
-                LOGGER.info(() -> "Pre-Loop Step " + preStepNum + " completed successfully");
+                mainTracker.completeCurrentStep();
             }
         }
         
-        // Execute loop iterations
+        // Execute loop iterations with nested progress tracking
+        ProgressTracker loopTracker = mainTracker.createSubTracker(
+            "Loop Iterations", loop.values.size());
+        loopTracker.start();
+        
         for (int iteration = 0; iteration < loop.values.size(); iteration++) {
             Object currentValue = loop.values.get(iteration);
             final int iterNum = iteration + 1;
-            final int totalIters = loop.values.size();
             
-            LOGGER.info("\n========================================");
-            LOGGER.info(() -> "=== Loop Iteration " + iterNum + "/" + totalIters + " ===");
-            LOGGER.info(() -> "Current value: " + currentValue);
-            LOGGER.info("========================================");
+            String iterDesc = String.format("Iteration %d/%d: %s", 
+                iterNum, loop.values.size(), currentValue);
+            loopTracker.incrementStep(iterDesc);
             
             // Execute each step in the loop with parameter overrides
             for (int stepIdx = 0; stepIdx < loop.steps.size(); stepIdx++) {
                 ActionConfigLoader.PipelineStep step = loop.steps.get(stepIdx);
-                final int loopStepNum = stepIdx + 1;
-                final int loopTotalSteps = loop.steps.size();
                 
-                LOGGER.info(() -> "\n--- Loop Step " + loopStepNum + "/" + loopTotalSteps + " ---");
-                LOGGER.info(() -> "Action: " + step.action);
-                if (step.description != null && !step.description.isEmpty()) {
-                    LOGGER.info(() -> "Description: " + step.description);
-                }
+                String stepDesc = String.format("  └─ %s - %s", 
+                    step.action,
+                    step.description != null ? step.description : "");
+                mainTracker.incrementStep(stepDesc);
                 
                 // Apply parameter overrides based on variation type and iteration
                 executeActionWithOverrides(step, loop.variationType, currentValue, iteration + 1, loop);
                 
-                LOGGER.info(() -> "Loop Step " + loopStepNum + " completed successfully");
+                mainTracker.completeCurrentStep();
             }
+            
+            loopTracker.completeCurrentStep();
         }
+        
+        loopTracker.complete();
+        mainTracker.complete();
         
         LOGGER.info("\n=== Pipeline with Loop Execution Completed Successfully ===");
         LOGGER.info(() -> "Total iterations: " + loop.values.size());
