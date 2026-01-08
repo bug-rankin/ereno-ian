@@ -1,0 +1,152 @@
+{
+  "action": "pipeline",
+  "description": "Evaluate all dual-attack trained models against all single and dual attack combinations",
+  "commonConfig": {
+    "randomSeed": 42,
+    "outputFormat": "arff"
+  },
+  "evaluationConfig": {
+    "modelBasePath": "target/dual_attack_models",
+    "testDatasetBasePath": "target/dual_attack_test_datasets",
+    "evaluationOutputPath": "target/dual_attack_evaluation"
+  },
+  "attackPairs": [
+    ["uc01_random_replay", "uc02_inverse_replay"],
+    ["uc01_random_replay", "uc03_masquerade_fault"],
+    ["uc01_random_replay", "uc04_masquerade_normal"],
+    ["uc01_random_replay", "uc05_injection"],
+    ["uc01_random_replay", "uc06_high_stnum"],
+    ["uc01_random_replay", "uc07_flooding"],
+    ["uc01_random_replay", "uc08_grayhole"],
+    ["uc02_inverse_replay", "uc03_masquerade_fault"],
+    ["uc02_inverse_replay", "uc04_masquerade_normal"],
+    ["uc02_inverse_replay", "uc05_injection"],
+    ["uc02_inverse_replay", "uc06_high_stnum"],
+    ["uc02_inverse_replay", "uc07_flooding"],
+    ["uc02_inverse_replay", "uc08_grayhole"],
+    ["uc03_masquerade_fault", "uc04_masquerade_normal"],
+    ["uc03_masquerade_fault", "uc05_injection"],
+    ["uc03_masquerade_fault", "uc06_high_stnum"],
+    ["uc03_masquerade_fault", "uc07_flooding"],
+    ["uc03_masquerade_fault", "uc08_grayhole"],
+    ["uc04_masquerade_normal", "uc05_injection"],
+    ["uc04_masquerade_normal", "uc06_high_stnum"],
+    ["uc04_masquerade_normal", "uc07_flooding"],
+    ["uc04_masquerade_normal", "uc08_grayhole"],
+    ["uc05_injection", "uc06_high_stnum"],
+    ["uc05_injection", "uc07_flooding"],
+    ["uc05_injection", "uc08_grayhole"],
+    ["uc06_high_stnum", "uc07_flooding"],
+    ["uc06_high_stnum", "uc08_grayhole"],
+    ["uc07_flooding", "uc08_grayhole"]
+  ],
+  "datasetPatterns": ["simple", "combined"],
+  "singleAttacks": [
+    "uc01_random_replay",
+    "uc02_inverse_replay",
+    "uc03_masquerade_fault",
+    "uc04_masquerade_normal",
+    "uc05_injection",
+    "uc06_high_stnum",
+    "uc07_flooding",
+    "uc08_grayhole"
+  ],
+  "pipeline": [
+    {
+      "action": "create_test_datasets",
+      "description": "Generate test datasets for all single attacks",
+      "loop": {
+        "variationType": "singleAttacks",
+        "values": "${singleAttacks}",
+        "steps": [
+          {
+            "action": "create_attack_dataset",
+            "inline": {
+              "action": "create_attack_dataset",
+              "description": "Generate test dataset for ${attackName}",
+              "input": {
+                "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+                "verifyBenignData": true
+              },
+              "output": {
+                "directory": "target/dual_attack_test_datasets/single",
+                "filename": "test_${attackName}.arff",
+                "format": "arff"
+              },
+              "datasetStructure": {
+                "messagesPerSegment": 1000,
+                "includeBenignSegment": true,
+                "shuffleSegments": false
+              },
+              "attackSegments": [
+                {
+                  "name": "${attackName}",
+                  "enabled": true,
+                  "attackConfig": "config/attacks/${attackName}.json",
+                  "description": "Single attack: ${attackName}"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "action": "evaluate_all_models",
+      "description": "Evaluate all trained models against all test datasets",
+      "loop": {
+        "variationType": "modelEvaluation",
+        "modelPairs": "${attackPairs}",
+        "modelPatterns": "${datasetPatterns}",
+        "testDatasets": {
+          "single": "${singleAttacks}",
+          "dual": "${attackPairs}"
+        },
+        "steps": [
+          {
+            "action": "evaluate",
+            "description": "Evaluate model ${modelAttack1}_${modelAttack2}_${modelPattern} against all test datasets",
+            "inline": {
+              "action": "evaluate",
+              "description": "Comprehensive evaluation of ${modelAttack1}_${modelAttack2}_${modelPattern}",
+              "input": {
+                "models": [
+                  {
+                    "name": "J48",
+                    "modelPath": "target/dual_attack_models/${modelAttack1}_${modelAttack2}_${modelPattern}/J48_model.model"
+                  },
+                  {
+                    "name": "RandomForest",
+                    "modelPath": "target/dual_attack_models/${modelAttack1}_${modelAttack2}_${modelPattern}/RandomForest_model.model"
+                  }
+                ],
+                "testDatasets": "${allTestDatasets}",
+                "verifyFiles": true
+              },
+              "output": {
+                "evaluationDirectory": "target/dual_attack_evaluation",
+                "evaluationFilename": "all_results.csv",
+                "format": "csv",
+                "appendMode": true,
+                "includeHeaders": true,
+                "additionalColumns": {
+                  "trainingAttack1": "${modelAttack1}",
+                  "trainingAttack2": "${modelAttack2}",
+                  "trainingPattern": "${modelPattern}",
+                  "modelName": "${modelName}",
+                  "testAttack": "${attackName}"
+                }
+              },
+              "outputMetrics": [
+                "accuracy",
+                "precision",
+                "recall",
+                "f1"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

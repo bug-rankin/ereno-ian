@@ -1,0 +1,168 @@
+{
+  "action": "pipeline",
+  "description": "Generate all combinations of 2 attacks with two dataset patterns: Pattern 1 (A1, A2) and Pattern 2 (A1, A2, A1+A2, A2+A1)",
+  "commonConfig": {
+    "randomSeed": 42,
+    "outputFormat": "arff"
+  },
+  "pipeline": [
+    {
+      "action": "create_benign",
+      "actionConfigFile": "config/actions/action_create_benign.json",
+      "description": "Generate baseline benign traffic data"
+    }
+  ],
+  "loop": {
+    "variationType": "dualAttackCombinations",
+    "description": "Generate all combinations of 2 attacks",
+    "attackPairs": [
+      ["uc01_random_replay", "uc02_inverse_replay"],
+      ["uc01_random_replay", "uc03_masquerade_fault"],
+      ["uc01_random_replay", "uc04_masquerade_normal"],
+      ["uc01_random_replay", "uc05_injection"],
+      ["uc01_random_replay", "uc06_high_stnum"],
+      ["uc01_random_replay", "uc07_flooding"],
+      ["uc01_random_replay", "uc08_grayhole"],
+      ["uc02_inverse_replay", "uc03_masquerade_fault"],
+      ["uc02_inverse_replay", "uc04_masquerade_normal"],
+      ["uc02_inverse_replay", "uc05_injection"],
+      ["uc02_inverse_replay", "uc06_high_stnum"],
+      ["uc02_inverse_replay", "uc07_flooding"],
+      ["uc02_inverse_replay", "uc08_grayhole"],
+      ["uc03_masquerade_fault", "uc04_masquerade_normal"],
+      ["uc03_masquerade_fault", "uc05_injection"],
+      ["uc03_masquerade_fault", "uc06_high_stnum"],
+      ["uc03_masquerade_fault", "uc07_flooding"],
+      ["uc03_masquerade_fault", "uc08_grayhole"],
+      ["uc04_masquerade_normal", "uc05_injection"],
+      ["uc04_masquerade_normal", "uc06_high_stnum"],
+      ["uc04_masquerade_normal", "uc07_flooding"],
+      ["uc04_masquerade_normal", "uc08_grayhole"],
+      ["uc05_injection", "uc06_high_stnum"],
+      ["uc05_injection", "uc07_flooding"],
+      ["uc05_injection", "uc08_grayhole"],
+      ["uc06_high_stnum", "uc07_flooding"],
+      ["uc06_high_stnum", "uc08_grayhole"],
+      ["uc07_flooding", "uc08_grayhole"]
+    ],
+    "datasetPatterns": [
+      {
+        "patternName": "simple",
+        "description": "Two separate attack segments",
+        "segments": ["A1", "A2"]
+      },
+      {
+        "patternName": "combined",
+        "description": "Separate and combined attack segments",
+        "segments": ["A1", "A2", "A1+A2", "A2+A1"]
+      }
+    ],
+    "steps": [
+      {
+        "action": "create_attack_dataset",
+        "description": "Create training dataset with attack pair - Pattern: ${patternName}",
+        "inline": {
+          "action": "create_attack_dataset",
+          "description": "Generate labeled attack dataset from benign data - ${attack1}_${attack2}_${patternName}",
+          "input": {
+            "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+            "verifyBenignData": true
+          },
+          "output": {
+            "directory": "target/dual_attack_training/${attack1}_${attack2}",
+            "filename": "training_dataset_${patternName}.arff",
+            "format": "arff"
+          },
+          "datasetStructure": {
+            "messagesPerSegment": 1000,
+            "includeBenignSegment": true,
+            "shuffleSegments": false
+          },
+          "attackSegments": "${attackSegmentsConfig}"
+        }
+      },
+      {
+        "action": "train_model",
+        "description": "Train models on ${attack1}_${attack2}_${patternName}",
+        "inline": {
+          "action": "train_model",
+          "description": "Train ML classifiers on attack dataset - ${attack1}_${attack2}_${patternName}",
+          "input": {
+            "trainingDatasetPath": "target/dual_attack_training/${attack1}_${attack2}/training_dataset_${patternName}.arff",
+            "verifyDataset": true
+          },
+          "output": {
+            "modelDirectory": "target/dual_attack_models/${attack1}_${attack2}_${patternName}",
+            "saveMetadata": true,
+            "metadataFilename": "training_metadata.json"
+          },
+          "classifiers": [
+            "J48",
+            "RandomForest"
+          ],
+          "classifierParameters": {
+            "j48": {
+              "confidenceFactor": 0.25,
+              "minNumObj": 2
+            },
+            "randomForest": {
+              "numIterations": 100,
+              "numFeatures": 0
+            },
+            "ibk": {
+              "k": 1
+            }
+          }
+        }
+      }
+    ]
+  },
+  "attackSegmentTemplates": {
+    "simple": [
+      {
+        "name": "${attack1}",
+        "enabled": true,
+        "attackConfig": "config/attacks/${attack1}.json",
+        "description": "Attack 1: ${attack1}"
+      },
+      {
+        "name": "${attack2}",
+        "enabled": true,
+        "attackConfig": "config/attacks/${attack2}.json",
+        "description": "Attack 2: ${attack2}"
+      }
+    ],
+    "combined": [
+      {
+        "name": "${attack1}",
+        "enabled": true,
+        "attackConfig": "config/attacks/${attack1}.json",
+        "description": "Attack 1: ${attack1}"
+      },
+      {
+        "name": "${attack2}",
+        "enabled": true,
+        "attackConfig": "config/attacks/${attack2}.json",
+        "description": "Attack 2: ${attack2}"
+      },
+      {
+        "name": "${attack1}_${attack2}_combined",
+        "enabled": true,
+        "attackConfigs": [
+          "config/attacks/${attack1}.json",
+          "config/attacks/${attack2}.json"
+        ],
+        "description": "Combined: ${attack1} + ${attack2}"
+      },
+      {
+        "name": "${attack2}_${attack1}_combined",
+        "enabled": true,
+        "attackConfigs": [
+          "config/attacks/${attack2}.json",
+          "config/attacks/${attack1}.json"
+        ],
+        "description": "Combined: ${attack2} + ${attack1}"
+      }
+    ]
+  }
+}
