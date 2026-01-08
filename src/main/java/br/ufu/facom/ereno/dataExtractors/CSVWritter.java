@@ -66,7 +66,7 @@ public class CSVWritter {
             System.out.println("Directory created at: " + filename);
         }
         // overwrite by default (no append)
-        FileOutputStream fos = new FileOutputStream(fout, false);
+        FileOutputStream fos = new FileOutputStream(fout, true);
         bw = new BufferedWriter(new OutputStreamWriter(fos));
     }
 

@@ -39,7 +39,7 @@ public class DelayedReplayCreatorC implements MessageCreator {
         int maxBurstSize = config.getNestedInt("burstSize", "max", 25);
 
         Goose delayMessage; // the potential message to be delayed
-        int selectionInterval = randomBetween(minInterval, maxInterval); // the rate or interval in which messages are selected to be delayed
+        int selectionInterval = 0; // the rate or interval in which messages are selected to be delayed
         //Logger.getLogger("DelayedReplayCreatorC").info("Selection Interval: " + selectionInterval);
         int burstInterval = randomBetween(minBurstInterval, maxBurstInterval);// the interval in which bursts of messages are selected and then delayed       
         int burstSize = randomBetween(minBurstSize, maxBurstSize);
@@ -55,7 +55,7 @@ public class DelayedReplayCreatorC implements MessageCreator {
         int faultCounter = 0;
 
         for (int i = 0; numDelayInstances > 0 & i < messageStream.size(); i++) {
-
+            selectionInterval = randomBetween(minInterval, maxInterval); // the rate or interval in which messages are selected to be delayed
             delayMessage = messageStream.get(i);
             //Logger.getLogger("DelayedReplayCreatorC").info("Captured the legitimate message at " + delayMessage.getTimestamp());
 
