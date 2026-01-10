@@ -28,7 +28,7 @@
         "description": "Create training dataset with varied random seed",
         "parameterOverrides": {
           "output": {
-            "directory": "target/training_variations",
+            "directory": "target/training_variations/seed_${iteration}",
             "filename": "training_dataset_seed_${iteration}.arff"
           }
         }
