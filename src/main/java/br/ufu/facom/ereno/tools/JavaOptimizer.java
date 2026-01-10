@@ -1,11 +1,5 @@
 package br.ufu.facom.ereno.tools;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -19,12 +13,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+
+import br.ufu.facom.ereno.tracking.OptimizerDatabase;
+import br.ufu.facom.ereno.tracking.OptimizerDatabase.OptimizerResult;
+
 /**
  * Java optimizer with a simple hill-climb stage.
- * - trial 0: baseline (no parameter changes)
- * - randomInit trials: random sampling
- * - remaining trials: mutate current best (greedy hill-climb)
- *
  * Uses a fixed dataset randomSeed so only attack parameters change.
  */
 public class JavaOptimizer {
@@ -54,6 +53,25 @@ public class JavaOptimizer {
 
         System.out.println("JavaOptimizer: attackKey=" + attackKey + " trials=" + trials + " seed=" + baseSeed);
 
+        // Initialize optimizer database
+        OptimizerDatabase optimizerDb = new OptimizerDatabase();
+        
+        // Check if we have a previous best result for this attack
+        OptimizerResult previousBest = null;
+        try {
+            previousBest = optimizerDb.getBestResultForAttack(attackKey);
+            if (previousBest != null) {
+                System.out.println("Found previous best result for attack '" + attackKey + "':");
+                System.out.println("  F1 score: " + previousBest.bestMetricF1);
+                System.out.println("  From: " + previousBest.timestamp);
+                System.out.println("  Optimizer: " + previousBest.optimizerType);
+                System.out.println("  Trials: " + previousBest.numTrials);
+                System.out.println("Will start from this configuration and attempt to improve.");
+            }
+        } catch (IOException e) {
+            System.err.println("Warning: Could not load previous optimizer results: " + e.getMessage());
+        }
+
         JsonObject base = loadJson(BASE_CFG.toFile());
         JsonObject attacksParams = base.getAsJsonObject("attacksParams");
         if (attacksParams == null || !attacksParams.has(attackKey)) {
@@ -63,9 +81,22 @@ public class JavaOptimizer {
 
         JsonElement attackCfg = attacksParams.get(attackKey);
 
-    double bestVal = Double.POSITIVE_INFINITY;
-    JsonObject bestPatch = null;
-    String baselineTrainPath = null;
+        double bestVal = Double.POSITIVE_INFINITY;
+        JsonObject bestPatch = null;
+        
+        // If we have a previous best, start from there
+        if (previousBest != null && previousBest.bestParametersJson != null) {
+            try {
+                bestPatch = previousBest.getParametersAsJson();
+                bestVal = previousBest.bestMetricF1;
+                System.out.println("Initialized with previous best parameters (F1=" + bestVal + ")");
+            } catch (Exception e) {
+                System.err.println("Warning: Could not parse previous best parameters: " + e.getMessage());
+                bestPatch = null;
+            }
+        }
+        
+        String baselineTrainPath = null;
 
         // Use a fixed randomSeed for all trials so that only attack parameters change
         long childSeed = baseSeed;
@@ -78,11 +109,24 @@ public class JavaOptimizer {
             JsonObject attacksRoot = new JsonObject();
             JsonObject attackPatch = new JsonObject();
 
-            // For trial 0 use the unmodified base attack config as the initial baseline
-            if (t > 0) {
-                // small helper: traverse and fill attackPatch with randomized values
+            // Trial 0: baseline (no changes)
+            // Trials 1..randomInit: random sampling
+            // Trials > randomInit: hill-climb by mutating current best
+            if (t > 0 && t <= randomInit) {
+                // Random exploration phase
                 traverseAndSample(attackKey, new ArrayList<>(), attackCfg, attackPatch);
+            } else if (t > randomInit && bestPatch != null) {
+                // Hill-climb phase: mutate the best solution found so far
+                JsonObject bestAttacksParams = bestPatch.getAsJsonObject("attacksParams");
+                if (bestAttacksParams != null && bestAttacksParams.has(attackKey)) {
+                    JsonObject bestAttackSub = bestAttacksParams.getAsJsonObject(attackKey);
+                    attackPatch = mutateAttackPatch(bestAttackSub);
+                } else {
+                    // Fallback to random if bestPatch structure is unexpected
+                    traverseAndSample(attackKey, new ArrayList<>(), attackCfg, attackPatch);
+                }
             }
+            // else: trial 0 uses empty attackPatch (baseline)
 
             attacksRoot.add(attackKey, attackPatch);
             patch.add("attacksParams", attacksRoot);
@@ -149,7 +193,7 @@ public class JavaOptimizer {
                     String sanitized = json.replace("\\", "\\\\");
                     JsonObject res = GSON.fromJson(sanitized, JsonObject.class);
                     metric = res.has("metric_f1") ? res.get("metric_f1").getAsDouble() : 1.0;
-                } catch (Exception ex) {
+                } catch (com.google.gson.JsonSyntaxException | IllegalStateException ex) {
                     // fallback: try to extract metric_f1 with a regex from the raw json snippet
                     try {
                         java.util.regex.Matcher m = java.util.regex.Pattern.compile("\\\"metric_f1\\\"\\s*:\\s*([0-9.]+)").matcher(json);
@@ -158,7 +202,7 @@ public class JavaOptimizer {
                         } else {
                             System.err.println("Failed to parse JSON from runner stdout: " + ex.getMessage());
                         }
-                    } catch (Exception e2) {
+                    } catch (NumberFormatException | IllegalStateException e2) {
                         System.err.println("Failed to fallback-parse metric_f1: " + e2.getMessage());
                     }
                 }
@@ -166,7 +210,8 @@ public class JavaOptimizer {
                 System.err.println("No JSON result from runner (rc=" + rc + "). stdout:\n" + stdout);
             }
 
-            System.out.println(String.format("Trial %d metric_f1=%.6f rc=%d", t, metric, rc));
+            String phase = t == 0 ? "baseline" : (t <= randomInit ? "random" : "hill-climb");
+            System.out.println(String.format("Trial %d (%s) metric_f1=%.6f rc=%d", t, phase, metric, rc));
 
             if (metric < bestVal) {
                 bestVal = metric;
@@ -202,6 +247,24 @@ public class JavaOptimizer {
             Files.createDirectories(outBest.getParent());
             Files.writeString(outBest, GSON.toJson(merged));
             System.out.println("Wrote best config to " + outBest.toString());
+            
+            // Save result to optimizer database
+            try {
+                OptimizerResult result = new OptimizerResult();
+                result.attackKey = attackKey;
+                result.attackCombination = ""; // single attack
+                result.optimizerType = "java_hillclimb";
+                result.numTrials = trials;
+                result.bestMetricF1 = bestVal;
+                result.bestParametersJson = GSON.toJson(bestPatch);
+                result.configBasePath = BASE_CFG.toString();
+                result.notes = "JavaOptimizer run with seed=" + baseSeed;
+                
+                String resultId = optimizerDb.saveResult(result);
+                System.out.println("Saved optimizer result to database: " + resultId);
+            } catch (IOException e) {
+                System.err.println("Warning: Could not save optimizer result to database: " + e.getMessage());
+            }
         }
     }
 
@@ -256,7 +319,7 @@ public class JavaOptimizer {
             JsonPrimitive prim = node.getAsJsonPrimitive();
             List<String> path = new ArrayList<>(prefix);
             JsonObject nodeOut = getOrCreatePath(out, path.subList(0, Math.max(0, path.size() - 1)));
-            if (path.size() == 0) return;
+            if (path.isEmpty()) return;
             String lastKey = path.get(path.size() - 1);
             if (prim.isBoolean()) {
                 nodeOut.addProperty(lastKey, RNG.nextBoolean());

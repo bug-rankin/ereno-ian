@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""Optuna prototype to optimize attack parameters by calling the Java ExperimentRunner.
+"""Aggressive Optuna optimizer with wider search spaces for finding stealthy attacks.
 
-Usage: python tools/optuna_opt.py [--trials N] [--study-name name] [--sampler tpe|cmaes|nsgaii]
+This version uses much wider parameter ranges to explore extreme configurations
+that might evade detection better.
 
-Requirements: optuna>=3.0.0, cmaes (pip install optuna cmaes)
+Usage: python tools/optuna_opt_aggressive.py --attack randomReplay --trials 200 --sampler cmaes
 """
 import argparse
 import json
-import os
 import shutil
 import subprocess
+import sys
 import tempfile
 import time
 from pathlib import Path
@@ -24,15 +25,24 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 BASE_CONFIG = REPO_ROOT / "config" / "configparams.json"
 JAR = REPO_ROOT / "target" / "ERENO-1.0-SNAPSHOT-uber.jar"
 
-# load base config once for parameter introspection
-with open(BASE_CONFIG, 'r', encoding='utf-8') as _f:
-    BASE_CFG_JSON = json.load(_f)
+# Map attack keys to their uc file paths
+ATTACK_FILE_MAP = {
+    'randomReplay': 'config/attacks/uc01_random_replay.json',
+    'inverseReplay': 'config/attacks/uc02_inverse_replay.json',
+    'masqFault': 'config/attacks/uc03_masquerade_fault.json',
+    'masqNormal': 'config/attacks/uc04_masquerade_normal.json',
+    'randomInjection': 'config/attacks/uc05_injection.json',
+    'highStNumInjection': 'config/attacks/uc06_high_stnum_injection.json',
+    'flooding': 'config/attacks/uc07_flooding.json',
+    'greyhole': 'config/attacks/uc08_grayhole.json'
+}
 
 # list to record mapping from optuna param names to config paths
 PARAM_MAP = []
 
 # selected attack (set in main)
 SELECT_ATTACK = None
+ATTACK_CONFIG_JSON = None  # Will hold the loaded attack config
 
 
 def write_config(base_cfg_path, out_path, patch):
@@ -85,98 +95,120 @@ def run_experiment(config_path: Path, outdir: Path, seed: int, classifier: str =
 
 def objective(trial: optuna.trial.Trial):
     # objective builds suggestions dynamically for the selected attack only
-    if SELECT_ATTACK is None:
+    if SELECT_ATTACK is None or ATTACK_CONFIG_JSON is None:
         raise RuntimeError("SELECT_ATTACK not set; pass --attack in CLI and set SELECT_ATTACK in main()")
 
     attack_key = SELECT_ATTACK
-    attack_cfg = BASE_CFG_JSON.get('attacksParams', {}).get(attack_key, {})
+    attack_cfg = ATTACK_CONFIG_JSON  # Use the loaded attack file config
 
-    # helper to set nested values into the patch
-    patch = {"attacksParams": {}, "gooseFlow": {"numberOfMessages": 2000}}
+    # Build optimized attack config (flat structure like uc files)
+    optimized_attack = {}
 
-    def set_in_patch(p, path, value):
-        cur = p.setdefault('attacksParams', {})
-        # path is like ['attack','delayMs','min']
+    def set_in_config(path, value):
+        # path is like ['delayMs','min']
         if len(path) == 0:
             return
-        attack = path[0]
-        if attack not in cur:
-            cur[attack] = {}
-        node = cur[attack]
-        for k in path[1:-1]:
+        node = optimized_attack
+        for k in path[:-1]:
             if k not in node or not isinstance(node[k], dict):
                 node[k] = {}
             node = node[k]
         node[path[-1]] = value
 
-    # traverse attack config and create trial suggestions for numeric leaves and min/max pairs
+    # AGGRESSIVE search space configuration
+    # Define much wider ranges for each parameter type
     def traverse(path_prefix, node):
-        # path_prefix is list of keys from attack root (attack_key already excluded)
+        # path_prefix is list of keys from attack root
         if isinstance(node, dict):
-            # min/max pair special handling
+            # min/max pair special handling with MUCH wider ranges
             if 'min' in node and 'max' in node and isinstance(node['min'], (int, float)) and isinstance(node['max'], (int, float)):
                 base_min = node['min']
                 base_max = node['max']
-                param_min_name = '_'.join([attack_key] + path_prefix + ['min'])
-                # choose integer vs float
+                param_min_name = '_'.join(path_prefix + ['min'])
+                
+                # AGGRESSIVE: Search from 0.1x to 10x the base range
                 if isinstance(base_min, int) and isinstance(base_max, int):
-                    low = max(0, int(base_min))
-                    high = max(low + 1, int(base_max))
-                    v_min = trial.suggest_int(param_min_name, low, high - 1)
+                    # For integers, use much wider range
+                    search_low = max(0, int(base_min * 0.1))
+                    search_high = int(base_max * 10)
+                    
+                    v_min = trial.suggest_int(param_min_name, search_low, search_high)
                     param_max_name = param_min_name.replace('_min', '_max')
-                    v_max = trial.suggest_int(param_max_name, v_min + 1, max(v_min + 1, int(base_max)))
+                    # Allow max to be much larger than min
+                    v_max = trial.suggest_int(param_max_name, v_min + 1, max(v_min + 1, search_high))
                 else:
-                    low = float(base_min)
-                    high = float(base_max)
-                    v_min = trial.suggest_float(param_min_name, low, max(low + 1e-6, high))
+                    # For floats, even wider range
+                    search_low = max(0.0, float(base_min) * 0.05)
+                    search_high = float(base_max) * 20.0
+                    
+                    v_min = trial.suggest_float(param_min_name, search_low, search_high)
                     param_max_name = param_min_name.replace('_min', '_max')
-                    v_max = trial.suggest_float(param_max_name, max(v_min + 1e-6, low), high)
+                    v_max = trial.suggest_float(param_max_name, v_min + 0.01, max(v_min + 0.01, search_high))
+                
                 # record and set
-                PARAM_MAP.append((param_min_name, [attack_key] + path_prefix + ['min']))
-                PARAM_MAP.append((param_max_name, [attack_key] + path_prefix + ['max']))
-                set_in_patch(patch, [attack_key] + path_prefix + ['min'], v_min)
-                set_in_patch(patch, [attack_key] + path_prefix + ['max'], v_max)
+                PARAM_MAP.append((param_min_name, path_prefix + ['min']))
+                PARAM_MAP.append((param_max_name, path_prefix + ['max']))
+                set_in_config(path_prefix + ['min'], v_min)
+                set_in_config(path_prefix + ['max'], v_max)
                 return
             # otherwise iterate children
             for k, v in node.items():
                 traverse(path_prefix + [k], v)
         elif isinstance(node, bool):
-            param_name = '_'.join([attack_key] + path_prefix)
+            param_name = '_'.join(path_prefix)
             val = trial.suggest_categorical(param_name, [True, False])
-            PARAM_MAP.append((param_name, [attack_key] + path_prefix))
-            set_in_patch(patch, [attack_key] + path_prefix, val)
+            PARAM_MAP.append((param_name, path_prefix))
+            set_in_config(path_prefix, val)
         elif isinstance(node, (int, float)):
-            param_name = '_'.join([attack_key] + path_prefix)
+            param_name = '_'.join(path_prefix)
             # heuristic for probability-like values
             if 0.0 <= float(node) <= 1.0:
+                # Full range for probabilities
                 val = trial.suggest_float(param_name, 0.0, 1.0)
             else:
-                # integer vs float
+                # AGGRESSIVE: Much wider range
                 if isinstance(node, int):
-                    low = max(0, int(node // 2))
-                    high = max(low + 1, int(node * 3 + 1))
+                    low = max(1, int(node * 0.1))  # Down to 10% of base
+                    high = int(node * 20)  # Up to 20x base
                     val = trial.suggest_int(param_name, low, high)
                 else:
-                    low = max(0.0, float(node) / 2.0)
-                    high = max(low + 1e-6, float(node) * 3.0)
+                    low = max(0.001, float(node) * 0.05)  # Down to 5% of base
+                    high = float(node) * 50.0  # Up to 50x base
                     val = trial.suggest_float(param_name, low, high)
-            PARAM_MAP.append((param_name, [attack_key] + path_prefix))
-            set_in_patch(patch, [attack_key] + path_prefix, val)
+            PARAM_MAP.append((param_name, path_prefix))
+            set_in_config(path_prefix, val)
         else:
             # skip arrays and strings for now
             return
 
     traverse([], attack_cfg)
 
-    # set a seed so results are deterministic per trial
-    patch['randomSeed'] = trial.number + int(time.time())
+    # Add attackType and enabled from base config
+    if 'attackType' in attack_cfg:
+        optimized_attack['attackType'] = attack_cfg['attackType']
+    if 'enabled' not in optimized_attack:
+        optimized_attack['enabled'] = True
 
-    tmpdir = Path(tempfile.mkdtemp(prefix='optuna_run_'))
+    # Load base config and merge in optimized attack
+    with open(BASE_CONFIG, 'r', encoding='utf-8') as f:
+        full_config = json.load(f)
+    
+    # Update the attack params with optimized values
+    if 'attacksParams' not in full_config:
+        full_config['attacksParams'] = {}
+    full_config['attacksParams'][attack_key] = optimized_attack
+    full_config['gooseFlow']['numberOfMessages'] = 5000
+    full_config['randomSeed'] = trial.number + int(time.time())
+
+    tmpdir = Path(tempfile.mkdtemp(prefix='optuna_aggressive_'))
     cfg_path = tmpdir / 'cfg.json'
-    write_config(BASE_CONFIG, cfg_path, patch)
+    with open(cfg_path, 'w', encoding='utf-8') as f:
+        json.dump(full_config, f, indent=2)
+
+    seed = full_config['randomSeed']
 
     try:
-        res = run_experiment(cfg_path, tmpdir, seed=patch['randomSeed'])
+        res = run_experiment(cfg_path, tmpdir, seed=seed)
     except Exception as e:
         print('Experiment failed:', e)
         # return high penalty
@@ -197,7 +229,7 @@ def objective(trial: optuna.trial.Trial):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Optimize attack parameters using Optuna with multiple samplers',
+        description='Aggressively optimize attack parameters with wider search spaces',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='''
 Sampler details:
@@ -205,25 +237,27 @@ Sampler details:
   cmaes   - Covariance Matrix Adaptation Evolution Strategy (excellent for continuous params)
   nsgaii  - Non-dominated Sorting Genetic Algorithm II (genetic algorithm approach)
 
+This aggressive version uses 10-50x wider search ranges than the standard optimizer.
+
 Example:
-  python tools/optuna_opt.py --attack randomReplay --trials 50 --sampler cmaes
+  python tools/optuna_opt_aggressive.py --attack randomReplay --trials 200 --sampler cmaes
 ''')
-    parser.add_argument('--trials', type=int, default=20, help='Number of optimization trials')
-    parser.add_argument('--study-name', type=str, default='ereno_opt', help='Name of the Optuna study')
+    parser.add_argument('--trials', type=int, default=100, help='Number of optimization trials')
+    parser.add_argument('--study-name', type=str, default='ereno_aggressive', help='Name of the Optuna study')
     parser.add_argument('--attack', type=str, default='randomReplay', 
                         help='Attack key inside attacksParams to optimize (e.g. randomReplay, greyhole)')
     parser.add_argument('--storage', type=str, default=None,
                         help='Optional sqlite storage for resuming studies, e.g. sqlite:///optuna.db')
-    parser.add_argument('--sampler', type=str, default='tpe', choices=['tpe', 'cmaes', 'nsgaii'],
+    parser.add_argument('--sampler', type=str, default='cmaes', choices=['tpe', 'cmaes', 'nsgaii'],
                         help='Optimization algorithm: tpe (Bayesian), cmaes (Evolution Strategy), nsgaii (Genetic Algorithm)')
     parser.add_argument('--pruner', action='store_true',
                         help='Enable median pruner to terminate unpromising trials early')
-    parser.add_argument('--n-startup-trials', type=int, default=10,
+    parser.add_argument('--n-startup-trials', type=int, default=20,
                         help='Number of random trials before sampler starts (for TPE/CMA-ES)')
     args = parser.parse_args()
 
     # set selected attack globally for the objective
-    global SELECT_ATTACK
+    global SELECT_ATTACK, ATTACK_CONFIG_JSON
     SELECT_ATTACK = args.attack
     
     # Initialize optimizer database
@@ -236,6 +270,21 @@ Example:
         print(f"Previous best params: {len(previous_best['best_parameters'])} parameters")
     else:
         print(f"\nNo previous results found for '{args.attack}'. Starting fresh.")
+    
+    # Load the attack config from uc file
+    if args.attack not in ATTACK_FILE_MAP:
+        print(f"Error: Unknown attack '{args.attack}'. Available: {list(ATTACK_FILE_MAP.keys())}")
+        sys.exit(1)
+    
+    attack_file = REPO_ROOT / ATTACK_FILE_MAP[args.attack]
+    if not attack_file.exists():
+        print(f"Error: Attack file not found: {attack_file}")
+        sys.exit(1)
+    
+    with open(attack_file, 'r', encoding='utf-8') as f:
+        ATTACK_CONFIG_JSON = json.load(f)
+    
+    print(f"Loaded attack config from: {attack_file}")
 
     # Create sampler based on user choice
     if args.sampler == 'tpe':
@@ -249,7 +298,6 @@ Example:
         sampler = CmaEsSampler(
             n_startup_trials=args.n_startup_trials,
             seed=42,
-            restart_strategy='ipop',  # Increasing population restart for better exploration
             warn_independent_sampling=False  # Suppress warnings for categorical params
         )
         print(f"Using CMA-ES (Evolution Strategy) sampler with {args.n_startup_trials} random startup trials")
@@ -287,7 +335,10 @@ Example:
         except Exception as e:
             print(f"Warning: Could not enqueue previous best: {e}")
     
-    print(f"\nOptimizing attack: {args.attack}")
+    print(f"\nAGGRESSIVE OPTIMIZATION MODE")
+    print(f"Search ranges: 0.05x - 50x base values")
+    print(f"Dataset size: 5000 messages (for better accuracy)")
+    print(f"Optimizing attack: {args.attack}")
     print(f"Total trials: {args.trials}")
     print(f"Study: {args.study_name}\n")
     
@@ -303,44 +354,52 @@ Example:
     for param, value in study.best_params.items():
         print(f'  {param}: {value}')
 
-    # write best config to file using discovered parameter map for the selected attack
-    best_cfg = Path('target') / 'opt_best_config.json'
-    best_patch = {'attacksParams': {}}
-
-    # Build a mapping of expected param names -> config paths (same naming as in objective)
-    def build_param_map_for_attack(attack_key, node, path_prefix=None, out=None):
+    # Write best config in uc01 attack file format
+    best_cfg = Path('target') / f'opt_{SELECT_ATTACK}_best.json'
+    
+    # Start with the original attack config structure
+    best_attack_config = json.loads(json.dumps(ATTACK_CONFIG_JSON))  # Deep copy
+    
+    # Build a mapping of expected param names -> config paths
+    def build_param_map(node, path_prefix=None, out=None):
         if out is None:
             out = {}
         if path_prefix is None:
             path_prefix = []
         if isinstance(node, dict):
             if 'min' in node and 'max' in node and isinstance(node['min'], (int, float)) and isinstance(node['max'], (int, float)):
-                param_min = '_'.join([attack_key] + path_prefix + ['min'])
+                param_min = '_'.join(path_prefix + ['min'])
                 param_max = param_min.replace('_min', '_max')
-                out[param_min] = [attack_key] + path_prefix + ['min']
-                out[param_max] = [attack_key] + path_prefix + ['max']
+                out[param_min] = path_prefix + ['min']
+                out[param_max] = path_prefix + ['max']
                 return out
             for k, v in node.items():
-                build_param_map_for_attack(attack_key, v, path_prefix + [k], out)
+                build_param_map(v, path_prefix + [k], out)
         elif isinstance(node, bool) or isinstance(node, (int, float)):
-            param = '_'.join([attack_key] + path_prefix)
-            out[param] = [attack_key] + path_prefix
+            param = '_'.join(path_prefix)
+            out[param] = path_prefix
         return out
 
-    attack_cfg = BASE_CFG_JSON.get('attacksParams', {}).get(SELECT_ATTACK, {})
-    param_map = build_param_map_for_attack(SELECT_ATTACK, attack_cfg)
+    param_map = build_param_map(ATTACK_CONFIG_JSON)
 
-    # populate best_patch from study.best_params where available
+    # Update best_attack_config with optimized values
     for pname, path in param_map.items():
         if pname in study.best_params:
-            # set in nested dict
-            cur = best_patch['attacksParams'].setdefault(path[0], {})
-            for k in path[1:-1]:
-                cur = cur.setdefault(k, {})
-            cur[path[-1]] = study.best_params[pname]
+            # Navigate and set value in nested dict
+            node = best_attack_config
+            for k in path[:-1]:
+                if k not in node:
+                    node[k] = {}
+                node = node[k]
+            node[path[-1]] = study.best_params[pname]
 
-    write_config(BASE_CONFIG, best_cfg, best_patch)
-    print('Best config written to', best_cfg)
+    # Write the optimized attack config
+    with open(best_cfg, 'w', encoding='utf-8') as f:
+        json.dump(best_attack_config, f, indent=2)
+    
+    print(f'\nOptimized attack config written to: {best_cfg}')
+    print(f'This file can be used directly with ActionRunner in:')
+    print(f'  config/actions/action_create_attack_dataset.json')
     
     # Save result to optimizer database
     try:
@@ -353,11 +412,11 @@ Example:
             best_params=study.best_params,
             attack_combination="",
             config_base_path=str(BASE_CONFIG),
-            notes=f"Standard optimization with {args.sampler} sampler"
+            notes=f"Aggressive optimization with {args.sampler} sampler"
         )
-        print(f'Result saved to optimizer database for future runs.')
+        print(f'\nResult saved to optimizer database for future runs.')
     except Exception as e:
-        print(f'Warning: Could not save to optimizer database: {e}')
+        print(f'\nWarning: Could not save to optimizer database: {e}')
 
 
 if __name__ == '__main__':
