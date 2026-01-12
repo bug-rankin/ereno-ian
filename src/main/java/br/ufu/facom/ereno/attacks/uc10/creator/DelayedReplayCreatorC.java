@@ -56,6 +56,7 @@ public class DelayedReplayCreatorC implements MessageCreator {
 
         // Store the parameter values in some txt file or in the csv file
 
+
         for (int i = 0; numDelayInstances > 0 & i < messageStream.size(); i++) {
             
             delayMessage = messageStream.get(i);
@@ -167,11 +168,11 @@ public class DelayedReplayCreatorC implements MessageCreator {
 
         }
 
-        writeToFile(selectionInterval, faultCounter, messageStream.size());
+        writeToFile(selectionInterval, faultCounter, messageStream.size(), minInterval, maxInterval, minBurstInterval, maxBurstInterval, minBurstSize, maxBurstSize, selectionInterval, burstInterval, burstSize, selectionProb, burstMode);
 
     }
 
-    private void writeToFile(int interval, int faults, int totalMessages) {
+    private void writeToFile(int interval, int faults, int totalMessages, int minInterval, int maxInterval, int minBurstInterval, int maxBurstInterval, int minBurstSize, int maxBurstSize, int selectionInterval, int burstInterval, int burstSize, double selectionProb, boolean burstMode) {
         try {
             FileWriter writer = new FileWriter("uc10_tracking.txt", true);
             writer.write("Total messages in the dataset: " + totalMessages + "\n");

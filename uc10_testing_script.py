@@ -18,11 +18,13 @@ def main():
         with open(path, 'x', newline='') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(header)
+            
         print("CSV file is created")
         for i in range(5):
             '''
             write iteration number to txt file or the csv file to go along with the parameter values for each iteration
             '''
+            
             result = subprocess.run(commands[1], capture_output=True, text=True, check=True)
         print("Evaluation iterations finished")
     except subprocess.CalledProcessError as e:
