@@ -17,6 +17,7 @@ import com.google.gson.GsonBuilder;
 import br.ufu.facom.ereno.evaluation.support.GenericEvaluation;
 import br.ufu.facom.ereno.evaluation.support.GenericResultado;
 import br.ufu.facom.ereno.tracking.ExperimentTracker;
+import br.ufu.facom.ereno.attacks.uc10.creator.DelayedReplayCreatorC;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 
@@ -250,7 +251,7 @@ public class EvaluateAction {
             report.append(String.format("False Pos:    %d\n", eval.falsePositives));
             report.append(String.format("False Neg:    %d\n", eval.falseNegatives));
             report.append(String.format("Eval Time:    %dms\n", eval.evaluationTimeMs));
-            
+
             String line = eval.modelName + "," + eval.accuracy + "," + eval.precision + "," + eval.recall + "," + eval.f1Score + "," + eval.truePositives 
             + "," + eval.trueNegatives + "," + eval.falsePositives + "," + eval.falseNegatives + "," + eval.evaluationTimeMs;
             br.ufu.facom.ereno.dataExtractors.CSVWritter.writeLine(line);

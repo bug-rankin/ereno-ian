@@ -16,6 +16,11 @@ import static br.ufu.facom.ereno.general.IED.randomBetween;
 public class DelayedReplayCreatorC implements MessageCreator {
     ArrayList<Goose> messageStream;
     private final AttackConfig config;
+    private int selectionInterval;
+    private int burstInterval;
+    private int burstSize;
+    private double selectionProb;
+    private boolean burstMode;
 
     public DelayedReplayCreatorC(ArrayList<Goose> messages, AttackConfig config) {
         this.messageStream = messages;
@@ -39,12 +44,12 @@ public class DelayedReplayCreatorC implements MessageCreator {
         int maxBurstSize = config.getNestedInt("burstSize", "max", 25);
 
         Goose delayMessage; // the potential message to be delayed
-        int selectionInterval = randomBetween(minInterval, maxInterval); // the rate or interval in which messages are selected to be delayed
+        selectionInterval = randomBetween(minInterval, maxInterval); // the rate or interval in which messages are selected to be delayed
         //Logger.getLogger("DelayedReplayCreatorC").info("Selection Interval: " + selectionInterval);
-        int burstInterval = randomBetween(minBurstInterval, maxBurstInterval);// the interval in which bursts of messages are selected and then delayed       
-        int burstSize = randomBetween(minBurstSize, maxBurstSize);
-        double selectionProb = config.getNestedDouble("selectionProb","value",0.5); // determines if a certain messages is delayed or not
-        boolean burstMode = config.getBoolean("burstMode", false); // determines if we will do bursts of messages or not
+        burstInterval = randomBetween(minBurstInterval, maxBurstInterval);// the interval in which bursts of messages are selected and then delayed       
+        burstSize = randomBetween(minBurstSize, maxBurstSize);
+        selectionProb = config.getNestedDouble("selectionProb","value",0.5); // determines if a certain messages is delayed or not
+        burstMode = config.getBoolean("burstMode", false); // determines if we will do bursts of messages or not
 
         // counter/tracking variables that are not assigned in the config file
         int burstMessageCounter = 0; // keeps track of the amount of messages grabbed before the burst maximum is reached
@@ -168,16 +173,22 @@ public class DelayedReplayCreatorC implements MessageCreator {
 
         }
 
-        writeToFile(selectionInterval, faultCounter, messageStream.size(), minInterval, maxInterval, minBurstInterval, maxBurstInterval, minBurstSize, maxBurstSize, selectionInterval, burstInterval, burstSize, selectionProb, burstMode);
+        writeToFile(faultCounter, messageStream.size());
 
     }
 
-    private void writeToFile(int interval, int faults, int totalMessages, int minInterval, int maxInterval, int minBurstInterval, int maxBurstInterval, int minBurstSize, int maxBurstSize, int selectionInterval, int burstInterval, int burstSize, double selectionProb, boolean burstMode) {
+    private void writeToFile(int faults, int totalMessages) {
         try {
-            FileWriter writer = new FileWriter("uc10_tracking.txt", true);
+            FileWriter writer = new FileWriter("target/evaluation/evaluation_report.txt", true);
+            writer.write("These are the metrics for uc10:\n");
             writer.write("Total messages in the dataset: " + totalMessages + "\n");
-            writer.write("The selection interval: " + interval + "\n");
+            writer.write("The selection interval: " + getSelectionInterval() + "\n");
+            writer.write("The burst interval: " + getBurstInterval() + "\n");
+            writer.write("The burst size: " + getBurstSize() + "\n");
+            writer.write("The selection probability: " + getSelectionProb() + "\n");
+            writer.write("The burst mode: " + getBurstMode() + "\n");
             writer.write("Total amount of faulty messages: " + faults + "\n");
+            writer.write("========================================================================\n\n");
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -213,5 +224,17 @@ public class DelayedReplayCreatorC implements MessageCreator {
 
         return closestIndex;
     }
+
+    public int getSelectionInterval() { return selectionInterval; }
+
+    public int getBurstInterval() { return burstInterval; }
+
+    public int getBurstSize() { return burstSize; }
+
+    public double getSelectionProb() { return selectionProb; }
+
+    public boolean getBurstMode() { return burstMode; }
+
+    // add more if more parameters are added to this attack
 
 }
