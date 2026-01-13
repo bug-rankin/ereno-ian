@@ -5,19 +5,19 @@
     "models": [
       {
         "name": "J48",
-        "modelPath": "target/models/J48_model.model"
+        "modelPath": "target/models/models_J48_model.model"
       },
       {
         "name": "RandomForest",
-        "modelPath": "target/models/RandomForest_model.model"
+        "modelPath": "target/models/models_RandomForest_model.model"
       },
       {
         "name": "NaiveBayes",
-        "modelPath": "target/models/NaiveBayes_model.model"
+        "modelPath": "target/models/models_NaiveBayes_model.model"
       },
       {
         "name": "REPTree",
-        "modelPath": "target/models/REPTree_model.model"
+        "modelPath": "target/models/models_REPTree_model.model"
       }
     ],
     "testDatasetPath": "target/testing/test_dataset.arff",

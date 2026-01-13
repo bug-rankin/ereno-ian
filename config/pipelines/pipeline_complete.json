@@ -2,7 +2,7 @@
   "action": "pipeline",
   "description": "Complete ML workflow: benign data, training dataset, test dataset, train, and evaluate",
   "commonConfig": {
-    "randomSeed": 29,
+    "randomSeed": 42,
     "outputFormat": "arff"
   },
   "pipeline": [
