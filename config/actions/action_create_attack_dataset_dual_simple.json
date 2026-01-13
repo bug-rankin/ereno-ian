@@ -1,0 +1,32 @@
+{
+  "action": "create_attack_dataset",
+  "description": "Generate dual-attack dataset - Simple pattern (RandomReplay, InverseReplay)",
+  "input": {
+    "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+    "verifyBenignData": true
+  },
+  "output": {
+    "directory": "target/dual_attack_training/random_replay_inverse_replay",
+    "filename": "training_dataset_simple.arff",
+    "format": "arff"
+  },
+  "datasetStructure": {
+    "messagesPerSegment": 1000,
+    "includeBenignSegment": true,
+    "shuffleSegments": false
+  },
+  "attackSegments": [
+    {
+      "name": "uc01_random_replay",
+      "enabled": true,
+      "attackConfig": "config/attacks/uc01_random_replay.json",
+      "description": "Random replay attack"
+    },
+    {
+      "name": "uc02_inverse_replay",
+      "enabled": true,
+      "attackConfig": "config/attacks/uc02_inverse_replay.json",
+      "description": "Inverse replay attack"
+    }
+  ]
+}

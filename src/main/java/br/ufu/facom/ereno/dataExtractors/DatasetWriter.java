@@ -1,15 +1,19 @@
 package br.ufu.facom.ereno.dataExtractors;
 
-import br.ufu.facom.ereno.general.ProtectionIED;
-import br.ufu.facom.ereno.featureEngineering.ProtocolCorrelation;
-import br.ufu.facom.ereno.messages.Goose;
-import br.ufu.facom.ereno.messages.Sv;
-
-import java.io.*;
-import br.ufu.facom.ereno.util.Labels;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+
+import br.ufu.facom.ereno.featureEngineering.ProtocolCorrelation;
+import br.ufu.facom.ereno.general.ProtectionIED;
+import br.ufu.facom.ereno.messages.Goose;
+import br.ufu.facom.ereno.messages.Sv;
+import br.ufu.facom.ereno.util.Labels;
 
 // @TODO: Is this still used? Did CSV and ARFF Writters replaced it?
 public class DatasetWriter {
@@ -18,10 +22,12 @@ public class DatasetWriter {
     static boolean replace = true;
     // Backwards-compatible alias used across the codebase. Points to centralized Labels.
     public static String[] label = br.ufu.facom.ereno.util.Labels.LABELS;
+    // Binary classification mode: if true, use {normal, attack} instead of multi-class labels
+    public static boolean binaryClassificationMode = false;
 
     public static class Debug {
         public static boolean gooseMessages = false;
-        private static boolean printSignatures = false;
+        private static final boolean PRINT_SIGNATURES = false;
     }
 
     public static void write(String line) throws IOException {
@@ -51,7 +57,7 @@ public class DatasetWriter {
         for (Goose gm : gooseMessages) {
             if (prev != null) {
                 String gooseString = gm.asCSVFull() + getConsistencyFeaturesAsCSV(gm, prev) + "," + gm.getLabel();
-                if (DatasetWriter.Debug.printSignatures) {
+                if (DatasetWriter.Debug.PRINT_SIGNATURES) {
                     System.out.println(gooseString);
                 }
                 write(gooseString);
@@ -109,25 +115,6 @@ public class DatasetWriter {
                 write(svString + "," + cycleStrig + "," + gooseString + "," + gm.getLabel());
             }
         }
-    }
-
-    private static void writeToDataset(ArrayList<Sv> svMessages, Goose prev, Goose attack, Sv sv) throws IOException {
-        String svString = sv.asCsv();
-        String cycleStrig = ProtocolCorrelation.getCorrespondingSVCycle(svMessages, attack, 80).asCsv();
-        String gooseString = attack.asCSVFull() + getConsistencyFeaturesAsCSV(attack, prev);
-        double delay = attack.getTimestamp() - sv.getTime();
-        write(svString + "," + cycleStrig + "," + gooseString + "," + delay + "," + attack.getLabel());
-
-//        System.out.println("SqNum: "+attack.getSqNum() + " / Label: "+attack.label);
-
-        // debug
-//        int stdiff = (attack.getStNum() - prev.getStNum());
-//        int sqDiff = (attack.getSqNum() - prev.getSqNum());
-//        int cbStatusDiff = (attack.isCbStatus() - prev.isCbStatus());
-//        write(
-//                "stDiff = " + stdiff + "sqDiff = " + sqDiff +
-//                        "cbStatusDiff = " + cbStatusDiff
-//        );
     }
 
     public static void writeSvMessagesToFile(ArrayList<Sv> svMessages, boolean printHeader, String substation) throws IOException {
@@ -225,7 +212,9 @@ public class DatasetWriter {
         write("@attribute tDiff numeric"); // temporal consistency 67
         write("@attribute timeFromLastChange numeric"); // temporal consistency 68
         write("@attribute delay numeric"); // temporal consistency 69
-    String classLine = "@attribute class {" + Labels.asArffSet() + "}";
+    String classLine = binaryClassificationMode ? 
+        "@attribute class {" + Labels.asArffSetBinary() + "}" :
+        "@attribute class {" + Labels.asArffSet() + "}";
 
         write(classLine);
         write("@data");
@@ -370,6 +359,7 @@ public class DatasetWriter {
     }
 
     @Deprecated
+    @SuppressWarnings("unused")
     private String getConsistencyFeaturesAsCSV(Goose gm, ProtectionIED protectionIED, double currentSVTime) {
         Goose prev = protectionIED.getPreviousGoose(gm, protectionIED);
         int stDiff = gm.getStNum() - prev.getStNum();
@@ -379,7 +369,7 @@ public class DatasetWriter {
         int apduSizeDiff = gm.getApduSize() - prev.getApduSize();
         int frameLenthDiff = gm.getFrameLen() - prev.getFrameLen();
         double timestampDiff = gm.getTimestamp() - prev.getTimestamp();
-        double tDiff = (Double.valueOf(gm.getT()) - Double.valueOf(prev.getT()));
+        double tDiff = (gm.getT() - prev.getT());
         double delay = currentSVTime - gm.getTimestamp();
 
         //ystem.out.println("Goose (st/sq/time): " + gm.getStNum() + "," + gm.getSqNum() + "," + time + ", Coisinhas:" + stDiff + ", " + sqDiff + ", " + gooseLenghtDiff + ", " + cbStatusDiff + ", " + apduSizeDiff + ", " + frameLenthDiff + ", " + timestampDiff + ", " + tDiff);
@@ -397,7 +387,7 @@ public class DatasetWriter {
         int apduSizeDiff = gm.getApduSize() - prev.getApduSize();
         int frameLenthDiff = gm.getFrameLen() - prev.getFrameLen();
         double timestampDiff = gm.getTimestamp() - prev.getTimestamp();
-        double tDiff = (Double.valueOf(gm.getT()) - Double.valueOf(prev.getT()));
+        double tDiff = (gm.getT() - prev.getT());
         double timeFromLastChange = (gm.getTimestamp() - gm.getT());
 
 

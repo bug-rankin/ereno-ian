@@ -1,0 +1,48 @@
+{
+  "action": "pipeline",
+  "description": "Evaluate all 112 dual-attack trained models",
+  "pipeline": [
+    {
+      "action": "evaluate",
+      "inline": {
+        "action": "evaluate",
+        "description": "Evaluate uc01_random_replay_uc02_inverse_replay_simple models",
+        "input": {
+          "models": [
+            {"name": "J48", "modelPath": "target/dual_attack_models/uc01_random_replay_uc02_inverse_replay_simple/uc01_random_replay_uc02_inverse_replay_simple_J48_model.model"},
+            {"name": "RandomForest", "modelPath": "target/dual_attack_models/uc01_random_replay_uc02_inverse_replay_simple/uc01_random_replay_uc02_inverse_replay_simple_RandomForest_model.model"}
+          ],
+          "testDatasetPath": "target/dual_attack_training/uc01_random_replay_uc02_inverse_replay/training_dataset_simple.arff",
+          "verifyFiles": true
+        },
+        "output": {
+          "evaluationDirectory": "target/dual_attack_evaluation",
+          "evaluationFilename": "results.json",
+          "appendMode": true
+        },
+        "outputMetrics": ["accuracy", "precision", "recall", "f1"]
+      }
+    },
+    {
+      "action": "evaluate",
+      "inline": {
+        "action": "evaluate",
+        "description": "Evaluate uc01_random_replay_uc02_inverse_replay_combined models",
+        "input": {
+          "models": [
+            {"name": "J48", "modelPath": "target/dual_attack_models/uc01_random_replay_uc02_inverse_replay_combined/uc01_random_replay_uc02_inverse_replay_combined_J48_model.model"},
+            {"name": "RandomForest", "modelPath": "target/dual_attack_models/uc01_random_replay_uc02_inverse_replay_combined/uc01_random_replay_uc02_inverse_replay_combined_RandomForest_model.model"}
+          ],
+          "testDatasetPath": "target/dual_attack_training/uc01_random_replay_uc02_inverse_replay/training_dataset_combined.arff",
+          "verifyFiles": true
+        },
+        "output": {
+          "evaluationDirectory": "target/dual_attack_evaluation",
+          "evaluationFilename": "results.json",
+          "appendMode": true
+        },
+        "outputMetrics": ["accuracy", "precision", "recall", "f1"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,1056 @@
+{
+  "action": "comprehensive_evaluate",
+  "description": "Comprehensive evaluation: 112 models \u00d7 64 test datasets = 7168 evaluations",
+  "input": {
+    "models": [
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc02_inverse_replay",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc02_inverse_replay_simple/uc01_random_replay_uc02_inverse_replay_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc02_inverse_replay",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc02_inverse_replay_simple/uc01_random_replay_uc02_inverse_replay_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc02_inverse_replay",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc02_inverse_replay_combined/uc01_random_replay_uc02_inverse_replay_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc02_inverse_replay",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc02_inverse_replay_combined/uc01_random_replay_uc02_inverse_replay_combined_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc03_masquerade_fault",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc03_masquerade_fault_simple/uc01_random_replay_uc03_masquerade_fault_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc03_masquerade_fault",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc03_masquerade_fault_simple/uc01_random_replay_uc03_masquerade_fault_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc03_masquerade_fault",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc03_masquerade_fault_combined/uc01_random_replay_uc03_masquerade_fault_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc03_masquerade_fault",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc03_masquerade_fault_combined/uc01_random_replay_uc03_masquerade_fault_combined_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc04_masquerade_normal",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc04_masquerade_normal_simple/uc01_random_replay_uc04_masquerade_normal_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc04_masquerade_normal",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc04_masquerade_normal_simple/uc01_random_replay_uc04_masquerade_normal_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc04_masquerade_normal",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc04_masquerade_normal_combined/uc01_random_replay_uc04_masquerade_normal_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc04_masquerade_normal",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc04_masquerade_normal_combined/uc01_random_replay_uc04_masquerade_normal_combined_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc05_injection",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc05_injection_simple/uc01_random_replay_uc05_injection_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc05_injection",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc05_injection_simple/uc01_random_replay_uc05_injection_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc05_injection",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc05_injection_combined/uc01_random_replay_uc05_injection_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc05_injection",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc05_injection_combined/uc01_random_replay_uc05_injection_combined_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc06_high_stnum_injection",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc06_high_stnum_injection_simple/uc01_random_replay_uc06_high_stnum_injection_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc06_high_stnum_injection",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc06_high_stnum_injection_simple/uc01_random_replay_uc06_high_stnum_injection_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc06_high_stnum_injection",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc06_high_stnum_injection_combined/uc01_random_replay_uc06_high_stnum_injection_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc06_high_stnum_injection",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc06_high_stnum_injection_combined/uc01_random_replay_uc06_high_stnum_injection_combined_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc07_flooding",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc07_flooding_simple/uc01_random_replay_uc07_flooding_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc07_flooding",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc07_flooding_simple/uc01_random_replay_uc07_flooding_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc07_flooding",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc07_flooding_combined/uc01_random_replay_uc07_flooding_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc07_flooding",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc07_flooding_combined/uc01_random_replay_uc07_flooding_combined_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc08_grayhole_simple/uc01_random_replay_uc08_grayhole_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc08_grayhole_simple/uc01_random_replay_uc08_grayhole_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc08_grayhole_combined/uc01_random_replay_uc08_grayhole_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc01_random_replay",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc08_grayhole_combined/uc01_random_replay_uc08_grayhole_combined_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc02_inverse_replay",
+        "trainingAttack2": "uc03_masquerade_fault",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc02_inverse_replay_uc03_masquerade_fault_simple/uc02_inverse_replay_uc03_masquerade_fault_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc02_inverse_replay",
+        "trainingAttack2": "uc03_masquerade_fault",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc02_inverse_replay_uc03_masquerade_fault_simple/uc02_inverse_replay_uc03_masquerade_fault_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc02_inverse_replay",
+        "trainingAttack2": "uc03_masquerade_fault",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc02_inverse_replay_uc03_masquerade_fault_combined/uc02_inverse_replay_uc03_masquerade_fault_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc02_inverse_replay",
+        "trainingAttack2": "uc03_masquerade_fault",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc02_inverse_replay_uc03_masquerade_fault_combined/uc02_inverse_replay_uc03_masquerade_fault_combined_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc02_inverse_replay",
+        "trainingAttack2": "uc04_masquerade_normal",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc02_inverse_replay_uc04_masquerade_normal_simple/uc02_inverse_replay_uc04_masquerade_normal_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc02_inverse_replay",
+        "trainingAttack2": "uc04_masquerade_normal",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc02_inverse_replay_uc04_masquerade_normal_simple/uc02_inverse_replay_uc04_masquerade_normal_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc02_inverse_replay",
+        "trainingAttack2": "uc04_masquerade_normal",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc02_inverse_replay_uc04_masquerade_normal_combined/uc02_inverse_replay_uc04_masquerade_normal_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc02_inverse_replay",
+        "trainingAttack2": "uc04_masquerade_normal",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc02_inverse_replay_uc04_masquerade_normal_combined/uc02_inverse_replay_uc04_masquerade_normal_combined_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc02_inverse_replay",
+        "trainingAttack2": "uc05_injection",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc02_inverse_replay_uc05_injection_simple/uc02_inverse_replay_uc05_injection_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc02_inverse_replay",
+        "trainingAttack2": "uc05_injection",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc02_inverse_replay_uc05_injection_simple/uc02_inverse_replay_uc05_injection_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc02_inverse_replay",
+        "trainingAttack2": "uc05_injection",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc02_inverse_replay_uc05_injection_combined/uc02_inverse_replay_uc05_injection_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc02_inverse_replay",
+        "trainingAttack2": "uc05_injection",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc02_inverse_replay_uc05_injection_combined/uc02_inverse_replay_uc05_injection_combined_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc02_inverse_replay",
+        "trainingAttack2": "uc06_high_stnum_injection",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc02_inverse_replay_uc06_high_stnum_injection_simple/uc02_inverse_replay_uc06_high_stnum_injection_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc02_inverse_replay",
+        "trainingAttack2": "uc06_high_stnum_injection",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc02_inverse_replay_uc06_high_stnum_injection_simple/uc02_inverse_replay_uc06_high_stnum_injection_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc02_inverse_replay",
+        "trainingAttack2": "uc06_high_stnum_injection",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc02_inverse_replay_uc06_high_stnum_injection_combined/uc02_inverse_replay_uc06_high_stnum_injection_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc02_inverse_replay",
+        "trainingAttack2": "uc06_high_stnum_injection",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc02_inverse_replay_uc06_high_stnum_injection_combined/uc02_inverse_replay_uc06_high_stnum_injection_combined_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc02_inverse_replay",
+        "trainingAttack2": "uc07_flooding",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc02_inverse_replay_uc07_flooding_simple/uc02_inverse_replay_uc07_flooding_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc02_inverse_replay",
+        "trainingAttack2": "uc07_flooding",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc02_inverse_replay_uc07_flooding_simple/uc02_inverse_replay_uc07_flooding_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc02_inverse_replay",
+        "trainingAttack2": "uc07_flooding",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc02_inverse_replay_uc07_flooding_combined/uc02_inverse_replay_uc07_flooding_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc02_inverse_replay",
+        "trainingAttack2": "uc07_flooding",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc02_inverse_replay_uc07_flooding_combined/uc02_inverse_replay_uc07_flooding_combined_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc02_inverse_replay",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc02_inverse_replay_uc08_grayhole_simple/uc02_inverse_replay_uc08_grayhole_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc02_inverse_replay",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc02_inverse_replay_uc08_grayhole_simple/uc02_inverse_replay_uc08_grayhole_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc02_inverse_replay",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc02_inverse_replay_uc08_grayhole_combined/uc02_inverse_replay_uc08_grayhole_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc02_inverse_replay",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc02_inverse_replay_uc08_grayhole_combined/uc02_inverse_replay_uc08_grayhole_combined_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc03_masquerade_fault",
+        "trainingAttack2": "uc04_masquerade_normal",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc03_masquerade_fault_uc04_masquerade_normal_simple/uc03_masquerade_fault_uc04_masquerade_normal_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc03_masquerade_fault",
+        "trainingAttack2": "uc04_masquerade_normal",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc03_masquerade_fault_uc04_masquerade_normal_simple/uc03_masquerade_fault_uc04_masquerade_normal_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc03_masquerade_fault",
+        "trainingAttack2": "uc04_masquerade_normal",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc03_masquerade_fault_uc04_masquerade_normal_combined/uc03_masquerade_fault_uc04_masquerade_normal_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc03_masquerade_fault",
+        "trainingAttack2": "uc04_masquerade_normal",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc03_masquerade_fault_uc04_masquerade_normal_combined/uc03_masquerade_fault_uc04_masquerade_normal_combined_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc03_masquerade_fault",
+        "trainingAttack2": "uc05_injection",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc03_masquerade_fault_uc05_injection_simple/uc03_masquerade_fault_uc05_injection_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc03_masquerade_fault",
+        "trainingAttack2": "uc05_injection",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc03_masquerade_fault_uc05_injection_simple/uc03_masquerade_fault_uc05_injection_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc03_masquerade_fault",
+        "trainingAttack2": "uc05_injection",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc03_masquerade_fault_uc05_injection_combined/uc03_masquerade_fault_uc05_injection_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc03_masquerade_fault",
+        "trainingAttack2": "uc05_injection",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc03_masquerade_fault_uc05_injection_combined/uc03_masquerade_fault_uc05_injection_combined_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc03_masquerade_fault",
+        "trainingAttack2": "uc06_high_stnum_injection",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc03_masquerade_fault_uc06_high_stnum_injection_simple/uc03_masquerade_fault_uc06_high_stnum_injection_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc03_masquerade_fault",
+        "trainingAttack2": "uc06_high_stnum_injection",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc03_masquerade_fault_uc06_high_stnum_injection_simple/uc03_masquerade_fault_uc06_high_stnum_injection_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc03_masquerade_fault",
+        "trainingAttack2": "uc06_high_stnum_injection",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc03_masquerade_fault_uc06_high_stnum_injection_combined/uc03_masquerade_fault_uc06_high_stnum_injection_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc03_masquerade_fault",
+        "trainingAttack2": "uc06_high_stnum_injection",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc03_masquerade_fault_uc06_high_stnum_injection_combined/uc03_masquerade_fault_uc06_high_stnum_injection_combined_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc03_masquerade_fault",
+        "trainingAttack2": "uc07_flooding",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc03_masquerade_fault_uc07_flooding_simple/uc03_masquerade_fault_uc07_flooding_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc03_masquerade_fault",
+        "trainingAttack2": "uc07_flooding",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc03_masquerade_fault_uc07_flooding_simple/uc03_masquerade_fault_uc07_flooding_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc03_masquerade_fault",
+        "trainingAttack2": "uc07_flooding",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc03_masquerade_fault_uc07_flooding_combined/uc03_masquerade_fault_uc07_flooding_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc03_masquerade_fault",
+        "trainingAttack2": "uc07_flooding",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc03_masquerade_fault_uc07_flooding_combined/uc03_masquerade_fault_uc07_flooding_combined_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc03_masquerade_fault",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc03_masquerade_fault_uc08_grayhole_simple/uc03_masquerade_fault_uc08_grayhole_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc03_masquerade_fault",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc03_masquerade_fault_uc08_grayhole_simple/uc03_masquerade_fault_uc08_grayhole_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc03_masquerade_fault",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc03_masquerade_fault_uc08_grayhole_combined/uc03_masquerade_fault_uc08_grayhole_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc03_masquerade_fault",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc03_masquerade_fault_uc08_grayhole_combined/uc03_masquerade_fault_uc08_grayhole_combined_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc04_masquerade_normal",
+        "trainingAttack2": "uc05_injection",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc04_masquerade_normal_uc05_injection_simple/uc04_masquerade_normal_uc05_injection_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc04_masquerade_normal",
+        "trainingAttack2": "uc05_injection",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc04_masquerade_normal_uc05_injection_simple/uc04_masquerade_normal_uc05_injection_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc04_masquerade_normal",
+        "trainingAttack2": "uc05_injection",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc04_masquerade_normal_uc05_injection_combined/uc04_masquerade_normal_uc05_injection_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc04_masquerade_normal",
+        "trainingAttack2": "uc05_injection",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc04_masquerade_normal_uc05_injection_combined/uc04_masquerade_normal_uc05_injection_combined_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc04_masquerade_normal",
+        "trainingAttack2": "uc06_high_stnum_injection",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc04_masquerade_normal_uc06_high_stnum_injection_simple/uc04_masquerade_normal_uc06_high_stnum_injection_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc04_masquerade_normal",
+        "trainingAttack2": "uc06_high_stnum_injection",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc04_masquerade_normal_uc06_high_stnum_injection_simple/uc04_masquerade_normal_uc06_high_stnum_injection_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc04_masquerade_normal",
+        "trainingAttack2": "uc06_high_stnum_injection",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc04_masquerade_normal_uc06_high_stnum_injection_combined/uc04_masquerade_normal_uc06_high_stnum_injection_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc04_masquerade_normal",
+        "trainingAttack2": "uc06_high_stnum_injection",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc04_masquerade_normal_uc06_high_stnum_injection_combined/uc04_masquerade_normal_uc06_high_stnum_injection_combined_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc04_masquerade_normal",
+        "trainingAttack2": "uc07_flooding",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc04_masquerade_normal_uc07_flooding_simple/uc04_masquerade_normal_uc07_flooding_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc04_masquerade_normal",
+        "trainingAttack2": "uc07_flooding",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc04_masquerade_normal_uc07_flooding_simple/uc04_masquerade_normal_uc07_flooding_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc04_masquerade_normal",
+        "trainingAttack2": "uc07_flooding",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc04_masquerade_normal_uc07_flooding_combined/uc04_masquerade_normal_uc07_flooding_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc04_masquerade_normal",
+        "trainingAttack2": "uc07_flooding",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc04_masquerade_normal_uc07_flooding_combined/uc04_masquerade_normal_uc07_flooding_combined_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc04_masquerade_normal",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc04_masquerade_normal_uc08_grayhole_simple/uc04_masquerade_normal_uc08_grayhole_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc04_masquerade_normal",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc04_masquerade_normal_uc08_grayhole_simple/uc04_masquerade_normal_uc08_grayhole_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc04_masquerade_normal",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc04_masquerade_normal_uc08_grayhole_combined/uc04_masquerade_normal_uc08_grayhole_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc04_masquerade_normal",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc04_masquerade_normal_uc08_grayhole_combined/uc04_masquerade_normal_uc08_grayhole_combined_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc05_injection",
+        "trainingAttack2": "uc06_high_stnum_injection",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc05_injection_uc06_high_stnum_injection_simple/uc05_injection_uc06_high_stnum_injection_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc05_injection",
+        "trainingAttack2": "uc06_high_stnum_injection",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc05_injection_uc06_high_stnum_injection_simple/uc05_injection_uc06_high_stnum_injection_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc05_injection",
+        "trainingAttack2": "uc06_high_stnum_injection",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc05_injection_uc06_high_stnum_injection_combined/uc05_injection_uc06_high_stnum_injection_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc05_injection",
+        "trainingAttack2": "uc06_high_stnum_injection",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc05_injection_uc06_high_stnum_injection_combined/uc05_injection_uc06_high_stnum_injection_combined_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc05_injection",
+        "trainingAttack2": "uc07_flooding",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc05_injection_uc07_flooding_simple/uc05_injection_uc07_flooding_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc05_injection",
+        "trainingAttack2": "uc07_flooding",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc05_injection_uc07_flooding_simple/uc05_injection_uc07_flooding_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc05_injection",
+        "trainingAttack2": "uc07_flooding",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc05_injection_uc07_flooding_combined/uc05_injection_uc07_flooding_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc05_injection",
+        "trainingAttack2": "uc07_flooding",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc05_injection_uc07_flooding_combined/uc05_injection_uc07_flooding_combined_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc05_injection",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc05_injection_uc08_grayhole_simple/uc05_injection_uc08_grayhole_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc05_injection",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc05_injection_uc08_grayhole_simple/uc05_injection_uc08_grayhole_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc05_injection",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc05_injection_uc08_grayhole_combined/uc05_injection_uc08_grayhole_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc05_injection",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc05_injection_uc08_grayhole_combined/uc05_injection_uc08_grayhole_combined_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc06_high_stnum_injection",
+        "trainingAttack2": "uc07_flooding",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc06_high_stnum_injection_uc07_flooding_simple/uc06_high_stnum_injection_uc07_flooding_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc06_high_stnum_injection",
+        "trainingAttack2": "uc07_flooding",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc06_high_stnum_injection_uc07_flooding_simple/uc06_high_stnum_injection_uc07_flooding_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc06_high_stnum_injection",
+        "trainingAttack2": "uc07_flooding",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc06_high_stnum_injection_uc07_flooding_combined/uc06_high_stnum_injection_uc07_flooding_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc06_high_stnum_injection",
+        "trainingAttack2": "uc07_flooding",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc06_high_stnum_injection_uc07_flooding_combined/uc06_high_stnum_injection_uc07_flooding_combined_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc06_high_stnum_injection",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc06_high_stnum_injection_uc08_grayhole_simple/uc06_high_stnum_injection_uc08_grayhole_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc06_high_stnum_injection",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc06_high_stnum_injection_uc08_grayhole_simple/uc06_high_stnum_injection_uc08_grayhole_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc06_high_stnum_injection",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc06_high_stnum_injection_uc08_grayhole_combined/uc06_high_stnum_injection_uc08_grayhole_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc06_high_stnum_injection",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc06_high_stnum_injection_uc08_grayhole_combined/uc06_high_stnum_injection_uc08_grayhole_combined_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc07_flooding",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "simple",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc07_flooding_uc08_grayhole_simple/uc07_flooding_uc08_grayhole_simple_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc07_flooding",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "simple",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc07_flooding_uc08_grayhole_simple/uc07_flooding_uc08_grayhole_simple_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc07_flooding",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "combined",
+        "modelName": "J48",
+        "modelPath": "target/dual_attack_models/uc07_flooding_uc08_grayhole_combined/uc07_flooding_uc08_grayhole_combined_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc07_flooding",
+        "trainingAttack2": "uc08_grayhole",
+        "trainingPattern": "combined",
+        "modelName": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc07_flooding_uc08_grayhole_combined/uc07_flooding_uc08_grayhole_combined_RandomForest_model.model"
+      }
+    ],
+    "testDatasets": [
+      {
+        "testAttack": "uc01_random_replay",
+        "testDatasetPath": "target/dual_attack_test_datasets/single/test_uc01_random_replay.arff"
+      },
+      {
+        "testAttack": "uc02_inverse_replay",
+        "testDatasetPath": "target/dual_attack_test_datasets/single/test_uc02_inverse_replay.arff"
+      },
+      {
+        "testAttack": "uc03_masquerade_fault",
+        "testDatasetPath": "target/dual_attack_test_datasets/single/test_uc03_masquerade_fault.arff"
+      },
+      {
+        "testAttack": "uc04_masquerade_normal",
+        "testDatasetPath": "target/dual_attack_test_datasets/single/test_uc04_masquerade_normal.arff"
+      },
+      {
+        "testAttack": "uc05_injection",
+        "testDatasetPath": "target/dual_attack_test_datasets/single/test_uc05_injection.arff"
+      },
+      {
+        "testAttack": "uc06_high_stnum_injection",
+        "testDatasetPath": "target/dual_attack_test_datasets/single/test_uc06_high_stnum_injection.arff"
+      },
+      {
+        "testAttack": "uc07_flooding",
+        "testDatasetPath": "target/dual_attack_test_datasets/single/test_uc07_flooding.arff"
+      },
+      {
+        "testAttack": "uc08_grayhole",
+        "testDatasetPath": "target/dual_attack_test_datasets/single/test_uc08_grayhole.arff"
+      },
+      {
+        "testAttack": "uc01_random_replay+uc02_inverse_replay_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc01_random_replay_uc02_inverse_replay_simple.arff"
+      },
+      {
+        "testAttack": "uc01_random_replay+uc02_inverse_replay_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc01_random_replay_uc02_inverse_replay_combined.arff"
+      },
+      {
+        "testAttack": "uc01_random_replay+uc03_masquerade_fault_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc01_random_replay_uc03_masquerade_fault_simple.arff"
+      },
+      {
+        "testAttack": "uc01_random_replay+uc03_masquerade_fault_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc01_random_replay_uc03_masquerade_fault_combined.arff"
+      },
+      {
+        "testAttack": "uc01_random_replay+uc04_masquerade_normal_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc01_random_replay_uc04_masquerade_normal_simple.arff"
+      },
+      {
+        "testAttack": "uc01_random_replay+uc04_masquerade_normal_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc01_random_replay_uc04_masquerade_normal_combined.arff"
+      },
+      {
+        "testAttack": "uc01_random_replay+uc05_injection_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc01_random_replay_uc05_injection_simple.arff"
+      },
+      {
+        "testAttack": "uc01_random_replay+uc05_injection_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc01_random_replay_uc05_injection_combined.arff"
+      },
+      {
+        "testAttack": "uc01_random_replay+uc06_high_stnum_injection_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc01_random_replay_uc06_high_stnum_injection_simple.arff"
+      },
+      {
+        "testAttack": "uc01_random_replay+uc06_high_stnum_injection_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc01_random_replay_uc06_high_stnum_injection_combined.arff"
+      },
+      {
+        "testAttack": "uc01_random_replay+uc07_flooding_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc01_random_replay_uc07_flooding_simple.arff"
+      },
+      {
+        "testAttack": "uc01_random_replay+uc07_flooding_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc01_random_replay_uc07_flooding_combined.arff"
+      },
+      {
+        "testAttack": "uc01_random_replay+uc08_grayhole_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc01_random_replay_uc08_grayhole_simple.arff"
+      },
+      {
+        "testAttack": "uc01_random_replay+uc08_grayhole_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc01_random_replay_uc08_grayhole_combined.arff"
+      },
+      {
+        "testAttack": "uc02_inverse_replay+uc03_masquerade_fault_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc02_inverse_replay_uc03_masquerade_fault_simple.arff"
+      },
+      {
+        "testAttack": "uc02_inverse_replay+uc03_masquerade_fault_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc02_inverse_replay_uc03_masquerade_fault_combined.arff"
+      },
+      {
+        "testAttack": "uc02_inverse_replay+uc04_masquerade_normal_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc02_inverse_replay_uc04_masquerade_normal_simple.arff"
+      },
+      {
+        "testAttack": "uc02_inverse_replay+uc04_masquerade_normal_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc02_inverse_replay_uc04_masquerade_normal_combined.arff"
+      },
+      {
+        "testAttack": "uc02_inverse_replay+uc05_injection_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc02_inverse_replay_uc05_injection_simple.arff"
+      },
+      {
+        "testAttack": "uc02_inverse_replay+uc05_injection_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc02_inverse_replay_uc05_injection_combined.arff"
+      },
+      {
+        "testAttack": "uc02_inverse_replay+uc06_high_stnum_injection_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc02_inverse_replay_uc06_high_stnum_injection_simple.arff"
+      },
+      {
+        "testAttack": "uc02_inverse_replay+uc06_high_stnum_injection_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc02_inverse_replay_uc06_high_stnum_injection_combined.arff"
+      },
+      {
+        "testAttack": "uc02_inverse_replay+uc07_flooding_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc02_inverse_replay_uc07_flooding_simple.arff"
+      },
+      {
+        "testAttack": "uc02_inverse_replay+uc07_flooding_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc02_inverse_replay_uc07_flooding_combined.arff"
+      },
+      {
+        "testAttack": "uc02_inverse_replay+uc08_grayhole_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc02_inverse_replay_uc08_grayhole_simple.arff"
+      },
+      {
+        "testAttack": "uc02_inverse_replay+uc08_grayhole_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc02_inverse_replay_uc08_grayhole_combined.arff"
+      },
+      {
+        "testAttack": "uc03_masquerade_fault+uc04_masquerade_normal_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc03_masquerade_fault_uc04_masquerade_normal_simple.arff"
+      },
+      {
+        "testAttack": "uc03_masquerade_fault+uc04_masquerade_normal_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc03_masquerade_fault_uc04_masquerade_normal_combined.arff"
+      },
+      {
+        "testAttack": "uc03_masquerade_fault+uc05_injection_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc03_masquerade_fault_uc05_injection_simple.arff"
+      },
+      {
+        "testAttack": "uc03_masquerade_fault+uc05_injection_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc03_masquerade_fault_uc05_injection_combined.arff"
+      },
+      {
+        "testAttack": "uc03_masquerade_fault+uc06_high_stnum_injection_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc03_masquerade_fault_uc06_high_stnum_injection_simple.arff"
+      },
+      {
+        "testAttack": "uc03_masquerade_fault+uc06_high_stnum_injection_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc03_masquerade_fault_uc06_high_stnum_injection_combined.arff"
+      },
+      {
+        "testAttack": "uc03_masquerade_fault+uc07_flooding_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc03_masquerade_fault_uc07_flooding_simple.arff"
+      },
+      {
+        "testAttack": "uc03_masquerade_fault+uc07_flooding_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc03_masquerade_fault_uc07_flooding_combined.arff"
+      },
+      {
+        "testAttack": "uc03_masquerade_fault+uc08_grayhole_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc03_masquerade_fault_uc08_grayhole_simple.arff"
+      },
+      {
+        "testAttack": "uc03_masquerade_fault+uc08_grayhole_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc03_masquerade_fault_uc08_grayhole_combined.arff"
+      },
+      {
+        "testAttack": "uc04_masquerade_normal+uc05_injection_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc04_masquerade_normal_uc05_injection_simple.arff"
+      },
+      {
+        "testAttack": "uc04_masquerade_normal+uc05_injection_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc04_masquerade_normal_uc05_injection_combined.arff"
+      },
+      {
+        "testAttack": "uc04_masquerade_normal+uc06_high_stnum_injection_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc04_masquerade_normal_uc06_high_stnum_injection_simple.arff"
+      },
+      {
+        "testAttack": "uc04_masquerade_normal+uc06_high_stnum_injection_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc04_masquerade_normal_uc06_high_stnum_injection_combined.arff"
+      },
+      {
+        "testAttack": "uc04_masquerade_normal+uc07_flooding_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc04_masquerade_normal_uc07_flooding_simple.arff"
+      },
+      {
+        "testAttack": "uc04_masquerade_normal+uc07_flooding_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc04_masquerade_normal_uc07_flooding_combined.arff"
+      },
+      {
+        "testAttack": "uc04_masquerade_normal+uc08_grayhole_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc04_masquerade_normal_uc08_grayhole_simple.arff"
+      },
+      {
+        "testAttack": "uc04_masquerade_normal+uc08_grayhole_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc04_masquerade_normal_uc08_grayhole_combined.arff"
+      },
+      {
+        "testAttack": "uc05_injection+uc06_high_stnum_injection_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc05_injection_uc06_high_stnum_injection_simple.arff"
+      },
+      {
+        "testAttack": "uc05_injection+uc06_high_stnum_injection_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc05_injection_uc06_high_stnum_injection_combined.arff"
+      },
+      {
+        "testAttack": "uc05_injection+uc07_flooding_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc05_injection_uc07_flooding_simple.arff"
+      },
+      {
+        "testAttack": "uc05_injection+uc07_flooding_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc05_injection_uc07_flooding_combined.arff"
+      },
+      {
+        "testAttack": "uc05_injection+uc08_grayhole_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc05_injection_uc08_grayhole_simple.arff"
+      },
+      {
+        "testAttack": "uc05_injection+uc08_grayhole_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc05_injection_uc08_grayhole_combined.arff"
+      },
+      {
+        "testAttack": "uc06_high_stnum_injection+uc07_flooding_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc06_high_stnum_injection_uc07_flooding_simple.arff"
+      },
+      {
+        "testAttack": "uc06_high_stnum_injection+uc07_flooding_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc06_high_stnum_injection_uc07_flooding_combined.arff"
+      },
+      {
+        "testAttack": "uc06_high_stnum_injection+uc08_grayhole_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc06_high_stnum_injection_uc08_grayhole_simple.arff"
+      },
+      {
+        "testAttack": "uc06_high_stnum_injection+uc08_grayhole_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc06_high_stnum_injection_uc08_grayhole_combined.arff"
+      },
+      {
+        "testAttack": "uc07_flooding+uc08_grayhole_simple",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc07_flooding_uc08_grayhole_simple.arff"
+      },
+      {
+        "testAttack": "uc07_flooding+uc08_grayhole_combined",
+        "testDatasetPath": "target/dual_attack_test_datasets/dual/test_uc07_flooding_uc08_grayhole_combined.arff"
+      }
+    ],
+    "verifyFiles": false
+  },
+  "output": {
+    "csvFilePath": "target/comprehensive_evaluation/comprehensive_results.csv",
+    "appendMode": false,
+    "includeHeaders": true
+  }
+}

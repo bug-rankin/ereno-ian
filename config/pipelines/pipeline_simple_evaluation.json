@@ -1,0 +1,31 @@
+{
+  "action": "evaluate",
+  "description": "Simple evaluation test of first model",
+  "input": {
+    "models": [
+      {
+        "name": "J48",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc02_inverse_replay_simple/uc01_random_replay_uc02_inverse_replay_simple_J48_model.model"
+      },
+      {
+        "name": "RandomForest",
+        "modelPath": "target/dual_attack_models/uc01_random_replay_uc02_inverse_replay_simple/uc01_random_replay_uc02_inverse_replay_simple_RandomForest_model.model"
+      }
+    ],
+    "testDatasetPath": "target/dual_attack_training/uc01_random_replay_uc02_inverse_replay/training_dataset_combined.arff",
+    "verifyFiles": true
+  },
+  "output": {
+    "evaluationDirectory": "target/dual_attack_evaluation",
+    "evaluationFilename": "simple_test_results.csv",
+    "format": "csv",
+    "appendMode": false,
+    "includeHeaders": true
+  },
+  "outputMetrics": [
+    "accuracy",
+    "precision",
+    "recall",
+    "f1"
+  ]
+}

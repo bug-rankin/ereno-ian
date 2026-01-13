@@ -20,10 +20,25 @@ public class Labels {
     };
 
     /**
+     * Binary classification labels (normal vs any attack)
+     */
+    public static final String[] BINARY_LABELS = {
+            "normal",
+            "attack"
+    };
+
+    /**
      * Returns the labels joined by ", " suitable for use inside an ARFF set.
      * Example: "normal, random_replay, inverse_replay"
      */
     public static String asArffSet() {
         return String.join(", ", LABELS);
+    }
+
+    /**
+     * Returns binary labels for ARFF set (normal vs attack)
+     */
+    public static String asArffSetBinary() {
+        return String.join(", ", BINARY_LABELS);
     }
 }

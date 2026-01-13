@@ -35,6 +35,7 @@ import br.ufu.facom.ereno.benign.uc00.devices.LegitimateProtectionIED;
 import br.ufu.facom.ereno.config.AttackConfig;
 import br.ufu.facom.ereno.config.ConfigLoader;
 import br.ufu.facom.ereno.dataExtractors.CSVWritter;
+import br.ufu.facom.ereno.dataExtractors.DatasetWriter;
 import static br.ufu.facom.ereno.dataExtractors.DatasetWriter.startWriting;
 import static br.ufu.facom.ereno.dataExtractors.DatasetWriter.write;
 import static br.ufu.facom.ereno.dataExtractors.DatasetWriter.writeGooseMessagesToFile;
@@ -68,6 +69,7 @@ public class CreateAttackDatasetAction {
         public static class InputConfig {
             public String benignDataPath;
             public boolean verifyBenignData = true;
+            public boolean useLegacy = false; // If true, use old school (non-C) attack implementations
         }
         
         public static class OutputConfig {
@@ -82,6 +84,7 @@ public class CreateAttackDatasetAction {
             public int messagesPerSegment = 1000;
             public boolean includeBenignSegment = true;
             public boolean shuffleSegments = false;
+            public boolean binaryClassification = false; // If true, map all attacks to "attack" label
         }
         
         public static class AttackSegmentConfig {
@@ -117,6 +120,10 @@ public class CreateAttackDatasetAction {
             LOGGER.info(() -> "Created output directory: " + config.output.directory);
         }
         
+        // Log attack implementation mode
+        String attackMode = config.input.useLegacy ? "LEGACY (non-C)" : "CONFIGURABLE (C)";
+        LOGGER.info(() -> "Attack implementation mode: " + attackMode);
+        
         // Load benign data
         LOGGER.info(() -> "Loading benign data from: " + config.input.benignDataPath);
         LegitimateProtectionIED benignIED = BenignDataManager.loadBenignData(config.input.benignDataPath);
@@ -136,6 +143,8 @@ public class CreateAttackDatasetAction {
         if (csvMode) {
             CSVWritter.startWriting(outputPath);
         } else {
+            // Set binary classification mode if configured
+            DatasetWriter.binaryClassificationMode = config.datasetStructure.binaryClassification;
             startWriting(outputPath);
             write("@relation ereno_attack_dataset");
         }
@@ -164,13 +173,13 @@ public class CreateAttackDatasetAction {
                 // Handle attack combination
                 LOGGER.info(() -> "Generating combination attack segment: " + attackSegment.name);
                 SegmentData combinedSegment = generateCombinationSegment(
-                    attackSegment, benignIED, config.datasetStructure.messagesPerSegment, false);
+                    attackSegment, benignIED, config.datasetStructure.messagesPerSegment, config.input.useLegacy);
                 segments.add(combinedSegment);
             } else {
                 // Single attack
                 LOGGER.info(() -> "Generating attack segment: " + attackSegment.name);
                 SegmentData segment = generateAttackSegment(
-                    attackSegment, benignIED, config.datasetStructure.messagesPerSegment, false);
+                    attackSegment, benignIED, config.datasetStructure.messagesPerSegment, config.input.useLegacy);
                 segments.add(segment);
             }
         }
@@ -187,10 +196,39 @@ public class CreateAttackDatasetAction {
         for (SegmentData segment : segments) {
             LOGGER.info(() -> "Writing segment '" + segment.name + "' with " + segment.messages.size() + " messages");
             
-            // Ensure all messages in this segment have the correct label
-            String segmentLabel = getLabelForSegmentName(segment.name);
-            for (Goose message : segment.messages) {
-                message.setLabel(segmentLabel);
+            // DEBUG: Check what labels messages have before processing
+            if (config.datasetStructure.binaryClassification) {
+                Map<String, Integer> labelCounts = new HashMap<>();
+                for (Goose message : segment.messages) {
+                    String label = message.getLabel();
+                    labelCounts.put(label, labelCounts.getOrDefault(label, 0) + 1);
+                }
+                LOGGER.info(() -> "Segment '" + segment.name + "' original label distribution: " + labelCounts);
+            }
+            
+            // Label messages based on configuration
+            if (config.datasetStructure.binaryClassification) {
+                // Binary classification: Check each message's label from attack creator
+                // Messages labeled by attacks (uc01-uc08) are "attack", normal messages stay "normal"
+                for (Goose message : segment.messages) {
+                    String originalLabel = message.getLabel();
+                    
+                    // Map attack-specific labels to binary "attack" label
+                    // Attack creators set labels like "random_replay", "injection", etc.
+                    if (originalLabel != null && !originalLabel.equals("normal")) {
+                        // This message was labeled by an attack creator - mark as attack
+                        message.setLabel("attack");
+                    } else {
+                        // This is a legitimate message - keep as normal
+                        message.setLabel("normal");
+                    }
+                }
+            } else {
+                // Multi-class mode: use segment-level labeling
+                String segmentLabel = getLabelForSegmentName(segment.name);
+                for (Goose message : segment.messages) {
+                    message.setLabel(segmentLabel);
+                }
             }
             
             if (csvMode) {
@@ -320,6 +358,15 @@ public class CreateAttackDatasetAction {
             return Labels.LABELS[9]; // "delayed_replay"
         }
         return Labels.LABELS[0]; // default to "normal"
+    }
+
+    private static String getLabelForSegmentNameBinary(String segmentName) {
+        // For binary classification: normal vs any attack
+        if (segmentName.equals("benign")) {
+            return Labels.BINARY_LABELS[0]; // "normal"
+        } else {
+            return Labels.BINARY_LABELS[1]; // "attack"
+        }
     }
 
     private static Config loadConfig(String path) throws IOException {

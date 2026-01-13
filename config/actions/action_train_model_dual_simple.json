@@ -1,0 +1,27 @@
+{
+  "action": "train_model",
+  "description": "Train ML classifiers on dual-attack simple pattern dataset",
+  "input": {
+    "trainingDatasetPath": "target/dual_attack_training/random_replay_inverse_replay/training_dataset_simple.arff",
+    "verifyDataset": true
+  },
+  "output": {
+    "modelDirectory": "target/dual_attack_models/random_replay_inverse_replay_simple",
+    "saveMetadata": true,
+    "metadataFilename": "training_metadata.json"
+  },
+  "classifiers": [
+    "J48",
+    "RandomForest"
+  ],
+  "classifierParameters": {
+    "j48": {
+      "confidenceFactor": 0.25,
+      "minNumObj": 2
+    },
+    "randomForest": {
+      "numIterations": 100,
+      "numFeatures": 0
+    }
+  }
+}
