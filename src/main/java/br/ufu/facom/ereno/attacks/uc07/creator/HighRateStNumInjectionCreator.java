@@ -1,14 +1,13 @@
 package br.ufu.facom.ereno.attacks.uc07.creator;
 
-import br.ufu.facom.ereno.dataExtractors.GSVDatasetWriter;
-import br.ufu.facom.ereno.config.ConfigLoader;
-import br.ufu.facom.ereno.benign.uc00.creator.MessageCreator;
-import br.ufu.facom.ereno.general.IED;
-import br.ufu.facom.ereno.messages.Goose;
-
 import java.util.ArrayList;
 
+import br.ufu.facom.ereno.benign.uc00.creator.MessageCreator;
+import br.ufu.facom.ereno.config.ConfigLoader;
+import br.ufu.facom.ereno.dataExtractors.GSVDatasetWriter;
+import br.ufu.facom.ereno.general.IED;
 import static br.ufu.facom.ereno.general.IED.randomBetween;
+import br.ufu.facom.ereno.messages.Goose;
 
 public class HighRateStNumInjectionCreator implements MessageCreator {
     ArrayList<Goose> legitimateMessages;
