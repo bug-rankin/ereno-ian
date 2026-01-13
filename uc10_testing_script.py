@@ -22,22 +22,23 @@ def main():
         print("cmd script done \n")
         print("Generating CSV file with evaluation metrics")
 
-        if os.path.exists(csv_path):
+        if os.path.exists(csv_path): # deletes pre-existing csv file
             os.remove(csv_path)
 
-        with open(csv_path, 'x', newline='') as csvfile:
+        with open(csv_path, 'x', newline='') as csvfile: # creates a new csv file
             writer = csv.writer(csvfile)
             writer.writerow(header)
             
         print("CSV file is created")
         for seed in random_seeds:
-            with open(pipeline_path, 'r') as json_file:
+
+            with open(pipeline_path, 'r') as json_file: # changes the random seed value in the pipeline_complete.json file
                 pipeline_data = json.load(json_file)
             pipeline_data['commonConfig']['randomSeed'] = seed
             with open(pipeline_path, 'w') as json_file:
                 json.dump(pipeline_data, json_file, indent=2)
             
-            result = subprocess.run(commands[1], capture_output=True, text=True, check=True)
+            result = subprocess.run(commands[1], capture_output=True, text=True, check=True) # runs the pipeline
 
         print("Evaluation iterations finished")
     except subprocess.CalledProcessError as e:
