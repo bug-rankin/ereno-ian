@@ -192,4 +192,19 @@ public class AttackConfig {
         }
         return defaultValue;
     }
+
+    /**
+     * Get an integer array from config
+     */
+    public int[] getIntArray(String key, int[] defaultValue) {
+        if (json.has(key) && json.get(key).isJsonArray()) {
+            com.google.gson.JsonArray arr = json.getAsJsonArray(key);
+            int[] result = new int[arr.size()];
+            for (int i = 0; i < arr.size(); i++) {
+                result[i] = arr.get(i).getAsInt();
+            }
+            return result;
+        }
+        return defaultValue;
+    }
 }
