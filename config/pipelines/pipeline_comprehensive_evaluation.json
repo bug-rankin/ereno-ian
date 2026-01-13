@@ -1,0 +1,408 @@
+{
+  "action": "pipeline",
+  "description": "Comprehensive Evaluation Pipeline: Create test datasets and evaluate all models",
+  "commonConfig": {
+    "randomSeed": 42,
+    "outputFormat": "arff"
+  },
+  "pipeline": [
+    {
+      "action": "create_test_datasets_single",
+      "description": "Step 1: Create 8 single-attack test datasets",
+      "loop": {
+        "variationType": "singleAttacks",
+        "values": [
+          "uc01_random_replay",
+          "uc02_inverse_replay",
+          "uc03_masquerade_fault",
+          "uc04_masquerade_normal",
+          "uc05_injection",
+          "uc06_high_stnum_injection",
+          "uc07_flooding",
+          "uc08_grayhole"
+        ],
+        "steps": [
+          {
+            "action": "create_attack_dataset",
+            "description": "Create test dataset for ${attackName}",
+            "inline": {
+              "action": "create_attack_dataset",
+              "description": "Generate test dataset for ${attackName}",
+              "input": {
+                "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+                "verifyBenignData": true,
+                "useLegacy": true
+              },
+              "output": {
+                "directory": "target/dual_attack_test_datasets/single",
+                "filename": "test_${attackName}.arff",
+                "format": "arff"
+              },
+              "datasetStructure": {
+                "messagesPerSegment": 10000,
+                "includeBenignSegment": true,
+                "shuffleSegments": false,
+                "binaryClassification": true
+              },
+              "attackSegments": [
+                {
+                  "name": "${attackName}",
+                  "enabled": true,
+                  "attackConfig": "config/attacks/${attackName}.json",
+                  "description": "Single attack: ${attackName}"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "action": "create_test_datasets_dual_simple",
+      "description": "Step 2a: Create 28 dual-attack test datasets (simple pattern)",
+      "loop": {
+        "variationType": "dualAttackPairs",
+        "values": [
+          [
+            "uc01_random_replay",
+            "uc02_inverse_replay"
+          ],
+          [
+            "uc01_random_replay",
+            "uc03_masquerade_fault"
+          ],
+          [
+            "uc01_random_replay",
+            "uc04_masquerade_normal"
+          ],
+          [
+            "uc01_random_replay",
+            "uc05_injection"
+          ],
+          [
+            "uc01_random_replay",
+            "uc06_high_stnum_injection"
+          ],
+          [
+            "uc01_random_replay",
+            "uc07_flooding"
+          ],
+          [
+            "uc01_random_replay",
+            "uc08_grayhole"
+          ],
+          [
+            "uc02_inverse_replay",
+            "uc03_masquerade_fault"
+          ],
+          [
+            "uc02_inverse_replay",
+            "uc04_masquerade_normal"
+          ],
+          [
+            "uc02_inverse_replay",
+            "uc05_injection"
+          ],
+          [
+            "uc02_inverse_replay",
+            "uc06_high_stnum_injection"
+          ],
+          [
+            "uc02_inverse_replay",
+            "uc07_flooding"
+          ],
+          [
+            "uc02_inverse_replay",
+            "uc08_grayhole"
+          ],
+          [
+            "uc03_masquerade_fault",
+            "uc04_masquerade_normal"
+          ],
+          [
+            "uc03_masquerade_fault",
+            "uc05_injection"
+          ],
+          [
+            "uc03_masquerade_fault",
+            "uc06_high_stnum_injection"
+          ],
+          [
+            "uc03_masquerade_fault",
+            "uc07_flooding"
+          ],
+          [
+            "uc03_masquerade_fault",
+            "uc08_grayhole"
+          ],
+          [
+            "uc04_masquerade_normal",
+            "uc05_injection"
+          ],
+          [
+            "uc04_masquerade_normal",
+            "uc06_high_stnum_injection"
+          ],
+          [
+            "uc04_masquerade_normal",
+            "uc07_flooding"
+          ],
+          [
+            "uc04_masquerade_normal",
+            "uc08_grayhole"
+          ],
+          [
+            "uc05_injection",
+            "uc06_high_stnum_injection"
+          ],
+          [
+            "uc05_injection",
+            "uc07_flooding"
+          ],
+          [
+            "uc05_injection",
+            "uc08_grayhole"
+          ],
+          [
+            "uc06_high_stnum_injection",
+            "uc07_flooding"
+          ],
+          [
+            "uc06_high_stnum_injection",
+            "uc08_grayhole"
+          ],
+          [
+            "uc07_flooding",
+            "uc08_grayhole"
+          ]
+        ],
+        "steps": [
+          {
+            "action": "create_attack_dataset",
+            "description": "Create simple test dataset for ${attack1}+${attack2}",
+            "inline": {
+              "action": "create_attack_dataset",
+              "description": "Generate dual simple test dataset for ${attack1}+${attack2}",
+              "input": {
+                "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+                "verifyBenignData": true,
+                "useLegacy": true
+              },
+              "output": {
+                "directory": "target/dual_attack_test_datasets/dual",
+                "filename": "test_${attack1}_${attack2}_simple.arff",
+                "format": "arff"
+              },
+              "datasetStructure": {
+                "messagesPerSegment": 10000,
+                "includeBenignSegment": true,
+                "shuffleSegments": false,
+                "binaryClassification": true
+              },
+              "attackSegments": [
+                {
+                  "name": "${attack1}",
+                  "enabled": true,
+                  "attackConfig": "config/attacks/${attack1}.json",
+                  "description": "First attack: ${attack1}"
+                },
+                {
+                  "name": "${attack2}",
+                  "enabled": true,
+                  "attackConfig": "config/attacks/${attack2}.json",
+                  "description": "Second attack: ${attack2}"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "action": "create_test_datasets_dual_combined",
+      "description": "Step 2b: Create 28 dual-attack test datasets (combined pattern - simultaneous attacks)",
+      "loop": {
+        "variationType": "dualAttackPairs",
+        "values": [
+          [
+            "uc01_random_replay",
+            "uc02_inverse_replay"
+          ],
+          [
+            "uc01_random_replay",
+            "uc03_masquerade_fault"
+          ],
+          [
+            "uc01_random_replay",
+            "uc04_masquerade_normal"
+          ],
+          [
+            "uc01_random_replay",
+            "uc05_injection"
+          ],
+          [
+            "uc01_random_replay",
+            "uc06_high_stnum_injection"
+          ],
+          [
+            "uc01_random_replay",
+            "uc07_flooding"
+          ],
+          [
+            "uc01_random_replay",
+            "uc08_grayhole"
+          ],
+          [
+            "uc02_inverse_replay",
+            "uc03_masquerade_fault"
+          ],
+          [
+            "uc02_inverse_replay",
+            "uc04_masquerade_normal"
+          ],
+          [
+            "uc02_inverse_replay",
+            "uc05_injection"
+          ],
+          [
+            "uc02_inverse_replay",
+            "uc06_high_stnum_injection"
+          ],
+          [
+            "uc02_inverse_replay",
+            "uc07_flooding"
+          ],
+          [
+            "uc02_inverse_replay",
+            "uc08_grayhole"
+          ],
+          [
+            "uc03_masquerade_fault",
+            "uc04_masquerade_normal"
+          ],
+          [
+            "uc03_masquerade_fault",
+            "uc05_injection"
+          ],
+          [
+            "uc03_masquerade_fault",
+            "uc06_high_stnum_injection"
+          ],
+          [
+            "uc03_masquerade_fault",
+            "uc07_flooding"
+          ],
+          [
+            "uc03_masquerade_fault",
+            "uc08_grayhole"
+          ],
+          [
+            "uc04_masquerade_normal",
+            "uc05_injection"
+          ],
+          [
+            "uc04_masquerade_normal",
+            "uc06_high_stnum_injection"
+          ],
+          [
+            "uc04_masquerade_normal",
+            "uc07_flooding"
+          ],
+          [
+            "uc04_masquerade_normal",
+            "uc08_grayhole"
+          ],
+          [
+            "uc05_injection",
+            "uc06_high_stnum_injection"
+          ],
+          [
+            "uc05_injection",
+            "uc07_flooding"
+          ],
+          [
+            "uc05_injection",
+            "uc08_grayhole"
+          ],
+          [
+            "uc06_high_stnum_injection",
+            "uc07_flooding"
+          ],
+          [
+            "uc06_high_stnum_injection",
+            "uc08_grayhole"
+          ],
+          [
+            "uc07_flooding",
+            "uc08_grayhole"
+          ]
+        ],
+        "steps": [
+          {
+            "action": "create_attack_dataset",
+            "description": "Create combined test dataset for ${attack1}+${attack2}",
+            "inline": {
+              "action": "create_attack_dataset",
+              "description": "Generate dual combined test dataset for ${attack1}+${attack2}",
+              "input": {
+                "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+                "verifyBenignData": true,
+                "useLegacy": true
+              },
+              "output": {
+                "directory": "target/dual_attack_test_datasets/dual",
+                "filename": "test_${attack1}_${attack2}_combined.arff",
+                "format": "arff"
+              },
+              "datasetStructure": {
+                "messagesPerSegment": 10000,
+                "includeBenignSegment": true,
+                "shuffleSegments": false,
+                "binaryClassification": true
+              },
+              "attackSegments": [
+                {
+                  "name": "${attack1}",
+                  "enabled": true,
+                  "attackConfig": "config/attacks/${attack1}.json",
+                  "description": "First attack: ${attack1}"
+                },
+                {
+                  "name": "${attack2}",
+                  "enabled": true,
+                  "attackConfig": "config/attacks/${attack2}.json",
+                  "description": "Second attack: ${attack2}"
+                },
+                {
+                  "name": "${attack1}_${attack2}_combined_1",
+                  "enabled": true,
+                  "attackConfig": "config/attacks/${attack1}.json",
+                  "description": "${attack1} + ${attack2} simultaneous (first order)",
+                  "simultaneousAttack": {
+                    "enabled": true,
+                    "secondAttackConfig": "config/attacks/${attack2}.json"
+                  }
+                },
+                {
+                  "name": "${attack2}_${attack1}_combined_2",
+                  "enabled": true,
+                  "attackConfig": "config/attacks/${attack2}.json",
+                  "description": "${attack2} + ${attack1} simultaneous (second order)",
+                  "simultaneousAttack": {
+                    "enabled": true,
+                    "secondAttackConfig": "config/attacks/${attack1}.json"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "action": "comprehensive_evaluate",
+      "description": "Step 3: Evaluate all 112 models against all 64 test datasets (7,168 evaluations)",
+      "actionConfigFile": "config/actions/action_comprehensive_evaluate.json"
+    }
+  ]
+}

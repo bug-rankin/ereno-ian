@@ -20,51 +20,54 @@ public class GeneralParameters {
     public static boolean PRINT_TRAINING_TIME = false;
     public static boolean PRINT_TESTING_TIME = false; // limit the analysis to the first 10k register in dataset
 
-    public static final String SWAT30pct = "/home/silvio/datasets/SWAT/swat30pct.csv";
+    public static final String SWAT_30_PCT = "/home/silvio/datasets/SWAT/swat30pct.csv";
     public static boolean SINGLE_FOLD_MODE = true;
     public static boolean PRINT_SELECTION = true;
     public static boolean DEBUG_MODE = false;
 
     public static boolean CSV = true;
-    public static String WSN_DATASET = "all_in_one_wsn.csv";
-    public static String WSN_DATASET_MINI = "all_mini_one_wsn.csv";
-    public static String TESTE_DATASET = "all_in_one_wsn.csv";
-    public static String CICIDS_DATASET = "/home/silvio/datasets/CICIDS2017/all_in_one/cicids.csv";
+    public static final String WSN_DATASET = "all_in_one_wsn.csv";
+    public static final String WSN_DATASET_MINI = "all_mini_one_wsn.csv";
+    public static final String TESTE_DATASET = "all_in_one_wsn.csv";
+    public static final String CICIDS_DATASET = "/home/silvio/datasets/CICIDS2017/all_in_one/cicids.csv";
     //    public static String CICIDS_DATASET = "all_in_one_cicids.csv";
-    public static String KDD_DATASET = "all_in_one_kdd.csv";
+    public static final String KDD_DATASET = "all_in_one_kdd.csv";
     public static String classes1_13 = "/home/silvio/datasets/classes1-13.csv";
-    public static String CONSISTENCYV4_DATASET_UC01 = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc01/uc00_uc01.csv";
-    public static String CONSISTENCYV4_DATASET_UC02 = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc02/uc00_uc02.csv";
-    public static String CONSISTENCYV4_DATASET_UC03 = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc03/uc00_uc03.csv";
-    public static String CONSISTENCYV4_DATASET_UC04 = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc04/uc00_uc04.csv";
-    public static String CONSISTENCYV4_DATASET_UC05 = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc05/uc00_uc05.csv";
-    public static String CONSISTENCYV4_DATASET_UC06 = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc06/uc00_uc06.csv";
-    public static String CONSISTENCYV4_DATASET_UC07 = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc07/uc00_uc07.csv";
-    public static String CONSISTENCYV4_DATASET_UC01_10percent = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc01/uc00_uc01_10percent.csv";
-    public static String CONSISTENCYV4_DATASET_UC02_10percent = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc02/uc00_uc02_10percent.csv";
-    public static String CONSISTENCYV4_DATASET_UC03_10percent = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc03/uc00_uc03_10percent.csv";
-    public static String CONSISTENCYV4_DATASET_UC04_10percent = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc04/uc00_uc04_10percent.csv";
-    public static String CONSISTENCYV4_DATASET_UC05_10percent = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc05/uc00_uc05_10percent.csv";
-    public static String CONSISTENCYV4_DATASET_UC06_10percent = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc06/uc00_uc06_10percent.csv";
-    public static String CONSISTENCYV4_DATASET_UC07_10percent = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc07/uc00_uc07_10percent.csv";
-    public static String CONSISTENCYV4_DATASET[] = {"", CONSISTENCYV4_DATASET_UC01, CONSISTENCYV4_DATASET_UC02, CONSISTENCYV4_DATASET_UC03, CONSISTENCYV4_DATASET_UC04, CONSISTENCYV4_DATASET_UC05, CONSISTENCYV4_DATASET_UC06, CONSISTENCYV4_DATASET_UC07};
-    public static String CONSISTENCYV4_DATASET_10percent[] = {
+    public static final String CONSISTENCYV4_DATASET_UC01 = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc01/uc00_uc01.csv";
+    public static final String CONSISTENCYV4_DATASET_UC02 = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc02/uc00_uc02.csv";
+    public static final String CONSISTENCYV4_DATASET_UC03 = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc03/uc00_uc03.csv";
+    public static final String CONSISTENCYV4_DATASET_UC04 = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc04/uc00_uc04.csv";
+    public static final String CONSISTENCYV4_DATASET_UC05 = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc05/uc00_uc05.csv";
+    public static final String CONSISTENCYV4_DATASET_UC06 = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc06/uc00_uc06.csv";
+    public static final String CONSISTENCYV4_DATASET_UC07 = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc07/uc00_uc07.csv";
+    public static final String CONSISTENCYV4_DATASET_UC01_10_PERCENT = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc01/uc00_uc01_10percent.csv";
+    public static final String CONSISTENCYV4_DATASET_UC02_10_PERCENT = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc02/uc00_uc02_10percent.csv";
+    public static final String CONSISTENCYV4_DATASET_UC03_10_PERCENT = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc03/uc00_uc03_10percent.csv";
+    public static final String CONSISTENCYV4_DATASET_UC04_10_PERCENT = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc04/uc00_uc04_10percent.csv";
+    public static final String CONSISTENCYV4_DATASET_UC05_10_PERCENT = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc05/uc00_uc05_10percent.csv";
+    public static final String CONSISTENCYV4_DATASET_UC06_10_PERCENT = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc06/uc00_uc06_10percent.csv";
+    public static final String CONSISTENCYV4_DATASET_UC07_10_PERCENT = "/home/silvio/datasets/Full_SV_2021/consistency_v4/uc07/uc00_uc07_10percent.csv";
+    
+    // Arrays initialized after individual fields to avoid initialization order issues
+    public static final String[] CONSISTENCYV4_DATASET = {"", CONSISTENCYV4_DATASET_UC01, CONSISTENCYV4_DATASET_UC02, CONSISTENCYV4_DATASET_UC03, CONSISTENCYV4_DATASET_UC04, CONSISTENCYV4_DATASET_UC05, CONSISTENCYV4_DATASET_UC06, CONSISTENCYV4_DATASET_UC07};
+    public static final String[] CONSISTENCYV4_DATASET_10PERCENT = {
             "",
-            CONSISTENCYV4_DATASET_UC01_10percent,
-            CONSISTENCYV4_DATASET_UC02_10percent,
-            CONSISTENCYV4_DATASET_UC03_10percent,
-            CONSISTENCYV4_DATASET_UC04_10percent,
-            CONSISTENCYV4_DATASET_UC05_10percent,
-            CONSISTENCYV4_DATASET_UC06_10percent,
-            CONSISTENCYV4_DATASET_UC07_10percent};
-    public static String CONSISTENCYV5_DATASET_UC01 = "uc01/uc00_uc01.csv";
-    public static String CONSISTENCYV5_DATASET_UC02 = "uc02/uc00_uc02.csv";
-    public static String CONSISTENCYV5_DATASET_UC03 = "uc03/uc00_uc03.csv";
-    public static String CONSISTENCYV5_DATASET_UC04 = "uc04/uc00_uc04.csv";
-    public static String CONSISTENCYV5_DATASET_UC05 = "uc05/uc00_uc05.csv";
-    public static String CONSISTENCYV5_DATASET_UC06 = "uc06/uc00_uc06.csv";
-    public static String CONSISTENCYV5_DATASET_UC07 = "uc07/uc00_uc07.csv";
-    public static String CONSISTENCYV5_DATASET[] = {
+            CONSISTENCYV4_DATASET_UC01_10_PERCENT,
+            CONSISTENCYV4_DATASET_UC02_10_PERCENT,
+            CONSISTENCYV4_DATASET_UC03_10_PERCENT,
+            CONSISTENCYV4_DATASET_UC04_10_PERCENT,
+            CONSISTENCYV4_DATASET_UC05_10_PERCENT,
+            CONSISTENCYV4_DATASET_UC06_10_PERCENT,
+            CONSISTENCYV4_DATASET_UC07_10_PERCENT};
+    public static final String CONSISTENCYV5_DATASET_UC01 = "uc01/uc00_uc01.csv";
+    public static final String CONSISTENCYV5_DATASET_UC02 = "uc02/uc00_uc02.csv";
+    public static final String CONSISTENCYV5_DATASET_UC03 = "uc03/uc00_uc03.csv";
+    public static final String CONSISTENCYV5_DATASET_UC04 = "uc04/uc00_uc04.csv";
+    public static final String CONSISTENCYV5_DATASET_UC05 = "uc05/uc00_uc05.csv";
+    public static final String CONSISTENCYV5_DATASET_UC06 = "uc06/uc00_uc06.csv";
+    public static final String CONSISTENCYV5_DATASET_UC07 = "uc07/uc00_uc07.csv";
+    
+    public static final String[] CONSISTENCYV5_DATASET = {
             "", CONSISTENCYV5_DATASET_UC01, CONSISTENCYV5_DATASET_UC02, CONSISTENCYV5_DATASET_UC03, CONSISTENCYV5_DATASET_UC04, CONSISTENCYV5_DATASET_UC05, CONSISTENCYV5_DATASET_UC06, CONSISTENCYV5_DATASET_UC07
     };
 
@@ -97,7 +100,7 @@ public class GeneralParameters {
 
     // Run Settings java 
 //  java -jar preGrasp.jar all_in_one_WSN.csv 4 >> pregrasp_WSN_RANDOM_FOREST.txt
-    public static String[] DATASETS_FOREACH = {
+    public static final String[] DATASETS_FOREACH = {
             CICIDS_DATASET,
             KDD_DATASET,
             WSN_DATASET

@@ -23,6 +23,7 @@ public class ActionConfigLoader {
         CREATE_ATTACK_DATASET,
         TRAIN_MODEL,
         EVALUATE,
+        COMPREHENSIVE_EVALUATE,
         COMPARE,
         PIPELINE,
         UNKNOWN
@@ -42,15 +43,21 @@ public class ActionConfigLoader {
         public String action;
         public String actionConfigFile;
         public String description;
+        // For inline configuration support
+        public JsonObject inline;
+        // For nested loop support
+        public LoopConfig loop;
         // For loop overrides
         public ParameterOverrides parameterOverrides;
     }
 
     public static class LoopConfig {
-        public String variationType; // "randomSeed", "attackSegments", "parameters"
+        public String variationType; // "randomSeed", "attackSegments", "parameters", "dualAttackCombinations"
         public List<Object> values; // List of values to iterate over
         public List<PipelineStep> steps; // Steps to repeat for each iteration
         public String baselineDataset; // Path to baseline test dataset for evaluation
+        // For dual attack combinations
+        public List<Object> datasetPatterns; // List of pattern configurations
     }
 
     public static class ParameterOverrides {
@@ -131,6 +138,8 @@ public class ActionConfigLoader {
                 return Action.TRAIN_MODEL;
             case "evaluate":
                 return Action.EVALUATE;
+            case "comprehensiveevaluate":
+                return Action.COMPREHENSIVE_EVALUATE;
             case "compare":
                 return Action.COMPARE;
             case "pipeline":

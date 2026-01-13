@@ -1,0 +1,88 @@
+{
+  "action": "pipeline",
+  "description": "Evaluate all dual-attack trained models using the same loop structure as training",
+  "commonConfig": {
+    "randomSeed": 42
+  },
+  "loop": {
+    "variationType": "dualAttackCombinations",
+    "description": "Evaluate all combinations of 2 attacks",
+    "values": [
+      ["uc01_random_replay", "uc02_inverse_replay"],
+      ["uc01_random_replay", "uc03_masquerade_fault"],
+      ["uc01_random_replay", "uc04_masquerade_normal"],
+      ["uc01_random_replay", "uc05_injection"],
+      ["uc01_random_replay", "uc06_high_stnum_injection"],
+      ["uc01_random_replay", "uc07_flooding"],
+      ["uc01_random_replay", "uc08_grayhole"],
+      ["uc02_inverse_replay", "uc03_masquerade_fault"],
+      ["uc02_inverse_replay", "uc04_masquerade_normal"],
+      ["uc02_inverse_replay", "uc05_injection"],
+      ["uc02_inverse_replay", "uc06_high_stnum_injection"],
+      ["uc02_inverse_replay", "uc07_flooding"],
+      ["uc02_inverse_replay", "uc08_grayhole"],
+      ["uc03_masquerade_fault", "uc04_masquerade_normal"],
+      ["uc03_masquerade_fault", "uc05_injection"],
+      ["uc03_masquerade_fault", "uc06_high_stnum_injection"],
+      ["uc03_masquerade_fault", "uc07_flooding"],
+      ["uc03_masquerade_fault", "uc08_grayhole"],
+      ["uc04_masquerade_normal", "uc05_injection"],
+      ["uc04_masquerade_normal", "uc06_high_stnum_injection"],
+      ["uc04_masquerade_normal", "uc07_flooding"],
+      ["uc04_masquerade_normal", "uc08_grayhole"],
+      ["uc05_injection", "uc06_high_stnum_injection"],
+      ["uc05_injection", "uc07_flooding"],
+      ["uc05_injection", "uc08_grayhole"],
+      ["uc06_high_stnum_injection", "uc07_flooding"],
+      ["uc06_high_stnum_injection", "uc08_grayhole"],
+      ["uc07_flooding", "uc08_grayhole"]
+    ],
+    "datasetPatterns": [
+      {
+        "patternName": "simple",
+        "description": "Evaluate simple pattern models",
+        "segments": []
+      },
+      {
+        "patternName": "combined",
+        "description": "Evaluate combined pattern models",
+        "segments": []
+      }
+    ],
+    "steps": [
+      {
+        "action": "evaluate",
+        "description": "Evaluate ${attack1}_${attack2}_${patternName} models",
+        "inline": {
+          "action": "evaluate",
+          "description": "Evaluate ${attack1}_${attack2}_${patternName}",
+          "input": {
+            "models": [
+              {
+                "name": "J48",
+                "modelPath": "target/dual_attack_models/${attack1}_${attack2}_${patternName}/${attack1}_${attack2}_${patternName}_J48_model.model"
+              },
+              {
+                "name": "RandomForest",
+                "modelPath": "target/dual_attack_models/${attack1}_${attack2}_${patternName}/${attack1}_${attack2}_${patternName}_RandomForest_model.model"
+              }
+            ],
+            "testDatasetPath": "target/dual_attack_training/${attack1}_${attack2}/training_dataset_${patternName}.arff",
+            "verifyFiles": true
+          },
+          "output": {
+            "evaluationDirectory": "target/dual_attack_evaluation",
+            "evaluationFilename": "all_results.json",
+            "appendMode": true
+          },
+          "outputMetrics": [
+            "accuracy",
+            "precision",
+            "recall",
+            "f1"
+          ]
+        }
+      }
+    ]
+  }
+}

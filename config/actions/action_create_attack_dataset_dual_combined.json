@@ -1,0 +1,52 @@
+{
+  "action": "create_attack_dataset",
+  "description": "Generate dual-attack dataset - Combined pattern (RandomReplay, InverseReplay, both combined)",
+  "input": {
+    "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+    "verifyBenignData": true
+  },
+  "output": {
+    "directory": "target/dual_attack_training/random_replay_inverse_replay",
+    "filename": "training_dataset_combined.arff",
+    "format": "arff"
+  },
+  "datasetStructure": {
+    "messagesPerSegment": 1000,
+    "includeBenignSegment": true,
+    "shuffleSegments": false
+  },
+  "attackSegments": [
+    {
+      "name": "uc01_random_replay",
+      "enabled": true,
+      "attackConfig": "config/attacks/uc01_random_replay.json",
+      "description": "Random replay attack"
+    },
+    {
+      "name": "uc02_inverse_replay",
+      "enabled": true,
+      "attackConfig": "config/attacks/uc02_inverse_replay.json",
+      "description": "Inverse replay attack"
+    },
+    {
+      "name": "uc01_uc02_combined_1",
+      "enabled": true,
+      "attackConfig": "config/attacks/uc01_random_replay.json",
+      "description": "RandomReplay + InverseReplay simultaneous (first order)",
+      "simultaneousAttack": {
+        "enabled": true,
+        "secondAttackConfig": "config/attacks/uc02_inverse_replay.json"
+      }
+    },
+    {
+      "name": "uc02_uc01_combined_2",
+      "enabled": true,
+      "attackConfig": "config/attacks/uc02_inverse_replay.json",
+      "description": "InverseReplay + RandomReplay simultaneous (second order)",
+      "simultaneousAttack": {
+        "enabled": true,
+        "secondAttackConfig": "config/attacks/uc01_random_replay.json"
+      }
+    }
+  ]
+}

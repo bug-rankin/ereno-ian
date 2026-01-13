@@ -1,0 +1,4 @@
+{
+  "action": "evaluate",
+  "actionConfigFile": "config/pipelines/pipeline_simple_evaluation.json"
+}

@@ -1,19 +1,18 @@
 package br.ufu.facom.ereno.util;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.logging.Logger;
+
 import br.ufu.facom.ereno.benign.uc00.devices.LegitimateProtectionIED;
 import br.ufu.facom.ereno.config.ConfigLoader;
 import br.ufu.facom.ereno.dataExtractors.CSVWritter;
 import br.ufu.facom.ereno.dataExtractors.GSVDatasetWriter;
 import br.ufu.facom.ereno.messages.Goose;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.logging.Logger;
 
 /**
  * Manages saving and loading of benign datasets.
@@ -210,7 +209,8 @@ public class BenignDataManager {
             int sqNum = Integer.parseInt(parts[2].trim());
             int stNum = Integer.parseInt(parts[3].trim());
             int cbStatus = Integer.parseInt(parts[4].trim());
-            String label = parts.length > 29 ? parts[29].trim() : "legitimate";
+            // Label is always the last field in ARFF format
+            String label = parts.length > 29 ? parts[parts.length - 1].trim() : "normal";
             
             return new Goose(cbStatus, stNum, sqNum, timestamp, t, label);
         } catch (Exception e) {

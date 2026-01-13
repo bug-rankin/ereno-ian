@@ -152,8 +152,10 @@ public class TrainModelAction {
                 
                 LOGGER.info(() -> classifierName + " training completed in " + trainingTime + "ms");
                 
-                // Save model
-                String modelFilename = classifierName + "_model.model";
+                // Save model with unique name based on model directory
+                File outputDir = new File(config.output.modelDirectory);
+                String dirName = outputDir.getName(); // e.g., "uc01_random_replay_uc02_inverse_replay_simple"
+                String modelFilename = dirName + "_" + classifierName + "_model.model";
                 String modelPath = new File(config.output.modelDirectory, modelFilename).getAbsolutePath();
                 SerializationHelper.write(modelPath, classifier);
                 LOGGER.info(() -> "Model saved to: " + modelPath);

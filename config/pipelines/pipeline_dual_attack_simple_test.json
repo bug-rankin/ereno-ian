@@ -1,0 +1,35 @@
+{
+  "action": "pipeline",
+  "description": "Simplified dual-attack test: Generate datasets and models for RandomReplay+InverseReplay",
+  "commonConfig": {
+    "randomSeed": 42,
+    "outputFormat": "arff"
+  },
+  "pipeline": [
+    {
+      "action": "create_benign",
+      "actionConfigFile": "config/actions/action_create_benign.json",
+      "description": "Generate baseline benign traffic data"
+    },
+    {
+      "action": "create_attack_dataset",
+      "actionConfigFile": "config/actions/action_create_attack_dataset_dual_simple.json",
+      "description": "Create training dataset - Simple pattern (A1, A2)"
+    },
+    {
+      "action": "train_model",
+      "actionConfigFile": "config/actions/action_train_model_dual_simple.json",
+      "description": "Train models on simple pattern"
+    },
+    {
+      "action": "create_attack_dataset",
+      "actionConfigFile": "config/actions/action_create_attack_dataset_dual_combined.json",
+      "description": "Create training dataset - Combined pattern (A1, A2, A1+A2, A2+A1)"
+    },
+    {
+      "action": "train_model",
+      "actionConfigFile": "config/actions/action_train_model_dual_combined.json",
+      "description": "Train models on combined pattern"
+    }
+  ]
+}

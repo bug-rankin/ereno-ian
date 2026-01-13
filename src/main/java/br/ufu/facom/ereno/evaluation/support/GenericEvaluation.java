@@ -5,22 +5,20 @@
  */
 package br.ufu.facom.ereno.evaluation.support;
 
+import java.awt.BorderLayout;
+import java.util.Arrays;
+
 import weka.classifiers.trees.J48;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.gui.treevisualizer.PlaceNode2;
 import weka.gui.treevisualizer.TreeVisualizer;
 
-import java.awt.*;
-import java.util.Arrays;
-
 /**
  * @author silvio
  */
 public class GenericEvaluation {
 
-    static boolean rawOutput = false;
-    static boolean debug = false;
     static boolean SIMPLE = false;
     static boolean ERROR = false;
     static double normalClass;
@@ -107,7 +105,7 @@ public class GenericEvaluation {
 
     public static GenericResultado runSingleClassifierBinaryMatrix(Instances trainBinary, Instances testBinary, Instances trainMulticlass, Instances testMulticlass) throws Exception {
         ClassifierExtended classififer = GeneralParameters.SINGLE_CLASSIFIER_MODE;
-        GenericResultado r = testaEssaGaleraBinaryMatrix(classififer, trainBinary, testBinary, trainMulticlass, testMulticlass, false);
+        GenericResultado r = testaEssaGaleraBinaryMatrix(classififer, trainBinary, testBinary, testMulticlass, false);
 
         if (GeneralParameters.CSV) {
             System.out.println(
@@ -208,7 +206,7 @@ public class GenericEvaluation {
 //    }
 
 
-    private static GenericResultado testaEssaGaleraBinaryMatrix(ClassifierExtended selectedClassifier, Instances trainBinary, Instances testBinary, Instances trainMulticlass, Instances testMulticlass, boolean timeTest) throws Exception {
+    private static GenericResultado testaEssaGaleraBinaryMatrix(ClassifierExtended selectedClassifier, Instances trainBinary, Instances testBinary, Instances testMulticlass, boolean timeTest) throws Exception {
         selectedClassifier.getClassifier().buildClassifier(trainBinary);
         if (timeTest) {
             System.out.println("---------");
@@ -222,7 +220,8 @@ public class GenericEvaluation {
         int FN = 0;
 
         long begin = System.nanoTime();
-        int[][] confusionMatrix = new int[GeneralParameters.NUM_CLASSES][GeneralParameters.NUM_CLASSES];
+        int numClasses = trainBinary.numClasses();
+        int[][] confusionMatrix = new int[numClasses][numClasses];
 
         for (int i = 0; i < testBinary.size(); i++) {
             try {
@@ -278,6 +277,7 @@ public class GenericEvaluation {
                 new PlaceNode2());
         jf.getContentPane().add(tv, BorderLayout.CENTER);
         jf.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
             public void windowClosing(java.awt.event.WindowEvent e) {
                 jf.dispose();
             }
@@ -295,8 +295,7 @@ public class GenericEvaluation {
             try {
                 showTree((J48) selectedClassifier.getClassifier());
             } catch (Exception e) {
-                System.out.println(e.getLocalizedMessage());
-                e.printStackTrace();
+                System.err.println("Error showing tree: " + e.getMessage());
             }
         }
         long endTraining = System.nanoTime();
@@ -313,7 +312,8 @@ public class GenericEvaluation {
         long beginNano = System.nanoTime();
         long beginMili = System.currentTimeMillis();
 
-        int[][] confusionMatrix = new int[GeneralParameters.NUM_CLASSES][GeneralParameters.NUM_CLASSES];
+        int numClasses = test.numClasses();
+        int[][] confusionMatrix = new int[numClasses][numClasses];
 
         long testSize;
         if (GeneralParameters.PRINT_TESTING_TIME) {
@@ -393,7 +393,8 @@ public class GenericEvaluation {
         long beginNano = System.nanoTime();
         long beginMili = System.currentTimeMillis();
 
-        int[][] confusionMatrix = new int[GeneralParameters.NUM_CLASSES][GeneralParameters.NUM_CLASSES];
+        int numClasses = test.numClasses();
+        int[][] confusionMatrix = new int[numClasses][numClasses];
 
         long testSize;
         if (GeneralParameters.PRINT_TESTING_TIME) {
@@ -460,16 +461,11 @@ public class GenericEvaluation {
         }
 
         // Resultados
-        double acuracia = 0;
-        double txDec = 0;
-        double txAFal = 0;
         int VP = 0;
         int VN = 0;
         int FP = 0;
         int FN = 0;
-        long time = System.nanoTime();
         long cumulativo = 0;
-        int vectorPosErrors[] = new int[1000];
 
         for (int i = 0; i < test.size(); i++) {
 
@@ -511,16 +507,10 @@ public class GenericEvaluation {
         }
         if (ERROR) {
             System.out.println("Results");
-            int ll = 0;
         }
 
-        try {
-            acuracia = Float.valueOf(((VP + VN)) * 100) / Float.valueOf((VP + VN + FP + FN));
-            txDec = Float.valueOf((VP * 100)) / Float.valueOf((VP + FN));  // Sensitividade ou Taxa de Detecção
-            txAFal = Float.valueOf((FP * 100)) / Float.valueOf((VN + FP)); // Especificade ou Taxa de Alarmes Falsos
-        } catch (ArithmeticException e) {
-            System.out.println("Divisão por zero ((" + VP + " + " + VN + ") * 100) / (" + VP + " + " + VN + "+ " + FP + "+" + FN + "))");
-        }
+        // Note: Metrics like accuracy, detection rate, and false alarm rate
+        // are calculated in GenericResultado class methods
 
 //        Resultado r = new Resultado(descricao, VP, FN, VN, FP, acuracia, txDec, txAFal, cumulativo / (VP + VN + FP + FN));
         GenericResultado r = new GenericResultado(selectedClassifier.getClassifierName(), VP, FN, VN, FP, cumulativo);
