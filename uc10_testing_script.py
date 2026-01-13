@@ -6,14 +6,14 @@ import json
 
 commands = [["mvnw.cmd", "clean", "package", "-DskipTests"], # array of commands, can either run the full pipeline or run each step individually
             ["java", "-jar", "target/ERENO-1.0-SNAPSHOT-uber.jar", "config/pipelines/pipeline_complete.json"],
-            ["java", "-jar", "target/ERENO-1.0-SNAPSHOT-uber.jar", "config/actions/action_create_benign.json"],
-            ["java", "-jar", "target/ERENO-1.0-SNAPSHOT-uber.jar", "config/actions/action_create_attack_dataset.json"],
+            ["java", "-jar", "target/ERENO-1.0-SNAPSHOT-uber.jar", "config/actions/action_benign_main.json"],
+            ["java", "-jar", "target/ERENO-1.0-SNAPSHOT-uber.jar", "config/pipelines/pipeline_uc10_placeholder.json"],
             ["java", "-jar", "target/ERENO-1.0-SNAPSHOT-uber.jar", "config/actions/action_create_test_dataset.json"],
             ["java", "-jar", "target/ERENO-1.0-SNAPSHOT-uber.jar", "config/actions/action_evaluate.json"]] 
 
 csv_path = "target/evaluation.csv"
 
-pipeline_path = "config/pipelines/pipeline_complete.json"
+pipeline_path = "config/pipelines/pipeline_uc10_placeholder.json"
 
 header = ["Model", "Accuracy", "Precision", "Recall", "F1 Score", "True Pos", "True Neg", "False Pos", "False Neg", "Eval Time"] # csv file header
 
@@ -35,7 +35,7 @@ def main():
             
         print("CSV file is created")
 
-        # result = subprocess.run(commands[2], capture_output=True, text=True, check=True) # creates benign dataset
+        result = subprocess.run(commands[2], capture_output=True, text=True, check=True) # creates benign dataset
 
         for seed in random_seeds:
 
@@ -45,9 +45,9 @@ def main():
             with open(pipeline_path, 'w') as json_file:
                 json.dump(pipeline_data, json_file, indent=2)
 
-            result = subprocess.run(commands[1], capture_output=True, text=True, check=True) # runs the entire pipeline (really do not want to do this)
+            # result = subprocess.run(commands[1], capture_output=True, text=True, check=True) # runs the entire pipeline (really do not want to do this)
             
-            # result = subprocess.run(commands[3], capture_output=True, text=True, check=True) # creates training dataset
+            result = subprocess.run(commands[3], capture_output=True, text=True, check=True) # creates training dataset
             # result = subprocess.run(commands[4], capture_output=True, text=True, check=True) # creates test dataset
             # result = subprocess.run(commands[5], capture_output=True, text=True, check=True) # runs evaluation
 

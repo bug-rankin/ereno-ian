@@ -1,0 +1,15 @@
+{
+  "action": "pipeline",
+  "description": "Complete ML workflow: benign data, training dataset, test dataset, train, and evaluate",
+  "commonConfig": {
+    "randomSeed": 42,
+    "outputFormat": "arff"
+  },
+  "pipeline": [
+    {
+      "action": "create_benign",
+      "actionConfigFile": "config/actions/action_create_benign.json",
+      "description": "Generate benign baseline traffic data"
+    }
+  ]
+}
