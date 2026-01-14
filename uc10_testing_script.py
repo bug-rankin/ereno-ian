@@ -34,10 +34,15 @@ def main():
             writer.writerow(header)
             
         print("CSV file is created")
-
+        print("Creating benign dataset")
+        
         result = subprocess.run(commands[2], capture_output=True, text=True, check=True) # creates benign dataset
-
+        
+        print("Benign dataset created, beginning training and evaluation iterations")
         for seed in random_seeds:
+            
+            # print dots to show progress
+            print(".", end="", flush=True)
 
             with open(pipeline_path, 'r') as json_file: # changes the random seed value in the pipeline_complete.json file
                 pipeline_data = json.load(json_file)
@@ -50,8 +55,7 @@ def main():
             result = subprocess.run(commands[3], capture_output=True, text=True, check=True) # creates training dataset
             # result = subprocess.run(commands[4], capture_output=True, text=True, check=True) # creates test dataset
             # result = subprocess.run(commands[5], capture_output=True, text=True, check=True) # runs evaluation
-
-
+            
         print("Evaluation iterations finished")
     except subprocess.CalledProcessError as e:
         print("Command failed with error code {e.returncode}")

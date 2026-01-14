@@ -6,12 +6,12 @@
     "max": 50
   },
   "burstInterval": {
-    "min": 3,
-    "max": 10
+    "min": 50,
+    "max": 100
   },
   "burstSize": {
-    "min": 25,
-    "max": 50
+    "min": 15,
+    "max": 25
   },
   "selectionProb": {
     "value": 0.75
