@@ -2,19 +2,19 @@
   "attackType": "delayed_replay",
   "enabled": true,
   "selectionInterval": {
-    "min": 25,
-    "max": 50
+    "min": 5,
+    "max": 25
   },
   "burstInterval": {
-    "min": 50,
-    "max": 100
+    "min": 15,
+    "max": 25
   },
   "burstSize": {
     "min": 15,
     "max": 25
   },
   "selectionProb": {
-    "value": 0.75
+    "value": 0.25
   },
-  "burstMode": true
+  "burstMode": false
 }
