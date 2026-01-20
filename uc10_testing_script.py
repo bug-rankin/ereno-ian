@@ -22,8 +22,18 @@ random_seeds = [42, 29, 27, 25, 24, 30, 32, 34, 33, 35, 37, 39, 40, 41, 36, 38, 
 def main():
     try: 
         print("Running commands")
-        result = subprocess.run(commands[0], capture_output=True, text=True, check=True)
-        print("cmd script done \n")
+        
+        print("Enter 1 to compile and create benign dataset, or 2 to skip this step if unecessary: ")
+        user_input = input().strip()
+        
+        if user_input == "1":
+            print("compiling project and creating benign dataset")
+            result = subprocess.run(commands[0], capture_output=True, text=True, check=True) # builds the project
+            result = subprocess.run(commands[2], capture_output=True, text=True, check=True) # creates benign dataset
+            print("Compilation and benign dataset creation complete")
+        elif user_input == "2":
+            print("skipping compilation and benign dataset creation")
+        
         print("Generating CSV file with evaluation metrics")
 
         if os.path.exists(csv_path): # deletes pre-existing csv file
@@ -34,11 +44,8 @@ def main():
             writer.writerow(header)
             
         print("CSV file is created")
-        print("Creating benign dataset")
         
-        result = subprocess.run(commands[2], capture_output=True, text=True, check=True) # creates benign dataset
-        
-        print("Benign dataset created, beginning training and evaluation iterations")
+        print("Beginning training and evaluation iterations")
         for seed in random_seeds:
             
             # print dots to show progress
@@ -56,7 +63,7 @@ def main():
             # result = subprocess.run(commands[4], capture_output=True, text=True, check=True) # creates test dataset
             # result = subprocess.run(commands[5], capture_output=True, text=True, check=True) # runs evaluation
             
-        print("Evaluation iterations finished")
+        print("\nEvaluation iterations finished")
     except subprocess.CalledProcessError as e:
         print("Command failed with error code {e.returncode}")
         print(e.stderr)

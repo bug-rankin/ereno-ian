@@ -18,7 +18,7 @@
   "attackSegments": [
     {
       "name": "uc01_random_replay",
-      "enabled": false,
+      "enabled": true,
       "attackConfig": "config/attacks/uc01_random_replay.json",
       "description": "Random replay attack"
     },
@@ -30,13 +30,13 @@
     },
     {
       "name": "uc03_masquerade_fault",
-      "enabled": false,
+      "enabled": true,
       "attackConfig": "config/attacks/uc03_masquerade_fault.json",
       "description": "Masquerade fake fault attack"
     },
     {
       "name": "uc04_masquerade_normal",
-      "enabled": false,
+      "enabled": true,
       "attackConfig": "config/attacks/uc04_masquerade_normal.json",
       "description": "Masquerade fake normal attack"
     },

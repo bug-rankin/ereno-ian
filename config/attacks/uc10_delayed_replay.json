@@ -14,7 +14,7 @@
     "max": 25
   },
   "selectionProb": {
-    "value": 0.25
+    "value": 0.50
   },
   "burstMode": false
 }
