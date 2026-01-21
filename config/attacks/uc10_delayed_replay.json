@@ -6,8 +6,8 @@
     "max": 100
   },
   "burstInterval": {
-    "min": 15,
-    "max": 25
+    "min": 25,
+    "max": 50
   },
   "burstSize": {
     "min": 15,
