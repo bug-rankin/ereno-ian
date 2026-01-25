@@ -70,7 +70,7 @@
     }
   ],
   "gooseFlow": {
-    "numberOfMessages": 300000,
+    "numberOfMessages": 400000,
     "goID": "IntLockA",
     "ethSrc": "01:0c:cd:01:2f:80",
     "ethDst": "01:0c:cd:01:2f:81",

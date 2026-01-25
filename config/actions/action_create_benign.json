@@ -7,7 +7,7 @@
     "filenamePrefix": null
   },
   "generation": {
-    "numberOfMessages": 300000,
+    "numberOfMessages": 400000,
     "faultProbability": 5
   },
   "gooseFlow": {
