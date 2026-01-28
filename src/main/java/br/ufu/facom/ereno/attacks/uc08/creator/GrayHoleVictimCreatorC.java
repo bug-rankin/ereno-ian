@@ -39,8 +39,6 @@ public class GrayHoleVictimCreatorC implements MessageCreator {
         // Work with messages in temporal order to maintain realism
         boolean inBurstDrop = false;
         int burstDropRemaining = 0;
-        boolean inDelayBurst = false;
-        int delayBurstRemaining = 0;
         
         for (int i = 0; i < legitimateMessages.size() && messagesAdded < targetMessageCount; i++) {
             Goose goose = legitimateMessages.get(i);
@@ -58,7 +56,7 @@ public class GrayHoleVictimCreatorC implements MessageCreator {
             }
             
             // Decide whether to drop
-            boolean shouldDrop = false;
+            boolean shouldDrop;
             
             if (inBurstDrop && burstDropRemaining > 0) {
                 // In burst drop mode - higher drop chance

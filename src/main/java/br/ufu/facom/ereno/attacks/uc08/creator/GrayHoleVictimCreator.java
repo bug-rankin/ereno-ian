@@ -50,7 +50,7 @@ public class GrayHoleVictimCreator implements MessageCreator {
             }
             
             // Decide whether to drop
-            boolean shouldDrop = false;
+            boolean shouldDrop;
             
             if (inBurstDrop && burstDropRemaining > 0) {
                 // In burst drop mode - drop messages
@@ -60,9 +60,8 @@ public class GrayHoleVictimCreator implements MessageCreator {
                     inBurstDrop = false;
                 }
             } else {
-                // Normal drop decision with higher probability (25-35%)
-                double dropChance = 0.25 + (randomBetween(0, 100) / 1000.0); // 25-35%
-                shouldDrop = (randomBetween(0, 1000) / 1000.0) < dropChance;
+                // Normal drop decision based on configured drop probability
+                shouldDrop = (randomBetween(0, 1000) / 1000.0) < dropProbability;
             }
             
             if (shouldDrop) {

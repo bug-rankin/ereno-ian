@@ -1,10 +1,12 @@
 import pandas as pd
+import numpy as np
+from scipy import stats
 
 # Load the comprehensive results
 df = pd.read_csv('target/comprehensive_evaluation/comprehensive_results.csv')
 
 print("=" * 80)
-print("COMPREHENSIVE RESULTS ANALYSIS - ATTACK IMPLEMENTATION ISSUES")
+print("COMPREHENSIVE RESULTS ANALYSIS")
 print("=" * 80)
 
 # 1. Analyze single attack performance (baseline)
@@ -14,94 +16,156 @@ single_attacks = df[~df['testAttack'].str.contains('+', regex=False)]
 perf = single_attacks.groupby('testAttack')[['accuracy', 'recall', 'f1']].agg(['mean', 'min', 'max', 'std'])
 print(perf.round(4).to_string())
 
-# 2. Find attacks with high variability (potential implementation issues)
-print("\n\n2. ATTACKS WITH HIGH PERFORMANCE VARIABILITY:")
+# 2. Benign-only models vs attack-trained models
+print("\n\n2. BENIGN-ONLY MODELS VS ATTACK-TRAINED MODELS:")
 print("-" * 80)
-print("(High std deviation suggests inconsistent detection)")
-variability = single_attacks.groupby('testAttack')['accuracy'].std().sort_values(ascending=False)
-print(variability.round(4).to_string())
+benign_models = df[df['trainingPattern'] == 'benign_only']
+attack_models = df[df['trainingPattern'] != 'benign_only']
 
-# 3. Identify low-performing combinations
-print("\n\n3. DUAL-ATTACK COMBINATIONS WITH LOW ACCURACY (<0.80):")
+print(f"\nBenign-only models performance (n={len(benign_models)}):")
+print(f"  Mean accuracy: {benign_models['accuracy'].mean():.4f} ± {benign_models['accuracy'].std():.4f}")
+print(f"  Mean recall:   {benign_models['recall'].mean():.4f} ± {benign_models['recall'].std():.4f}")
+print(f"  Mean F1:       {benign_models['f1'].mean():.4f} ± {benign_models['f1'].std():.4f}")
+
+print(f"\nAttack-trained models performance (n={len(attack_models)}):")
+print(f"  Mean accuracy: {attack_models['accuracy'].mean():.4f} ± {attack_models['accuracy'].std():.4f}")
+print(f"  Mean recall:   {attack_models['recall'].mean():.4f} ± {attack_models['recall'].std():.4f}")
+print(f"  Mean F1:       {attack_models['f1'].mean():.4f} ± {attack_models['f1'].std():.4f}")
+
+# Statistical significance
+stat, p_value = stats.mannwhitneyu(benign_models['accuracy'], attack_models['accuracy'], alternative='two-sided')
+print(f"\nMann-Whitney U test for accuracy: p-value = {p_value:.6f}")
+print(f"  {'SIGNIFICANT' if p_value < 0.05 else 'NOT SIGNIFICANT'} at α=0.05")
+
+# Breakdown by test attack type
+print("\nBenign models on single attacks vs dual attacks:")
+benign_single = benign_models[~benign_models['testAttack'].str.contains('+', regex=False)]
+benign_dual = benign_models[benign_models['testAttack'].str.contains('+', regex=False)]
+print(f"  Single attacks: {benign_single['accuracy'].mean():.4f} (n={len(benign_single)})")
+print(f"  Dual attacks:   {benign_dual['accuracy'].mean():.4f} (n={len(benign_dual)})")
+
+# 3. Individual vs Combined models on unrelated attacks
+print("\n\n3. INDIVIDUAL VS COMBINED MODELS ON UNRELATED ATTACKS:")
 print("-" * 80)
-low_acc = df[df['accuracy'] < 0.80]
-print(f"Total low-accuracy records: {len(low_acc)}")
-print("\nMost problematic test attack combinations:")
-print(low_acc['testAttack'].value_counts().head(10).to_string())
 
-# 4. Analyze uc02_inverse_replay specifically (appears problematic)
-print("\n\n4. DETAILED ANALYSIS: uc02_inverse_replay")
-print("-" * 80)
-uc02 = df[df['testAttack'] == 'uc02_inverse_replay']
-print(f"Total tests: {len(uc02)}")
-print(f"Mean accuracy: {uc02['accuracy'].mean():.4f}")
-print(f"Min accuracy: {uc02['accuracy'].min():.4f}")
-print(f"Max accuracy: {uc02['accuracy'].max():.4f}")
-print(f"Std deviation: {uc02['accuracy'].std():.4f}")
-print("\nWorst performing models for uc02:")
-print(uc02.nsmallest(5, 'accuracy')[['trainingAttack1', 'trainingAttack2', 'trainingPattern', 'modelName', 'accuracy', 'recall']].to_string())
+# Extract attack names from test datasets
+def extract_attacks_from_test(test_name):
+    """Extract attack names from test dataset name"""
+    if '+' not in test_name:
+        return {test_name.split('_simple')[0].split('_combined')[0]}
+    # For dual attacks, parse the pattern
+    parts = test_name.split('+')
+    attack1 = parts[0]
+    rest = parts[1].split('_simple')[0].split('_combined')[0]
+    return {attack1, rest}
 
-# 5. Analyze uc04_masquerade_normal (lowest baseline performance)
-print("\n\n5. DETAILED ANALYSIS: uc04_masquerade_normal")
-print("-" * 80)
-uc04 = df[df['testAttack'] == 'uc04_masquerade_normal']
-print(f"Total tests: {len(uc04)}")
-print(f"Mean accuracy: {uc04['accuracy'].mean():.4f}")
-print(f"Min accuracy: {uc04['accuracy'].min():.4f}")
-print(f"Max accuracy: {uc04['accuracy'].max():.4f}")
-print(f"Std deviation: {uc04['accuracy'].std():.4f}")
-print("\nPerformance breakdown by training attacks:")
-uc04_grouped = uc04.groupby(['trainingAttack1', 'trainingAttack2'])['accuracy'].mean().sort_values()
-print(uc04_grouped.head(10).to_string())
+def categorize_attack_relationship(train_a1, train_a2, test_attacks):
+    """Categorize relationship between training and test attacks"""
+    train_attacks = {train_a1, train_a2}
+    
+    # Skip benign models
+    if train_a1 == 'benign':
+        return 'benign'
+    
+    # Count overlap
+    overlap = len(train_attacks & test_attacks)
+    
+    if overlap == len(test_attacks) and len(test_attacks) == 2:
+        return 'same'  # Both training attacks match both test attacks
+    elif overlap == 1:
+        return 'half-same'  # One attack matches
+    elif overlap == 0:
+        return 'unrelated'  # No matches
+    elif overlap == 2 and len(test_attacks) == 1:
+        return 'half-same'  # Testing single attack that appears in dual training
+    else:
+        return 'other'
 
-# 6. Check combined pattern performance on problematic combinations
-print("\n\n6. PROBLEMATIC DUAL-ATTACK COMBINATION ANALYSIS:")
-print("-" * 80)
-print("\nuc02_inverse_replay + uc04_masquerade_normal combined:")
-combo1 = df[df['testAttack'] == 'uc02_inverse_replay+uc04_masquerade_normal_combined']
-print(f"Mean accuracy: {combo1['accuracy'].mean():.4f}")
-print(f"Min accuracy: {combo1['accuracy'].min():.4f}")
-print(f"Records with accuracy < 0.80: {len(combo1[combo1['accuracy'] < 0.80])}")
+# Add relationship category to dataframe
+df['test_attacks'] = df['testAttack'].apply(extract_attacks_from_test)
+df['relationship'] = df.apply(lambda row: categorize_attack_relationship(
+    row['trainingAttack1'], row['trainingAttack2'], row['test_attacks']), axis=1)
 
-print("\nuc02_inverse_replay + uc07_flooding simple:")
-combo2 = df[df['testAttack'] == 'uc02_inverse_replay+uc07_flooding_simple']
-print(f"Mean accuracy: {combo2['accuracy'].mean():.4f}")
-print(f"Min accuracy: {combo2['accuracy'].min():.4f}")
-print(f"Records with accuracy < 0.80: {len(combo2[combo2['accuracy'] < 0.80])}")
+# Filter for unrelated attacks only (exclude benign)
+unrelated = df[(df['relationship'] == 'unrelated') & (df['trainingPattern'] != 'benign_only')]
 
-# 7. Pattern analysis - simple vs combined
-print("\n\n7. TRAINING PATTERN PERFORMANCE ON PROBLEM ATTACKS:")
-print("-" * 80)
-problem_attacks = ['uc02_inverse_replay', 'uc04_masquerade_normal', 
-                   'uc02_inverse_replay+uc04_masquerade_normal_combined',
-                   'uc02_inverse_replay+uc07_flooding_simple']
-for attack in problem_attacks:
-    attack_data = df[df['testAttack'] == attack]
-    pattern_perf = attack_data.groupby('trainingPattern')['accuracy'].mean()
-    print(f"\n{attack}:")
-    print(pattern_perf.to_string())
+# Compare simple vs combined on unrelated attacks
+simple_unrelated = unrelated[unrelated['trainingPattern'] == 'simple']
+combined_unrelated = unrelated[unrelated['trainingPattern'] == 'combined']
 
-# 8. Check if precision is always 1.0 (potential overfitting or dataset issue)
-print("\n\n8. PRECISION ANALYSIS (checking for overfitting patterns):")
-print("-" * 80)
-perfect_precision = df[df['precision'] == 1.0]
-print(f"Records with precision = 1.0: {len(perfect_precision)} / {len(df)} ({100*len(perfect_precision)/len(df):.2f}%)")
-print("\nThis suggests potential issues with:")
-print("- Class imbalance in test datasets")
-print("- Attack messages not being properly generated")
-print("- Model only learning to detect obvious patterns")
+print(f"\nUnrelated attacks (training attacks don't match test attacks):")
+print(f"\nSimple training pattern (n={len(simple_unrelated)}):")
+print(f"  Mean accuracy: {simple_unrelated['accuracy'].mean():.4f} ± {simple_unrelated['accuracy'].std():.4f}")
+print(f"  Mean recall:   {simple_unrelated['recall'].mean():.4f} ± {simple_unrelated['recall'].std():.4f}")
+print(f"  Mean F1:       {simple_unrelated['f1'].mean():.4f} ± {simple_unrelated['f1'].std():.4f}")
 
-# 9. Recall analysis - where are we missing attacks?
-print("\n\n9. LOW RECALL ANALYSIS (attacks not being detected):")
-print("-" * 80)
-low_recall = df[df['recall'] < 0.50]
-print(f"Records with recall < 0.50: {len(low_recall)}")
-if len(low_recall) > 0:
-    print("\nTest attacks with lowest recall:")
-    print(low_recall.groupby('testAttack')['recall'].mean().sort_values().head(10).to_string())
-    print("\nWorst recall cases:")
-    print(low_recall.nsmallest(10, 'recall')[['testAttack', 'trainingAttack1', 'trainingAttack2', 'trainingPattern', 'accuracy', 'recall']].to_string())
+print(f"\nCombined training pattern (n={len(combined_unrelated)}):")
+print(f"  Mean accuracy: {combined_unrelated['accuracy'].mean():.4f} ± {combined_unrelated['accuracy'].std():.4f}")
+print(f"  Mean recall:   {combined_unrelated['recall'].mean():.4f} ± {combined_unrelated['recall'].std():.4f}")
+print(f"  Mean F1:       {combined_unrelated['f1'].mean():.4f} ± {combined_unrelated['f1'].std():.4f}")
+
+if len(simple_unrelated) > 0 and len(combined_unrelated) > 0:
+    stat, p_value = stats.mannwhitneyu(simple_unrelated['accuracy'], combined_unrelated['accuracy'], alternative='two-sided')
+    print(f"\nMann-Whitney U test for accuracy: p-value = {p_value:.6f}")
+    print(f"  {'SIGNIFICANT' if p_value < 0.05 else 'NOT SIGNIFICANT'} at α=0.05")
+    
+    diff = combined_unrelated['accuracy'].mean() - simple_unrelated['accuracy'].mean()
+    print(f"  Combined is {abs(diff):.4f} {'better' if diff > 0 else 'worse'} than simple")
+
+# 4. Simple vs Combined on Same, Half-Same, and Unrelated Attacks
+print("\n\n4. SIMPLE VS COMBINED TRAINING PATTERNS BY ATTACK RELATIONSHIP:")
+print("=" * 80)
+
+relationships = ['same', 'half-same', 'unrelated']
+for rel in relationships:
+    print(f"\n{rel.upper()} ATTACKS:")
+    print("-" * 80)
+    
+    rel_data = df[(df['relationship'] == rel) & (df['trainingPattern'] != 'benign_only')]
+    simple_data = rel_data[rel_data['trainingPattern'] == 'simple']
+    combined_data = rel_data[rel_data['trainingPattern'] == 'combined']
+    
+    if len(simple_data) == 0 or len(combined_data) == 0:
+        print(f"  Insufficient data (simple: {len(simple_data)}, combined: {len(combined_data)})")
+        continue
+    
+    print(f"\nSimple pattern (n={len(simple_data)}):")
+    print(f"  Accuracy: {simple_data['accuracy'].mean():.4f} ± {simple_data['accuracy'].std():.4f}")
+    print(f"  Recall:   {simple_data['recall'].mean():.4f} ± {simple_data['recall'].std():.4f}")
+    print(f"  F1:       {simple_data['f1'].mean():.4f} ± {simple_data['f1'].std():.4f}")
+    
+    print(f"\nCombined pattern (n={len(combined_data)}):")
+    print(f"  Accuracy: {combined_data['accuracy'].mean():.4f} ± {combined_data['accuracy'].std():.4f}")
+    print(f"  Recall:   {combined_data['recall'].mean():.4f} ± {combined_data['recall'].std():.4f}")
+    print(f"  F1:       {combined_data['f1'].mean():.4f} ± {combined_data['f1'].std():.4f}")
+    
+    # Statistical tests for all metrics
+    for metric in ['accuracy', 'recall', 'f1']:
+        stat, p_value = stats.mannwhitneyu(simple_data[metric], combined_data[metric], alternative='two-sided')
+        diff = combined_data[metric].mean() - simple_data[metric].mean()
+        sig_marker = '***' if p_value < 0.001 else '**' if p_value < 0.01 else '*' if p_value < 0.05 else 'ns'
+        
+        print(f"\n{metric.capitalize()} comparison:")
+        print(f"  Difference: {diff:+.4f} (combined - simple)")
+        print(f"  Mann-Whitney U p-value: {p_value:.6f} [{sig_marker}]")
+        
+        # Effect size (Cohen's d)
+        pooled_std = np.sqrt((simple_data[metric].std()**2 + combined_data[metric].std()**2) / 2)
+        if pooled_std > 0:
+            cohens_d = diff / pooled_std
+            print(f"  Effect size (Cohen's d): {cohens_d:.4f}")
+
+# 5. Summary by classifier
+print("\n\n5. PERFORMANCE BY CLASSIFIER:")
+print("=" * 80)
+non_benign = df[df['trainingPattern'] != 'benign_only']
+for classifier in df['modelName'].unique():
+    clf_data = non_benign[non_benign['modelName'] == classifier]
+    print(f"\n{classifier}:")
+    print(f"  Mean accuracy: {clf_data['accuracy'].mean():.4f} ± {clf_data['accuracy'].std():.4f}")
+    print(f"  Mean recall:   {clf_data['recall'].mean():.4f} ± {clf_data['recall'].std():.4f}")
+    print(f"  Mean F1:       {clf_data['f1'].mean():.4f} ± {clf_data['f1'].std():.4f}")
 
 print("\n" + "=" * 80)
-print("SUMMARY OF KEY FINDINGS:")
+print("LEGEND: *** p<0.001, ** p<0.01, * p<0.05, ns = not significant")
 print("=" * 80)
