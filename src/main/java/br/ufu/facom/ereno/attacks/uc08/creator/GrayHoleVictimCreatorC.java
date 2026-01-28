@@ -1,7 +1,6 @@
 package br.ufu.facom.ereno.attacks.uc08.creator;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 import br.ufu.facom.ereno.benign.uc00.creator.MessageCreator;
 import br.ufu.facom.ereno.config.AttackConfig;
@@ -22,38 +21,70 @@ public class GrayHoleVictimCreatorC implements MessageCreator {
 
     @Override
     public void generate(IED ied, int targetMessageCount) {
-        // Get drop probability from config (0.0 to 1.0)
-        double dropProbability = config.getProbability("dropProbability", 0.3); // Default 30%
+        // Get configuration parameters
+        double dropRateMin = config.getRangeMin("dropRate", 0.25);
+        double dropRateMax = config.getRangeMax("dropRate", 0.35);
+        double burstDropProb = config.getDouble("burstDropProb", 0.20);
+        int burstDropMin = config.getNestedRangeMinInt("burstDropLen", "min", 3);
+        int burstDropMax = config.getNestedRangeMaxInt("burstDropLen", "max", 7);
+        boolean protectStatusChanges = config.getBoolean("protectStatusChanges", false);
+        double statusChangeDropProb = config.getDouble("statusChangeDropProb", 0.25);
         
-        // Shuffle messages to randomize selection
-        ArrayList<Goose> shuffled = new ArrayList<>(legitimateMessages);
-        Collections.shuffle(shuffled);
+        // Calculate base drop rate
+        double baseDropRate = dropRateMin + (Math.random() * (dropRateMax - dropRateMin));
         
         int messagesAdded = 0;
-        int index = 0;
+        int messagesDropped = 0;
         
-        // Keep adding messages until we reach target count
-        while (messagesAdded < targetMessageCount && index < shuffled.size()) {
-            Goose g = shuffled.get(index).copy();
-            g.setLabel(GSVDatasetWriter.label[8]);
+        // Work with messages in temporal order to maintain realism
+        boolean inBurstDrop = false;
+        int burstDropRemaining = 0;
+        boolean inDelayBurst = false;
+        int delayBurstRemaining = 0;
+        
+        for (int i = 0; i < legitimateMessages.size() && messagesAdded < targetMessageCount; i++) {
+            Goose goose = legitimateMessages.get(i);
             
-            // Randomly decide whether to drop this message
-            double rand = Math.random();
-            if (rand >= dropProbability) {
-                // Don't drop - add the message
-                ProtectionIED gh = (ProtectionIED) ied;
-                gh.addMessage(g);
-                messagesAdded++;
+            // Check if this is a status change (critical message)
+            boolean isStatusChange = false;
+            if (protectStatusChanges && i > 0) {
+                isStatusChange = (goose.getCbStatus() != legitimateMessages.get(i-1).getCbStatus());
             }
-            // else: message is dropped (simulating grayhole behavior)
             
-            index++;
-            
-            // If we've gone through all messages but haven't reached target, start over
-            if (index >= shuffled.size() && messagesAdded < targetMessageCount) {
-                index = 0;
-                Collections.shuffle(shuffled); // Re-shuffle for variety
+            // Start a burst drop?
+            if (!inBurstDrop && Math.random() < burstDropProb) {
+                inBurstDrop = true;
+                burstDropRemaining = (int)(burstDropMin + Math.random() * (burstDropMax - burstDropMin + 1));
             }
+            
+            // Decide whether to drop
+            boolean shouldDrop = false;
+            
+            if (inBurstDrop && burstDropRemaining > 0) {
+                // In burst drop mode - higher drop chance
+                shouldDrop = !isStatusChange || Math.random() < statusChangeDropProb;
+                burstDropRemaining--;
+                if (burstDropRemaining == 0) {
+                    inBurstDrop = false;
+                }
+            } else {
+                // Normal drop decision
+                double dropChance = isStatusChange ? statusChangeDropProb : baseDropRate;
+                shouldDrop = Math.random() < dropChance;
+            }
+            
+            if (shouldDrop) {
+                messagesDropped++;
+                continue; // Message dropped
+            }
+            
+            // Message survives - add without delay
+            Goose survivedMessage = goose.copy();
+            survivedMessage.setLabel(GSVDatasetWriter.label[8]);
+            
+            ProtectionIED gh = (ProtectionIED) ied;
+            gh.addMessage(survivedMessage);
+            messagesAdded++;
         }
     }
 }

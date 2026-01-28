@@ -2,32 +2,32 @@
   "attackType": "random_replay",
   "enabled": true,
   "count": {
-    "lambda": 800
+    "lambda": 600
   },
   "windowS": {
-    "min": 0.5,
-    "max": 12.0
-  },
-  "delayMs": {
-    "min": 0.5,
+    "min": 2.0,
     "max": 8.0
   },
+  "delayMs": {
+    "min": 50.0,
+    "max": 500.0
+  },
   "burst": {
-    "prob": 0.35,
-    "min": 20,
-    "max": 40,
+    "prob": 0.12,
+    "min": 2,
+    "max": 5,
     "gapMs": {
-      "min": 0.3,
-      "max": 2.0
+      "min": 80.0,
+      "max": 300.0
     }
   },
-  "reorderProb": 0.15,
+  "reorderProb": 0.05,
   "ttlOverride": {
-    "valuesMs": [40, 10, 2, 0],
-    "prob": 0.2
+    "valuesMs": [100, 150, 200, 250],
+    "prob": 0.08
   },
   "ethSpoof": {
-    "srcProb": 0.1,
-    "dstProb": 0.05
+    "srcProb": 0.02,
+    "dstProb": 0.01
   }
 }

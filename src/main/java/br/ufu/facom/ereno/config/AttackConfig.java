@@ -99,6 +99,17 @@ public class AttackConfig {
     }
 
     /**
+     * Get window parameters in seconds
+     */
+    public double getWindowMinS(double defaultSeconds) {
+        return getRangeMin("windowS", defaultSeconds);
+    }
+
+    public double getWindowMaxS(double defaultSeconds) {
+        return getRangeMax("windowS", defaultSeconds);
+    }
+
+    /**
      * Get probability value (handles both 0-1 and 0-100 ranges)
      */
     public double getProbability(String key, double defaultValue) {
