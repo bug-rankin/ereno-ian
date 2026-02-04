@@ -1,6 +1,49 @@
 import pandas as pd
 import numpy as np
-from scipy import stats
+import random
+
+def permutation_test(group1, group2, n_permutations=10000):
+    """
+    Perform permutation test to compare two groups.
+    Returns p-value for two-tailed test.
+    """
+    group1 = np.array(group1)
+    group2 = np.array(group2)
+    
+    # Observed difference in means
+    observed_diff = abs(group1.mean() - group2.mean())
+    
+    # Combine all data
+    combined = np.concatenate([group1, group2])
+    n1 = len(group1)
+    
+    # Count how many permutations have difference >= observed
+    extreme_count = 0
+    
+    for _ in range(n_permutations):
+        # Shuffle and split
+        np.random.shuffle(combined)
+        perm_group1 = combined[:n1]
+        perm_group2 = combined[n1:]
+        
+        # Calculate difference
+        perm_diff = abs(perm_group1.mean() - perm_group2.mean())
+        
+        if perm_diff >= observed_diff:
+            extreme_count += 1
+    
+    p_value = extreme_count / n_permutations
+    return p_value
+
+def cohens_d(group1, group2):
+    """Calculate Cohen's d effect size"""
+    group1 = np.array(group1)
+    group2 = np.array(group2)
+    
+    pooled_std = np.sqrt((group1.std()**2 + group2.std()**2) / 2)
+    if pooled_std == 0:
+        return 0
+    return (group1.mean() - group2.mean()) / pooled_std
 
 # Load the comprehensive results
 df = pd.read_csv('target/comprehensive_evaluation/comprehensive_results.csv')
@@ -16,36 +59,8 @@ single_attacks = df[~df['testAttack'].str.contains('+', regex=False)]
 perf = single_attacks.groupby('testAttack')[['accuracy', 'recall', 'f1']].agg(['mean', 'min', 'max', 'std'])
 print(perf.round(4).to_string())
 
-# 2. Benign-only models vs attack-trained models
-print("\n\n2. BENIGN-ONLY MODELS VS ATTACK-TRAINED MODELS:")
-print("-" * 80)
-benign_models = df[df['trainingPattern'] == 'benign_only']
-attack_models = df[df['trainingPattern'] != 'benign_only']
-
-print(f"\nBenign-only models performance (n={len(benign_models)}):")
-print(f"  Mean accuracy: {benign_models['accuracy'].mean():.4f} ± {benign_models['accuracy'].std():.4f}")
-print(f"  Mean recall:   {benign_models['recall'].mean():.4f} ± {benign_models['recall'].std():.4f}")
-print(f"  Mean F1:       {benign_models['f1'].mean():.4f} ± {benign_models['f1'].std():.4f}")
-
-print(f"\nAttack-trained models performance (n={len(attack_models)}):")
-print(f"  Mean accuracy: {attack_models['accuracy'].mean():.4f} ± {attack_models['accuracy'].std():.4f}")
-print(f"  Mean recall:   {attack_models['recall'].mean():.4f} ± {attack_models['recall'].std():.4f}")
-print(f"  Mean F1:       {attack_models['f1'].mean():.4f} ± {attack_models['f1'].std():.4f}")
-
-# Statistical significance
-stat, p_value = stats.mannwhitneyu(benign_models['accuracy'], attack_models['accuracy'], alternative='two-sided')
-print(f"\nMann-Whitney U test for accuracy: p-value = {p_value:.6f}")
-print(f"  {'SIGNIFICANT' if p_value < 0.05 else 'NOT SIGNIFICANT'} at α=0.05")
-
-# Breakdown by test attack type
-print("\nBenign models on single attacks vs dual attacks:")
-benign_single = benign_models[~benign_models['testAttack'].str.contains('+', regex=False)]
-benign_dual = benign_models[benign_models['testAttack'].str.contains('+', regex=False)]
-print(f"  Single attacks: {benign_single['accuracy'].mean():.4f} (n={len(benign_single)})")
-print(f"  Dual attacks:   {benign_dual['accuracy'].mean():.4f} (n={len(benign_dual)})")
-
-# 3. Individual vs Combined models on unrelated attacks
-print("\n\n3. INDIVIDUAL VS COMBINED MODELS ON UNRELATED ATTACKS:")
+# 2. Individual vs Combined models on unrelated attacks
+print("\n\n2. INDIVIDUAL VS COMBINED MODELS ON UNRELATED ATTACKS:")
 print("-" * 80)
 
 # Extract attack names from test datasets
@@ -62,10 +77,6 @@ def extract_attacks_from_test(test_name):
 def categorize_attack_relationship(train_a1, train_a2, test_attacks):
     """Categorize relationship between training and test attacks"""
     train_attacks = {train_a1, train_a2}
-    
-    # Skip benign models
-    if train_a1 == 'benign':
-        return 'benign'
     
     # Count overlap
     overlap = len(train_attacks & test_attacks)
@@ -86,8 +97,8 @@ df['test_attacks'] = df['testAttack'].apply(extract_attacks_from_test)
 df['relationship'] = df.apply(lambda row: categorize_attack_relationship(
     row['trainingAttack1'], row['trainingAttack2'], row['test_attacks']), axis=1)
 
-# Filter for unrelated attacks only (exclude benign)
-unrelated = df[(df['relationship'] == 'unrelated') & (df['trainingPattern'] != 'benign_only')]
+# Filter for unrelated attacks only
+unrelated = df[df['relationship'] == 'unrelated']
 
 # Compare simple vs combined on unrelated attacks
 simple_unrelated = unrelated[unrelated['trainingPattern'] == 'simple']
@@ -105,15 +116,17 @@ print(f"  Mean recall:   {combined_unrelated['recall'].mean():.4f} ± {combined_
 print(f"  Mean F1:       {combined_unrelated['f1'].mean():.4f} ± {combined_unrelated['f1'].std():.4f}")
 
 if len(simple_unrelated) > 0 and len(combined_unrelated) > 0:
-    stat, p_value = stats.mannwhitneyu(simple_unrelated['accuracy'], combined_unrelated['accuracy'], alternative='two-sided')
-    print(f"\nMann-Whitney U test for accuracy: p-value = {p_value:.6f}")
+    p_value = permutation_test(simple_unrelated['accuracy'], combined_unrelated['accuracy'])
+    print(f"\nPermutation test for accuracy: p-value = {p_value:.4f}")
     print(f"  {'SIGNIFICANT' if p_value < 0.05 else 'NOT SIGNIFICANT'} at α=0.05")
     
     diff = combined_unrelated['accuracy'].mean() - simple_unrelated['accuracy'].mean()
+    effect = cohens_d(combined_unrelated['accuracy'], simple_unrelated['accuracy'])
     print(f"  Combined is {abs(diff):.4f} {'better' if diff > 0 else 'worse'} than simple")
+    print(f"  Effect size (Cohen's d): {effect:.4f}")
 
-# 4. Simple vs Combined on Same, Half-Same, and Unrelated Attacks
-print("\n\n4. SIMPLE VS COMBINED TRAINING PATTERNS BY ATTACK RELATIONSHIP:")
+# 3. Simple vs Combined on Same, Half-Same, and Unrelated Attacks
+print("\n\n3. SIMPLE VS COMBINED TRAINING PATTERNS BY ATTACK RELATIONSHIP:")
 print("=" * 80)
 
 relationships = ['same', 'half-same', 'unrelated']
@@ -121,7 +134,7 @@ for rel in relationships:
     print(f"\n{rel.upper()} ATTACKS:")
     print("-" * 80)
     
-    rel_data = df[(df['relationship'] == rel) & (df['trainingPattern'] != 'benign_only')]
+    rel_data = df[df['relationship'] == rel]
     simple_data = rel_data[rel_data['trainingPattern'] == 'simple']
     combined_data = rel_data[rel_data['trainingPattern'] == 'combined']
     
@@ -141,26 +154,23 @@ for rel in relationships:
     
     # Statistical tests for all metrics
     for metric in ['accuracy', 'recall', 'f1']:
-        stat, p_value = stats.mannwhitneyu(simple_data[metric], combined_data[metric], alternative='two-sided')
+        p_value = permutation_test(simple_data[metric], combined_data[metric])
         diff = combined_data[metric].mean() - simple_data[metric].mean()
         sig_marker = '***' if p_value < 0.001 else '**' if p_value < 0.01 else '*' if p_value < 0.05 else 'ns'
         
         print(f"\n{metric.capitalize()} comparison:")
         print(f"  Difference: {diff:+.4f} (combined - simple)")
-        print(f"  Mann-Whitney U p-value: {p_value:.6f} [{sig_marker}]")
+        print(f"  Permutation test p-value: {p_value:.4f} [{sig_marker}]")
         
         # Effect size (Cohen's d)
-        pooled_std = np.sqrt((simple_data[metric].std()**2 + combined_data[metric].std()**2) / 2)
-        if pooled_std > 0:
-            cohens_d = diff / pooled_std
-            print(f"  Effect size (Cohen's d): {cohens_d:.4f}")
+        effect = cohens_d(combined_data[metric], simple_data[metric])
+        print(f"  Effect size (Cohen's d): {effect:.4f}")
 
-# 5. Summary by classifier
-print("\n\n5. PERFORMANCE BY CLASSIFIER:")
+# 4. Summary by classifier
+print("\n\n4. PERFORMANCE BY CLASSIFIER:")
 print("=" * 80)
-non_benign = df[df['trainingPattern'] != 'benign_only']
 for classifier in df['modelName'].unique():
-    clf_data = non_benign[non_benign['modelName'] == classifier]
+    clf_data = df[df['modelName'] == classifier]
     print(f"\n{classifier}:")
     print(f"  Mean accuracy: {clf_data['accuracy'].mean():.4f} ± {clf_data['accuracy'].std():.4f}")
     print(f"  Mean recall:   {clf_data['recall'].mean():.4f} ± {clf_data['recall'].std():.4f}")

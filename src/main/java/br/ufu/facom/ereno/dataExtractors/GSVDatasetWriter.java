@@ -1,16 +1,15 @@
 package br.ufu.facom.ereno.dataExtractors;
 
-import br.ufu.facom.ereno.benign.uc00.devices.MergingUnit;
-import br.ufu.facom.ereno.general.ProtectionIED;
-import br.ufu.facom.ereno.messages.Goose;
-import br.ufu.facom.ereno.messages.Sv;
-import br.ufu.facom.ereno.featureEngineering.ProtocolCorrelation;
-
-import java.io.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
+import br.ufu.facom.ereno.benign.uc00.devices.MergingUnit;
 import br.ufu.facom.ereno.config.ConfigLoader;
+import br.ufu.facom.ereno.featureEngineering.ProtocolCorrelation;
+import br.ufu.facom.ereno.general.ProtectionIED;
+import br.ufu.facom.ereno.messages.Goose;
+import br.ufu.facom.ereno.messages.Sv;
 
 // @TODO: Needs documentation for this class: what is its purpose? -- potentially a legacy class?
 
@@ -197,7 +196,7 @@ public class GSVDatasetWriter extends DatasetWriter {
         int apduSizeDiff = gm.getApduSize() - prev.getApduSize();
         int frameLenthDiff = gm.getFrameLen() - prev.getFrameLen();
         double timestampDiff = gm.getTimestamp() - prev.getTimestamp();
-        double tDiff = (Double.valueOf(gm.getT()) - Double.valueOf(prev.getT()));
+        double tDiff = gm.getT() - prev.getT();
         double timeFromLastChange = (gm.getTimestamp() - gm.getT());
 
 

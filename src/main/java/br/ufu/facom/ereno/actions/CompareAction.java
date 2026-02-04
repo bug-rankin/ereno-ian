@@ -1,16 +1,26 @@
 package br.ufu.facom.ereno.actions;
 
-import br.ufu.facom.ereno.config.ActionConfigLoader;
-import br.ufu.facom.ereno.messages.Goose;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.logging.Logger;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.logging.Logger;
+import br.ufu.facom.ereno.config.ActionConfigLoader;
+import br.ufu.facom.ereno.messages.Goose;
 
 /**
  * Action runner for comparing benign data with attack datasets.

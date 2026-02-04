@@ -5,13 +5,12 @@
  */
 package br.ufu.facom.ereno.general;
 
-import br.ufu.facom.ereno.SubstationNetwork;
-import br.ufu.facom.ereno.config.ConfigLoader;
-import br.ufu.facom.ereno.benign.uc00.creator.MessageCreator;
-import br.ufu.facom.ereno.messages.EthernetFrame;
-
-import java.util.Random;
 import java.util.logging.Logger;
+
+import br.ufu.facom.ereno.SubstationNetwork;
+import br.ufu.facom.ereno.benign.uc00.creator.MessageCreator;
+import br.ufu.facom.ereno.config.ConfigLoader;
+import br.ufu.facom.ereno.messages.EthernetFrame;
 
 /**
  * @author silvio
