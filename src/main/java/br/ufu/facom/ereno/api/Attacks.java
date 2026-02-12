@@ -1,4 +1,4 @@
-package br.ufu.facom.ereno.redundant.api;
+package br.ufu.facom.ereno.api;
 
 /**
  * Archived Attacks adapter — Configuration is read via ConfigLoader now.

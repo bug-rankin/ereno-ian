@@ -9,6 +9,7 @@ import br.ufu.facom.ereno.attacks.uc05.devices.InjectorIED;
 import br.ufu.facom.ereno.attacks.uc06.devices.HighStNumInjectorIED;
 import br.ufu.facom.ereno.attacks.uc07.devices.HighRateStNumInjectorIED;
 import br.ufu.facom.ereno.attacks.uc08.devices.GrayHoleVictimIED;
+import br.ufu.facom.ereno.attacks.uc10.devices.DelayedReplayIED;
 import br.ufu.facom.ereno.benign.uc00.devices.LegitimateProtectionIED;
 import br.ufu.facom.ereno.benign.uc00.devices.MergingUnit;
 import br.ufu.facom.ereno.general.ProtectionIED;
@@ -40,7 +41,7 @@ public class MultiSource {
 
 
     public static void noIDSDataset(String datasetName, int numberOfMessages) throws IOException {
-        startWriting("C:\\Users\\iwran\\Downloads\\github\\ereno dataset\\hibrid_dataset_GOOSE_" + datasetName + ".arff");
+        startWriting("C:\\Users\\lhaid\\ERENO\\datasets" + datasetName + ".csv");
 
         // Generate SV
         MergingUnit mu = runMU();
@@ -79,6 +80,9 @@ public class MultiSource {
         GrayHoleVictimIED uc08 = new GrayHoleVictimIED(uc00forGrayhole);
         uc08.run(80); //80 = discards 20%
 
+        DelayedReplayIED uc10 = new DelayedReplayIED(uc00);
+        uc10.run(numberOfMessages);
+
         uc00.addMessages(uc01.getMessages());
         uc00.addMessages(uc02.getMessages());
         uc00.addMessages(uc03.getMessages());
@@ -96,7 +100,7 @@ public class MultiSource {
 
     public static void twoDevices(String datasetName, int n, boolean train) throws IOException {
         numberOfMessages = n;
-        startWriting("C:\\Users\\iwran\\Downloads\\github\\ereno dataset\\hibrid_dataset_GOOSE_" + datasetName + ".arff");
+        startWriting("C:\\Users\\lhaid\\ERENO\\datasets\\" + datasetName + ".csv");
 
         // Generating SV messages
         MergingUnit mu = runMU();
@@ -115,6 +119,7 @@ public class MultiSource {
 //            runUC06(legitimateIED, mu);
 //            runUC07(legitimateIED, mu);  // parei aqui, os outros parece que tem bug no timestamp
 //            runUC08(legitimateIED, mu);
+//            runUC10(legitimateIED, mu);
         }
         if (!train) {
 //            runUC01(legitimateIED, mu);
@@ -125,6 +130,7 @@ public class MultiSource {
 //            runUC06(legitimateIED, mu);
 //            runUC07(legitimateIED, mu);  // parei aqui, os outros parece que tem bug no timestamp
 //            runUC08(legitimateIED, mu);
+//            runUC10(legitimateIED, mu);
         }
 
         finishWriting();
@@ -216,6 +222,13 @@ public class MultiSource {
         Logger.getLogger("MultiSource").info("Writting " + qtdGrayhole08 + " gryhole (UC08) messages to dataset.");
     }
 
+    public static void runUC10(LegitimateProtectionIED uc00, MergingUnit mu) throws IOException {
+        DelayedReplayIED uc10 = new DelayedReplayIED(uc00);
+        uc10.run(numberOfMessages);
+        int qtdReplay10 = writeAttack(uc00, uc10, mu, false);
+        Logger.getLogger("MultiSource").info("Writing " + qtdReplay10 + " delayed (UC10) messages to dataset.");
+    }
+
 
     public static void init() {
         try {
@@ -225,14 +238,15 @@ public class MultiSource {
         }
         // defaults (can be overridden in config file)
         ConfigLoader.attacks.legitimate = true;
-        ConfigLoader.attacks.randomReplay = true;
+        ConfigLoader.attacks.randomReplay = false;
         ConfigLoader.attacks.masqueradeOutage = true;
         ConfigLoader.attacks.masqueradeDamage = true;
         ConfigLoader.attacks.randomInjection = true;
-        ConfigLoader.attacks.inverseReplay = true;
-        ConfigLoader.attacks.highStNum = true;
-        ConfigLoader.attacks.flooding = true;
+        ConfigLoader.attacks.inverseReplay = false;
+        ConfigLoader.attacks.highStNum = false;
+        ConfigLoader.attacks.flooding = false;
         ConfigLoader.attacks.grayhole = false;
+        ConfigLoader.attacks.delayedReplay = true;
         numberOfMessages = ConfigLoader.gooseFlow.numberOfMessages;
     }
 

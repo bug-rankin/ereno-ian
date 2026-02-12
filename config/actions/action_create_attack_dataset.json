@@ -11,58 +11,77 @@
     "format": "arff"
   },
   "datasetStructure": {
-    "messagesPerSegment": 1000,
+    "messagesPerSegment": 100000,
     "includeBenignSegment": true,
     "shuffleSegments": false
   },
   "attackSegments": [
     {
       "name": "uc01_random_replay",
-      "enabled": true,
+      "enabled": false,
       "attackConfig": "config/attacks/uc01_random_replay.json",
       "description": "Random replay attack"
     },
     {
       "name": "uc02_inverse_replay",
-      "enabled": true,
+      "enabled": false,
       "attackConfig": "config/attacks/uc02_inverse_replay.json",
       "description": "Inverse replay attack"
     },
     {
       "name": "uc03_masquerade_fault",
-      "enabled": true,
+      "enabled": false,
       "attackConfig": "config/attacks/uc03_masquerade_fault.json",
       "description": "Masquerade fake fault attack"
     },
     {
       "name": "uc04_masquerade_normal",
-      "enabled": true,
+      "enabled": false,
       "attackConfig": "config/attacks/uc04_masquerade_normal.json",
       "description": "Masquerade fake normal attack"
     },
     {
       "name": "uc05_injection",
-      "enabled": true,
+      "enabled": false,
       "attackConfig": "config/attacks/uc05_injection.json",
       "description": "Random injection attack"
     },
     {
       "name": "uc06_high_stnum",
-      "enabled": true,
+      "enabled": false,
       "attackConfig": "config/attacks/uc06_high_stnum_injection.json",
       "description": "High StNum injection attack"
     },
     {
       "name": "uc07_flooding",
-      "enabled": true,
+      "enabled": false,
       "attackConfig": "config/attacks/uc07_flooding.json",
       "description": "Flooding attack"
     },
     {
       "name": "uc08_grayhole",
+      "enabled": false,
+      "attackConfig": "config/attacks/uc08_grayhole.json"
+    },
+    {
+      "name": "uc10_delayed_replay",
       "enabled": true,
-      "attackConfig": "config/attacks/uc08_grayhole.json",
-      "description": "Grayhole attack"
+      "attackConfig": "config/attacks/uc10_delayed_replay.json"
     }
-  ]
+  ],
+  "gooseFlow": {
+    "numberOfMessages": 400000,
+    "goID": "IntLockA",
+    "ethSrc": "01:0c:cd:01:2f:80",
+    "ethDst": "01:0c:cd:01:2f:81",
+    "ethType": "0x88B8",
+    "gooseAppid": "0x00003001",
+    "TPID": "0x8100",
+    "ndsCom": true,
+    "test": true,
+    "cbstatus": true
+  },
+  "devices": {
+    "useCVariants": true
+  }
 }

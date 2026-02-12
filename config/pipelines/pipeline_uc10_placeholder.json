@@ -1,0 +1,30 @@
+{
+  "action": "pipeline",
+  "description": "Complete ML workflow: benign data, training dataset, test dataset, train, and evaluate",
+  "commonConfig": {
+    "randomSeed": 20,
+    "outputFormat": "arff"
+  },
+  "pipeline": [
+    {
+      "action": "create_attack_dataset",
+      "actionConfigFile": "config/actions/action_create_attack_dataset.json",
+      "description": "Create training dataset with attacks"
+    },
+    {
+      "action": "create_attack_dataset",
+      "actionConfigFile": "config/actions/action_create_test_dataset.json",
+      "description": "Create separate test dataset"
+    },
+    {
+      "action": "train_model",
+      "actionConfigFile": "config/actions/action_train_model.json",
+      "description": "Train ML classifiers"
+    },
+    {
+      "action": "evaluate",
+      "actionConfigFile": "config/actions/action_evaluate.json",
+      "description": "Evaluate trained models"
+    }
+  ]
+}

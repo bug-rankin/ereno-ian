@@ -1,0 +1,6 @@
+Total messages in the dataset: 50005
+The selection interval: 23
+Total amount of faulty messages: 7180
+Total messages in the dataset: 50005
+The selection interval: 13
+Total amount of faulty messages: 7180

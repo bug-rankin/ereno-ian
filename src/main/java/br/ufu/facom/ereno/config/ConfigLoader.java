@@ -22,7 +22,8 @@ public class ConfigLoader {
     // optional global seed for deterministic runs (null -> use system time)
     public static Long randomSeed = null;
     // shared RNG used across the codebase
-    public static java.util.Random RNG = new java.util.Random(System.nanoTime());
+    //public static java.util.Random RNG = new java.util.Random(System.nanoTime());
+    public static java.util.Random RNG;
 
     public static void load() throws IOException {
         load("config/configparams.json");
@@ -163,6 +164,31 @@ public class ConfigLoader {
             applied.append("uc08.selectionRate set to 1..100%; ");
         }
 
+        if (attacksParams.uc10 == null) attacksParams.uc10 = new AttacksParams.UC10Config();
+        // add stuff here after asking Ian what the heck this does.
+        if (attacksParams.uc10.selectionInterval == null) attacksParams.uc10.selectionInterval = new AttacksParams.RangeInt();
+        if (attacksParams.uc10.selectionInterval.min <= 0 || attacksParams.uc10.selectionInterval.max <= 0 ||
+        attacksParams.uc10.selectionInterval.min >= attacksParams.uc10.selectionInterval.max) {
+            attacksParams.uc10.selectionInterval.min = 5;
+            attacksParams.uc10.selectionInterval.max = 25;
+            attacksParams.uc10.selectionInterval.defaultValue = 15;
+        }
+        if (attacksParams.uc10.burstInterval == null)  attacksParams.uc10.burstInterval = new AttacksParams.RangeInt();
+        if (attacksParams.uc10.burstInterval.min <= 0 || attacksParams.uc10.burstInterval.max <= 0 ||
+        attacksParams.uc10.burstInterval.min >= attacksParams.uc10.burstInterval.max) {
+            attacksParams.uc10.burstInterval.min = 5;
+            attacksParams.uc10.burstInterval.max = 25;
+            attacksParams.uc10.burstInterval.defaultValue = 15;
+        }
+        if (attacksParams.uc10.burstSize == null)  attacksParams.uc10.burstSize = new AttacksParams.RangeInt();
+        if (attacksParams.uc10.burstSize.min <= 0 || attacksParams.uc10.burstSize.max <= 0 ||
+        attacksParams.uc10.burstSize.min >= attacksParams.uc10.burstSize.max) {
+            attacksParams.uc10.burstSize.min = 5;
+            attacksParams.uc10.burstSize.max = 25;
+            attacksParams.uc10.burstSize.defaultValue = 15;
+        }
+
+
         // Log applied defaults (if any) to help auditing and debugging of config migrations
         if (applied.length() > 0) {
             java.util.logging.Logger.getLogger("ConfigLoader").info(() -> "Applied config defaults: " + applied.toString());
@@ -193,6 +219,7 @@ public class ConfigLoader {
         public UC06Config uc06 = new UC06Config();
         public UC07Config uc07 = new UC07Config();
         public UC08Config uc08 = new UC08Config();
+        public UC10Config uc10 = new UC10Config();
 
         // New, descriptive attack parameter sections (match keys in config/configparams.json)
         public RandomReplayConfig randomReplay = new RandomReplayConfig();
@@ -202,6 +229,7 @@ public class ConfigLoader {
         public HighStNumInjectionConfig highStNumInjection = new HighStNumInjectionConfig();
         public HighRateStNumInjectionConfig highRateStNumInjection = new HighRateStNumInjectionConfig();
         public GreyholeConfig greyhole = new GreyholeConfig();
+        public DelayedReplayConfig delayedRandomReplay = new DelayedReplayConfig();
 
         public static class RangeInt { public int min; public int max; public int defaultValue; }
         public static class RangeMs { public int minMs; public int maxMs; public int defaultMs; }
@@ -233,6 +261,14 @@ public class ConfigLoader {
         public static class UC07Config { public RangeDouble minTimeMultiplier = new RangeDouble(); }
 
         public static class UC08Config { public RangeInt selectionRate = new RangeInt(); }
+
+        public static class UC10Config { // adjust the config if necessary
+            public double selectionProb = 0.5;
+            public RangeInt selectionInterval = new RangeInt();
+            public RangeInt burstInterval = new RangeInt();
+            public RangeInt burstSize = new RangeInt();
+            public boolean burstMode = false;
+        }
 
         // --- new descriptive configs ---
         public static class RandomReplayConfig {
@@ -319,6 +355,16 @@ public class ConfigLoader {
             public double delayBurstProb = 0.2;
             public RangeDouble delayBurstLen = new RangeDouble();
         }
+
+        public static class DelayedReplayConfig { // adjust if necessary
+            public boolean enabled = false;
+            public RangeInt selectionInterval = new RangeInt();
+            public RangeInt burstInterval = new RangeInt();
+            public RangeInt burstSize = new RangeInt();
+            public double selectionProb = 0.5;
+            public boolean burstMode = false;
+        }
+
     }
 
     public static class OutputConfig {
@@ -339,6 +385,7 @@ public class ConfigLoader {
         public boolean highStNum;
         public boolean flooding;
         public boolean grayhole;
+        public boolean delayedReplay;
         public boolean stealthyAttack;
     }
 

@@ -3,7 +3,7 @@
   "description": "Compare benign data with attack dataset to analyze attack implementation",
   "input": {
     "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
-    "attackDatasetPath": "target/ereno_generated.arff",
+    "attackDatasetPath": "target/training/training_dataset.arff",
     "verifyFiles": true
   },
   "output": {

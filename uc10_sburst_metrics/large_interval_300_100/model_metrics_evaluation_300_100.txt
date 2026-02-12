@@ -1,0 +1,200 @@
+Model: J48
+  Metric: Accuracy
+    Mean: 0.9620945000000001
+    Median: 0.9623562999999999
+    Min: 0.9456801
+    Max: 0.9757456
+    Std: 0.008095304139665423
+  Metric: Precision
+    Mean: 0.7558890640735626
+    Median: 0.75404953956604
+    Min: 0.7318998575210571
+    Max: 0.7746773362159729
+    Std: 0.01067994705501682
+  Metric: Recall
+    Mean: 0.8035783499479294
+    Median: 0.7992688715457916
+    Min: 0.7773888111114502
+    Max: 0.8519238233566284
+    Std: 0.020287225200586633
+  Metric: F1 Score
+    Mean: 0.778798865
+    Median: 0.7781882
+    Min: 0.765632
+    Max: 0.7958122
+    Std: 0.008840695132366428
+  Metric: True Pos
+    Mean: 7397.15
+    Median: 7226.0
+    Min: 4442
+    Max: 11630
+    Std: 2076.0517759236614
+  Metric: True Neg
+    Mean: 97598.6
+    Median: 97664.0
+    Min: 95822
+    Max: 98707
+    Std: 731.0431911784837
+  Metric: False Pos
+    Mean: 2400.4
+    Median: 2335.0
+    Min: 1292
+    Max: 4177
+    Std: 731.0431911784837
+  Metric: False Neg
+    Mean: 1754.75
+    Median: 1804.5
+    Min: 1272
+    Max: 2169
+    Std: 274.35280302252386
+
+Model: RandomForest
+  Metric: Accuracy
+    Mean: 0.9620945000000001
+    Median: 0.9623562999999999
+    Min: 0.9456801
+    Max: 0.9757456
+    Std: 0.008095304139665423
+  Metric: Precision
+    Mean: 0.7558890640735626
+    Median: 0.75404953956604
+    Min: 0.7318998575210571
+    Max: 0.7746773362159729
+    Std: 0.01067994705501682
+  Metric: Recall
+    Mean: 0.8035783499479294
+    Median: 0.7992688715457916
+    Min: 0.7773888111114502
+    Max: 0.8519238233566284
+    Std: 0.020287225200586633
+  Metric: F1 Score
+    Mean: 0.778798865
+    Median: 0.7781882
+    Min: 0.765632
+    Max: 0.7958122
+    Std: 0.008840695132366428
+  Metric: True Pos
+    Mean: 7397.15
+    Median: 7226.0
+    Min: 4442
+    Max: 11630
+    Std: 2076.0517759236614
+  Metric: True Neg
+    Mean: 97598.6
+    Median: 97664.0
+    Min: 95822
+    Max: 98707
+    Std: 731.0431911784837
+  Metric: False Pos
+    Mean: 2400.4
+    Median: 2335.0
+    Min: 1292
+    Max: 4177
+    Std: 731.0431911784837
+  Metric: False Neg
+    Mean: 1754.75
+    Median: 1804.5
+    Min: 1272
+    Max: 2169
+    Std: 274.35280302252386
+
+Model: NaiveBayes
+  Metric: Accuracy
+    Mean: 0.9620945000000001
+    Median: 0.9623562999999999
+    Min: 0.9456801
+    Max: 0.9757456
+    Std: 0.008095304139665423
+  Metric: Precision
+    Mean: 0.7558890640735626
+    Median: 0.75404953956604
+    Min: 0.7318998575210571
+    Max: 0.7746773362159729
+    Std: 0.01067994705501682
+  Metric: Recall
+    Mean: 0.8035783499479294
+    Median: 0.7992688715457916
+    Min: 0.7773888111114502
+    Max: 0.8519238233566284
+    Std: 0.020287225200586633
+  Metric: F1 Score
+    Mean: 0.778798865
+    Median: 0.7781882
+    Min: 0.765632
+    Max: 0.7958122
+    Std: 0.008840695132366428
+  Metric: True Pos
+    Mean: 7397.15
+    Median: 7226.0
+    Min: 4442
+    Max: 11630
+    Std: 2076.0517759236614
+  Metric: True Neg
+    Mean: 97598.6
+    Median: 97664.0
+    Min: 95822
+    Max: 98707
+    Std: 731.0431911784837
+  Metric: False Pos
+    Mean: 2400.4
+    Median: 2335.0
+    Min: 1292
+    Max: 4177
+    Std: 731.0431911784837
+  Metric: False Neg
+    Mean: 1754.75
+    Median: 1804.5
+    Min: 1272
+    Max: 2169
+    Std: 274.35280302252386
+
+Model: REPTree
+  Metric: Accuracy
+    Mean: 0.9620945000000001
+    Median: 0.9623562999999999
+    Min: 0.9456801
+    Max: 0.9757456
+    Std: 0.008095304139665423
+  Metric: Precision
+    Mean: 0.7558890640735626
+    Median: 0.75404953956604
+    Min: 0.7318998575210571
+    Max: 0.7746773362159729
+    Std: 0.01067994705501682
+  Metric: Recall
+    Mean: 0.8035783499479294
+    Median: 0.7992688715457916
+    Min: 0.7773888111114502
+    Max: 0.8519238233566284
+    Std: 0.020287225200586633
+  Metric: F1 Score
+    Mean: 0.778798865
+    Median: 0.7781882
+    Min: 0.765632
+    Max: 0.7958122
+    Std: 0.008840695132366428
+  Metric: True Pos
+    Mean: 7397.15
+    Median: 7226.0
+    Min: 4442
+    Max: 11630
+    Std: 2076.0517759236614
+  Metric: True Neg
+    Mean: 97598.6
+    Median: 97664.0
+    Min: 95822
+    Max: 98707
+    Std: 731.0431911784837
+  Metric: False Pos
+    Mean: 2400.4
+    Median: 2335.0
+    Min: 1292
+    Max: 4177
+    Std: 731.0431911784837
+  Metric: False Neg
+    Mean: 1754.75
+    Median: 1804.5
+    Min: 1272
+    Max: 2169
+    Std: 274.35280302252386
+

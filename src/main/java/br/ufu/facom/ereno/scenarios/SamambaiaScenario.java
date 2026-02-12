@@ -1,5 +1,6 @@
 package br.ufu.facom.ereno.scenarios;
 
+import br.ufu.facom.ereno.attacks.uc10.devices.DelayedReplayIED;
 import br.ufu.facom.ereno.config.ConfigLoader;
 import br.ufu.facom.ereno.attacks.uc01.devices.RandomReplayerIED;
 import br.ufu.facom.ereno.attacks.uc02.devices.InverseReplayerIED;
@@ -9,6 +10,7 @@ import br.ufu.facom.ereno.attacks.uc05.devices.InjectorIED;
 import br.ufu.facom.ereno.attacks.uc06.devices.HighStNumInjectorIED;
 import br.ufu.facom.ereno.attacks.uc07.devices.HighRateStNumInjectorIED;
 import br.ufu.facom.ereno.attacks.uc08.devices.GrayHoleVictimIED;
+import br.ufu.facom.ereno.attacks.uc10.devices.DelayedReplayIED;
 import br.ufu.facom.ereno.benign.uc00.devices.LegitimateProtectionIED;
 import br.ufu.facom.ereno.benign.uc00.devices.MergingUnit;
 import br.ufu.facom.ereno.SubstationNetwork;
@@ -58,6 +60,7 @@ public class SamambaiaScenario implements IScenario {
         ConfigLoader.attacks.highStNum = false;
         ConfigLoader.attacks.flooding = false;
         ConfigLoader.attacks.grayhole = false;
+        ConfigLoader.attacks.delayedReplay = false;
     }
 
     @Override
@@ -82,6 +85,7 @@ public class SamambaiaScenario implements IScenario {
         HighRateStNumInjectorIED uc07 = new HighRateStNumInjectorIED(uc00);
         ProtectionIED uc00forGrayhole = new LegitimateProtectionIED();
         GrayHoleVictimIED uc08 = new GrayHoleVictimIED(uc00forGrayhole);
+        DelayedReplayIED uc10 = new DelayedReplayIED(uc00);
 
 //        uc00.setInitialTimestamp(mu.getInitialTimestamp());
         uc00.setSubstationNetwork(substationNetwork);
@@ -103,6 +107,8 @@ public class SamambaiaScenario implements IScenario {
         uc00forGrayhole.setSubstationNetwork(substationNetwork);
 //        uc08.setInitialTimestamp(mu.getInitialTimestamp());
         uc08.setSubstationNetwork(substationNetwork);
+//        uc10.setInitialTimestamp(mu.getInitialTimestamp());
+        uc10.setSubstationNetwork(substationNetwork);
 
         substationNetwork.processLevelDevices.add(mu);
         substationNetwork.bayLevelDevices.add(uc00);
@@ -115,6 +121,7 @@ public class SamambaiaScenario implements IScenario {
 //        substationNetwork.bayLevelDevices.add(uc07);
 //        substationNetwork.bayLevelDevices.add(uc00forGrayhole);
 //        substationNetwork.bayLevelDevices.add(uc08);
+//        substationNetwork.bayLevelDevices.add(uc10);
 
         Logger.getLogger("SamambaiaScenario").info("Devices set up!");
     }
@@ -158,11 +165,11 @@ public class SamambaiaScenario implements IScenario {
         try {
             if (!debug) {
                 if (generate_arff) {
-                    ARFFWritter.startWriting("C:\\Users\\iwran\\Documents\\github\\erenodataset\\ereninho\\multiclass_train.arff");
+                    ARFFWritter.startWriting("C:\\Users\\lhaid\\ERENO\\samambaia_output\\multiclass_train.arff");
                     ARFFWritter.processDataset(substationNetwork.stationBusMessages, substationNetwork.processBusMessages);
                     ARFFWritter.finishWriting();
                 } else {
-                    CSVWritter.startWriting("C:\\Users\\iwran\\Documents\\github\\erenodataset\\ereninho\\dataset.csv");
+                    CSVWritter.startWriting("C:\\Users\\lhaid\\ERENO\\samambaia_output\\dataset.csv");
 //                    CSVWritter.startWriting("/home/silvio/datasets/dataset.csv");
                     CSVWritter.processDataset(substationNetwork.stationBusMessages, substationNetwork.processBusMessages);
                     CSVWritter.finishWriting();

@@ -1,0 +1,7 @@
+{
+  "action": "compare",
+  "actionConfigFile": "config/action_compare.json",
+  "commonConfig": {
+    "randomSeed": 42
+  }
+}

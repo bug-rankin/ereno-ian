@@ -15,7 +15,8 @@ public class Labels {
             "injection",
             "high_StNum",
             "poisoned_high_rate",
-            "grayhole"
+            "grayhole",
+            "delayed_replay",
     };
 
     /**
