@@ -80,7 +80,8 @@ public class BenignDataManager {
             if (prev != null) {
                 String gooseString = gm.asCSVFull();
                 String gooseConsistency = br.ufu.facom.ereno.featureEngineering.IntermessageCorrelation.getConsistencyFeaturesAsCSV(gm, prev);
-                String line = gooseString + "," + gooseConsistency + "," + gm.getLabel();
+                double e2eDelayMs = gm.getE2EDelayMs();
+                String line = gooseString + "," + gooseConsistency + "," + e2eDelayMs + "," + gm.getLabel();
                 CSVWritter.writeLine(line);
             }
             prev = gm.copy();
@@ -211,8 +212,20 @@ public class BenignDataManager {
             int cbStatus = Integer.parseInt(parts[4].trim());
             // Label is always the last field in ARFF format
             String label = parts.length > 29 ? parts[parts.length - 1].trim() : "normal";
-            
-            return new Goose(cbStatus, stNum, sqNum, timestamp, t, label);
+
+            Goose goose = new Goose(cbStatus, stNum, sqNum, timestamp, t, label);
+            int e2eDelayIndex = parts.length - 2;
+            if (e2eDelayIndex >= 0) {
+                try {
+                    double e2eDelayMs = Double.parseDouble(parts[e2eDelayIndex].trim());
+                    goose.setPublisherTxTs(timestamp);
+                    goose.setSubscriberRxTs(timestamp + (e2eDelayMs / 1000.0));
+                } catch (NumberFormatException ignored) {
+                    // Older files or non-e2e schema: keep default/fallback behavior
+                }
+            }
+
+            return goose;
         } catch (Exception e) {
             LOGGER.warning("Failed to parse line: " + line + " - " + e.getMessage());
             return null;

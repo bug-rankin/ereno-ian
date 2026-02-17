@@ -6,13 +6,13 @@
 package br.ufu.facom.ereno.general;
 
 
-import br.ufu.facom.ereno.config.ConfigLoader;
-import br.ufu.facom.ereno.benign.uc00.creator.GooseCreator;
-import br.ufu.facom.ereno.messages.EthernetFrame;
-import br.ufu.facom.ereno.messages.Goose;
-
 import java.util.ArrayList;
 import java.util.logging.Logger;
+
+import br.ufu.facom.ereno.benign.uc00.creator.GooseCreator;
+import br.ufu.facom.ereno.config.ConfigLoader;
+import br.ufu.facom.ereno.messages.EthernetFrame;
+import br.ufu.facom.ereno.messages.Goose;
 
 /**
  * @author silvio
@@ -77,7 +77,15 @@ public class ProtectionIED extends IED {
     @Override
     public void addMessage(EthernetFrame periodicGoose) {
         if (ConfigLoader.gooseFlow.numberOfMessages >= messages.size()){
-            this.messages.add((Goose) periodicGoose);
+            Goose goose = (Goose) periodicGoose;
+            if (goose.getPublisherTxTs() == null) {
+                goose.setPublisherTxTs(goose.getTimestamp());
+            }
+            if (goose.getSubscriberRxTs() == null) {
+                double defaultNetworkDelaySeconds = randomBetween(0.001, 0.031);
+                goose.setSubscriberRxTs(goose.getPublisherTxTs() + defaultNetworkDelaySeconds);
+            }
+            this.messages.add(goose);
         } else {
             Logger.getLogger("addMessage").warning("Adding more GOOSE than the predefined threshold. There is something wrong with your logic.");
         }

@@ -100,7 +100,8 @@ public class GSVDatasetWriter extends DatasetWriter {
         String cycleStrig = ProtocolCorrelation.getCorrespondingSVCycle(svMessages, attack, 80).asCsv();
         String gooseString = attack.asCSVFull() + getConsistencyFeaturesAsCSV(attack, prev);
         double delay = attack.getTimestamp() - sv.getTime();
-        write(svString + "," + cycleStrig + "," + gooseString + "," + delay + "," + attack.getLabel());
+        double e2eDelayMs = attack.getE2EDelayMs();
+        write(svString + "," + cycleStrig + "," + gooseString + "," + delay + "," + e2eDelayMs + "," + attack.getLabel());
 
 //        System.out.println("SqNum: "+attack.getSqNum() + " / Label: "+attack.label);
 
@@ -176,6 +177,7 @@ public class GSVDatasetWriter extends DatasetWriter {
         write("@attribute tDiff numeric"); // temporal consistency 67
         write("@attribute timeFromLastChange numeric"); // temporal consistency 68
         write("@attribute delay numeric"); // temporal consistency 69
+        write("@attribute e2eDelayMs numeric"); // temporal consistency 70
     // Use centralized Labels to guarantee header/data consistency across all writers
     write("@attribute class {" + br.ufu.facom.ereno.util.Labels.asArffSet() + "}");
         write("@data");

@@ -1,15 +1,19 @@
 package br.ufu.facom.ereno.dataExtractors;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.PriorityQueue;
+import java.util.logging.Logger;
+
 import br.ufu.facom.ereno.featureEngineering.IntermessageCorrelation;
 import br.ufu.facom.ereno.featureEngineering.ProtocolCorrelation;
 import br.ufu.facom.ereno.messages.EthernetFrame;
 import br.ufu.facom.ereno.messages.Goose;
 import br.ufu.facom.ereno.messages.Sv;
-
-import java.io.*;
-import java.util.ArrayList;
-import java.util.PriorityQueue;
-import java.util.logging.Logger;
 
 /**
  * This extractor writes the generated messages to an CSV file.
@@ -46,7 +50,8 @@ public class CSVWritter {
                 String gooseConsistency = IntermessageCorrelation.getConsistencyFeaturesAsCSV(goose, previousGoose);
 
                 double delay = goose.getTimestamp() - sv.getTime();
-                write(svString + "," + cycleStrig + "," + gooseString + "," + gooseConsistency + "," + delay + "," + goose.getLabel());
+                double e2eDelayMs = goose.getE2EDelayMs();
+                write(svString + "," + cycleStrig + "," + gooseString + "," + gooseConsistency + "," + delay + "," + e2eDelayMs + "," + goose.getLabel());
             }
             previousGoose = goose.copy();
         }
@@ -82,7 +87,7 @@ public class CSVWritter {
                 "t", "GooseTimestamp", "SqNum", "StNum", "cbStatus", "frameLen", "ethDst", "ethSrc", "ethType",
                 "gooseTimeAllowedtoLive", "gooseAppid", "gooseLen", "TPID", "gocbRef", "datSet", "goID", "test", "confRev", "ndsCom",
                 "numDatSetEntries", "APDUSize", "protocol", "stDiff", "sqDiff", "gooseLengthDiff", "cbStatusDiff",
-                "apduSizeDiff", "frameLengthDiff", "timestampDiff", "tDiff", "timeFromLastChange", "delay", "class"
+                "apduSizeDiff", "frameLengthDiff", "timestampDiff", "tDiff", "timeFromLastChange", "delay", "e2eDelayMs", "class"
         });
         write(header);
     }

@@ -1,15 +1,19 @@
 package br.ufu.facom.ereno.dataExtractors;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.PriorityQueue;
+import java.util.logging.Logger;
+
 import br.ufu.facom.ereno.featureEngineering.IntermessageCorrelation;
 import br.ufu.facom.ereno.featureEngineering.ProtocolCorrelation;
 import br.ufu.facom.ereno.messages.EthernetFrame;
 import br.ufu.facom.ereno.messages.Goose;
 import br.ufu.facom.ereno.messages.Sv;
-
-import java.io.*;
-import java.util.ArrayList;
-import java.util.PriorityQueue;
-import java.util.logging.Logger;
 
 /**
  * This extractor writes the generated messages to an ARFF file.
@@ -41,7 +45,8 @@ public class DebugWritter {
                 String consistencyDebug = f[0] + "," + f[1] + "," + f[2] + "," + f[6] + "," + f[7];
 
                 double delay = goose.getTimestamp() - sv.getTime();
-                write(svString + "," + gooseString + "," + consistencyDebug + "," + delay + "," + goose.getLabel());
+                double e2eDelayMs = goose.getE2EDelayMs();
+                write(svString + "," + gooseString + "," + consistencyDebug + "," + delay + "," + e2eDelayMs + "," + goose.getLabel());
             }
             previousGoose = goose.copy();
         }
@@ -68,7 +73,7 @@ public class DebugWritter {
         String header = String.join(",", new String[]{
                 "svTime","GooseTimestamp", "t", "SqNum", "StNum", "cbStatus",
                 "stDiff", "sqDiff", "cbStatusDiff",
-                "timestampDiff", "tDiff", "timeFromLastChange", "delay", "class"
+                "timestampDiff", "tDiff", "timeFromLastChange", "delay", "e2eDelayMs", "class"
         });
         write(header);
     }

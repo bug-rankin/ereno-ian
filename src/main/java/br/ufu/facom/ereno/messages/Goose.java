@@ -13,6 +13,8 @@ import br.ufu.facom.ereno.config.ConfigLoader;
 public class Goose extends EthernetFrame {
 
     private String label;
+    private Double publisherTxTs;
+    private Double subscriberRxTs;
     private int cbStatus;                   // DYNAMICALLY GENERATED 
     private int stNum;                      // DYNAMICALLY GENERATED 
     private int sqNum;                      // DYNAMICALLY GENERATED 
@@ -42,6 +44,20 @@ public class Goose extends EthernetFrame {
         super.setTimestamp((timestamp));
         this.t = (t);
         this.label = label;
+        this.publisherTxTs = timestamp;
+        this.subscriberRxTs = null;
+    }
+
+    public Goose(int cbStatus, int stNum, int sqNum, double timestamp, double t, String label, Double publisherTxTs, Double subscriberRxTs) {
+        fromECF();
+        this.cbStatus = cbStatus;
+        this.stNum = stNum;
+        this.sqNum = sqNum;
+        super.setTimestamp((timestamp));
+        this.t = (t);
+        this.label = label;
+        this.publisherTxTs = publisherTxTs != null ? publisherTxTs : timestamp;
+        this.subscriberRxTs = subscriberRxTs;
     }
 
 
@@ -179,7 +195,31 @@ public class Goose extends EthernetFrame {
     }
 
     public Goose copy() {
-        return new Goose(cbStatus, stNum, sqNum, getTimestamp(), t, label);
+        return new Goose(cbStatus, stNum, sqNum, getTimestamp(), t, label, publisherTxTs, subscriberRxTs);
+    }
+
+    public Double getPublisherTxTs() {
+        return publisherTxTs;
+    }
+
+    public void setPublisherTxTs(Double publisherTxTs) {
+        this.publisherTxTs = publisherTxTs;
+    }
+
+    public Double getSubscriberRxTs() {
+        return subscriberRxTs;
+    }
+
+    public void setSubscriberRxTs(Double subscriberRxTs) {
+        this.subscriberRxTs = subscriberRxTs;
+    }
+
+    public double getE2EDelayMs() {
+        if (publisherTxTs == null || subscriberRxTs == null) {
+            return 0.0;
+        }
+        double seconds = subscriberRxTs - publisherTxTs;
+        return Math.max(0.0, seconds * 1000.0);
     }
 
     public int getGooseTimeAllowedtoLive() {

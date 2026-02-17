@@ -299,7 +299,8 @@ public class SingleSource {
                 String gooseString = gm.asCSVFull();
                 String gooseConsistency = br.ufu.facom.ereno.featureEngineering.IntermessageCorrelation.getConsistencyFeaturesAsCSV(gm, prev);
                 double delay = gm.getTimestamp() - (svResolved == null ? gm.getTimestamp() : svResolved.getTime());
-                String line = svString + "," + cycleStrig + "," + gooseString + "," + gooseConsistency + "," + delay + "," + gm.getLabel();
+                double e2eDelayMs = gm.getE2EDelayMs();
+                String line = svString + "," + cycleStrig + "," + gooseString + "," + gooseConsistency + "," + delay + "," + e2eDelayMs + "," + gm.getLabel();
                 br.ufu.facom.ereno.dataExtractors.CSVWritter.writeLine(line);
             }
             prev = gm.copy();

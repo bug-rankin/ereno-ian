@@ -1,18 +1,19 @@
 package br.ufu.facom.ereno.dataExtractors;
 
-import br.ufu.facom.ereno.featureEngineering.IntermessageCorrelation;
-import br.ufu.facom.ereno.featureEngineering.ProtocolCorrelation;
-import br.ufu.facom.ereno.general.ProtectionIED;
-import br.ufu.facom.ereno.messages.EthernetFrame;
-import br.ufu.facom.ereno.messages.Goose;
-import br.ufu.facom.ereno.messages.Sv;
-
-import java.io.*;
-import java.nio.file.Files;
-import java.text.DecimalFormat;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.PriorityQueue;
 import java.util.logging.Logger;
+
+import br.ufu.facom.ereno.featureEngineering.IntermessageCorrelation;
+import br.ufu.facom.ereno.featureEngineering.ProtocolCorrelation;
+import br.ufu.facom.ereno.messages.EthernetFrame;
+import br.ufu.facom.ereno.messages.Goose;
+import br.ufu.facom.ereno.messages.Sv;
 import br.ufu.facom.ereno.util.Labels;
 
 /**
@@ -38,7 +39,8 @@ public class ARFFWritter {
                 String gooseString = goose.asCSVFull();
                 String gooseConsistency = IntermessageCorrelation.getConsistencyFeaturesAsCSV(goose, previousGoose);
                 double delay = goose.getTimestamp() - sv.getTime();
-                write(svString + "," + cycleStrig + "," + gooseString + "," + gooseConsistency + "," + delay + "," + goose.getLabel());
+                double e2eDelayMs = goose.getE2EDelayMs();
+                write(svString + "," + cycleStrig + "," + gooseString + "," + gooseConsistency + "," + delay + "," + e2eDelayMs + "," + goose.getLabel());
             }
             previousGoose = goose.copy();
         }
@@ -118,6 +120,7 @@ public class ARFFWritter {
         write("@attribute tDiff numeric"); // temporal consistency 67
         write("@attribute timeFromLastChange numeric"); // temporal consistency 68
         write("@attribute delay numeric"); // temporal consistency 69
+        write("@attribute e2eDelayMs numeric"); // temporal consistency 70
     String classLine = "@attribute class {" + Labels.asArffSet() + "}";
 
         write(classLine);
