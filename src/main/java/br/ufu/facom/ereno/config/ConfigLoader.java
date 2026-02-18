@@ -188,6 +188,13 @@ public class ConfigLoader {
             attacksParams.uc10.burstSize.defaultValue = 15;
         }
 
+        if (attacksParams.uc10.delayAmount == null) attacksParams.uc10.delayAmount = new AttacksParams.RangeInt();
+        if (attacksParams.uc10.burstSize.min <= 0 || attacksParams.uc10.burstSize.max <= 0 ||
+            attacksParams.uc10.burstSize.min >= attacksParams.uc10.burstSize.max) {
+                attacksParams.uc10.burstSize.min = 1;
+                attacksParams.uc10.burstSize.max = 31;
+                attacksParams.uc10.burstSize.defaultValue = 1;
+            }
 
         // Log applied defaults (if any) to help auditing and debugging of config migrations
         if (applied.length() > 0) {
@@ -267,6 +274,8 @@ public class ConfigLoader {
             public RangeInt selectionInterval = new RangeInt();
             public RangeInt burstInterval = new RangeInt();
             public RangeInt burstSize = new RangeInt();
+            public RangeInt delayAmount = new RangeInt();
+            public boolean reorderOnly = false;
             public boolean burstMode = false;
         }
 
@@ -362,6 +371,8 @@ public class ConfigLoader {
             public RangeInt burstInterval = new RangeInt();
             public RangeInt burstSize = new RangeInt();
             public double selectionProb = 0.5;
+            public RangeInt delayAmount = new RangeInt();
+            public boolean reorderOnly = false;
             public boolean burstMode = false;
         }
 

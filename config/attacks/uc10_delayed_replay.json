@@ -16,5 +16,10 @@
   "selectionProb": {
     "value": 1.00
   },
+  "delayAmoount": {
+    "min": 1,
+    "max": 31
+  },
+  "reorderOnly": false,
   "burstMode": false
 }

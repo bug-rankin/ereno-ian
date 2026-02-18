@@ -21,6 +21,7 @@ public class DelayedReplayCreatorC implements MessageCreator {
     private int burstSize;
     private double selectionProb;
     private boolean burstMode;
+    private boolean reorderOnly;
 
     public DelayedReplayCreatorC(ArrayList<Goose> messages, AttackConfig config) {
         this.messageStream = messages;
@@ -43,6 +44,9 @@ public class DelayedReplayCreatorC implements MessageCreator {
         int minBurstSize = config.getNestedInt("burstSize", "min", 5);
         int maxBurstSize = config.getNestedInt("burstSize", "max", 25);
 
+        double minDelayAmount = (double) config.getNestedInt("delayRange", "min" , 1) / 1000;
+        double maxDelayAmount = (double) config.getNestedInt("delayRange", "max", 31) / 1000;
+
         Goose delayMessage; // the potential message to be delayed
         selectionInterval = randomBetween(minInterval, maxInterval); // the rate or interval in which messages are selected to be delayed
         //Logger.getLogger("DelayedReplayCreatorC").info("Selection Interval: " + selectionInterval);
@@ -50,6 +54,7 @@ public class DelayedReplayCreatorC implements MessageCreator {
         burstSize = randomBetween(minBurstSize, maxBurstSize);
         selectionProb = config.getNestedDouble("selectionProb","value",0.5); // determines if a certain messages is delayed or not
         burstMode = config.getBoolean("burstMode", false); // determines if we will do bursts of messages or not
+        reorderOnly = config.getBoolean("reorderOnly", false);
 
         // counter/tracking variables that are not assigned in the config file
         int burstMessageCounter = 0; // keeps track of the amount of messages grabbed before the burst maximum is reached
@@ -84,37 +89,33 @@ public class DelayedReplayCreatorC implements MessageCreator {
                     continue;
                 }
 
-                double networkDelay = getNetworkDelay();
+                double networkDelay = randomBetween(minDelayAmount, maxDelayAmount);
                 int currentIndex = i;
 
-                //int closestIndex = getClosestIndex(delayMessage, networkDelay, currentIndex);
-                //Goose closestMessage = messageStream.get(closestIndex);
+                int closestIndex = getClosestIndex(delayMessage, networkDelay, currentIndex);
+                Goose closestMessage = messageStream.get(closestIndex);
 
                 double delayedTimestamp = delayMessage.getTimestamp() + networkDelay;
+
                 delayMessage.setTimestamp(delayedTimestamp);
+
                 delayMessage.setLabel(GSVDatasetWriter.label[9]);
 
-                ied.addMessage(delayMessage);
-
-                /*
                 if (delayedTimestamp >= closestMessage.getTimestamp()) {
-                    delayMessage.setTimestamp(delayedTimestamp);
-                    delayMessage.setLabel(GSVDatasetWriter.label[9]);
+                    //delayMessage.setTimestamp(delayedTimestamp);
+                    //delayMessage.setLabel(GSVDatasetWriter.label[9]);
 
-                    //messageStream.add(closestIndex+1, delayMessage);
-                    //messageStream.remove(currentIndex);
-
-                    ied.addMessage(delayMessage);
+                    messageStream.add(closestIndex+1, delayMessage);
                 } else if (delayedTimestamp < closestMessage.getTimestamp()) {
-                    delayMessage.setTimestamp(delayedTimestamp);
-                    delayMessage.setLabel(GSVDatasetWriter.label[9]);
+                    //delayMessage.setTimestamp(delayedTimestamp);
+                    //delayMessage.setLabel(GSVDatasetWriter.label[9]);
 
-                    //messageStream.add(closestIndex-1, delayMessage);
-                    //messageStream.remove(currentIndex);
-
-                    ied.addMessage(delayMessage);
+                    messageStream.add(closestIndex-1, delayMessage);
                 }
-                 */
+
+                messageStream.remove(currentIndex);
+                ied.addMessage(delayMessage);
+                
                 numDelayInstances--;
                 burstMessageCounter++;
 
@@ -142,30 +143,31 @@ public class DelayedReplayCreatorC implements MessageCreator {
                 double networkDelay = getNetworkDelay();
                 int currentIndex = i;
 
-                //int closestIndex = getClosestIndex(delayMessage, networkDelay, currentIndex);
-                //Goose closestMessage = messageStream.get(closestIndex);
+                int closestIndex = getClosestIndex(delayMessage, networkDelay, currentIndex);
+                Goose closestMessage = messageStream.get(closestIndex);
 
                 double delayedTimestamp = delayMessage.getTimestamp() + networkDelay;
-                delayMessage.setTimestamp(delayedTimestamp);
-                delayMessage.setLabel(GSVDatasetWriter.label[9]);
-                ied.addMessage(delayMessage);
-                /*
-                if (delayedTimestamp >= closestMessage.getTimestamp()) {
-                    delayMessage.setTimestamp(delayedTimestamp);
-                    delayMessage.setLabel(GSVDatasetWriter.label[9]);
 
-                    //messageStream.add(closestIndex+1, delayMessage);
-                    //messageStream.remove(currentIndex);
-                    ied.addMessage(delayMessage);
+                delayMessage.setTimestamp(delayedTimestamp);
+
+                delayMessage.setLabel(GSVDatasetWriter.label[9]);
+                
+                if (delayedTimestamp >= closestMessage.getTimestamp()) {
+                    //delayMessage.setTimestamp(delayedTimestamp);
+                    //delayMessage.setLabel(GSVDatasetWriter.label[9]);
+
+                    messageStream.add(closestIndex+1, delayMessage);
                     //messageStream.get(currentIndex).setLabel("faulty_not_delayed");
                 } else if (delayedTimestamp < closestMessage.getTimestamp()) {
-                    delayMessage.setTimestamp(delayedTimestamp);
-                    delayMessage.setLabel(GSVDatasetWriter.label[9]);
+                    //delayMessage.setTimestamp(delayedTimestamp);
+                    //delayMessage.setLabel(GSVDatasetWriter.label[9]);
 
-                    ied.addMessage(delayMessage);
+                    messageStream.add(closestIndex-1, delayMessage);
                     //messageStream.set(currentIndex, delayMessage); // for debugging, add the delayed message at the index after currentIndex
                 }
-                */
+                messageStream.remove(currentIndex);
+                ied.addMessage(delayMessage);
+                
                 numDelayInstances--;
                 selectionIntervalCounter++;
             }
