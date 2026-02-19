@@ -33,7 +33,7 @@ def main():
             print("Compilation and benign dataset creation complete")
         elif user_input == "2":
             print("skipping compilation and benign dataset creation")
-        
+
         print("Generating CSV file with evaluation metrics")
 
         if os.path.exists(csv_path): # deletes pre-existing csv file

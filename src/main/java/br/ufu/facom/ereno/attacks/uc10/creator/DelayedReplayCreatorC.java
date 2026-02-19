@@ -96,11 +96,12 @@ public class DelayedReplayCreatorC implements MessageCreator {
                 Goose closestMessage = messageStream.get(closestIndex);
 
                 double delayedTimestamp = delayMessage.getTimestamp() + networkDelay;
+                // may replace this with changes to the SubscriberRxTs and PublisherTxTs
 
                 delayMessage.setTimestamp(delayedTimestamp);
 
                 delayMessage.setLabel(GSVDatasetWriter.label[9]);
-
+                /* 
                 if (delayedTimestamp >= closestMessage.getTimestamp()) {
                     //delayMessage.setTimestamp(delayedTimestamp);
                     //delayMessage.setLabel(GSVDatasetWriter.label[9]);
@@ -112,7 +113,7 @@ public class DelayedReplayCreatorC implements MessageCreator {
 
                     messageStream.add(closestIndex-1, delayMessage);
                 }
-
+                */
                 messageStream.remove(currentIndex);
                 ied.addMessage(delayMessage);
                 
@@ -140,18 +141,20 @@ public class DelayedReplayCreatorC implements MessageCreator {
                     continue;
                 }
                 
-                double networkDelay = getNetworkDelay();
+                double networkDelay = randomBetween(minDelayAmount, maxDelayAmount);
                 int currentIndex = i;
 
                 int closestIndex = getClosestIndex(delayMessage, networkDelay, currentIndex);
                 Goose closestMessage = messageStream.get(closestIndex);
 
                 double delayedTimestamp = delayMessage.getTimestamp() + networkDelay;
+                // may replace this with changes to the SubscriberRxTs and PublisherTxTs
 
-                delayMessage.setTimestamp(delayedTimestamp);
-
+                //delayMessage.setTimestamp(delayedTimestamp);
+                delayMessage.setSubscriberRxTs(delayMessage.getSubscriberRxTs() + networkDelay);
+                //delayMessage.setPublisherTxTs();
                 delayMessage.setLabel(GSVDatasetWriter.label[9]);
-                
+                /* 
                 if (delayedTimestamp >= closestMessage.getTimestamp()) {
                     //delayMessage.setTimestamp(delayedTimestamp);
                     //delayMessage.setLabel(GSVDatasetWriter.label[9]);
@@ -165,7 +168,8 @@ public class DelayedReplayCreatorC implements MessageCreator {
                     messageStream.add(closestIndex-1, delayMessage);
                     //messageStream.set(currentIndex, delayMessage); // for debugging, add the delayed message at the index after currentIndex
                 }
-                messageStream.remove(currentIndex);
+                */
+                //messageStream.remove(currentIndex);
                 ied.addMessage(delayMessage);
                 
                 numDelayInstances--;

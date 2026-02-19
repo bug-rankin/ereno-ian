@@ -17,9 +17,11 @@
     "value": 1.00
   },
   "delayAmoount": {
-    "min": 1,
-    "max": 31
+    "min": 100,
+    "max": 600
   },
+  "subscriberRxTs": 1000.0,
+  "publisherTxTs": 0.0,
   "reorderOnly": false,
   "burstMode": false
 }
