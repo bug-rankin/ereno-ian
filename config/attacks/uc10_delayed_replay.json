@@ -16,7 +16,7 @@
   "selectionProb": {
     "value": 1.00
   },
-  "delayAmoount": {
+  "delayAmount": {
     "min": 100,
     "max": 600
   },

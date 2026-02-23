@@ -44,8 +44,8 @@ public class DelayedReplayCreatorC implements MessageCreator {
         int minBurstSize = config.getNestedInt("burstSize", "min", 5);
         int maxBurstSize = config.getNestedInt("burstSize", "max", 25);
 
-        double minDelayAmount = (double) config.getNestedInt("delayRange", "min" , 1) / 1000;
-        double maxDelayAmount = (double) config.getNestedInt("delayRange", "max", 31) / 1000;
+        double minDelayAmount = (double) config.getNestedInt("delayAmount", "min" , 1) / 1000;
+        double maxDelayAmount = (double) config.getNestedInt("delayAmount", "max", 31) / 1000;
 
         Goose delayMessage; // the potential message to be delayed
         selectionInterval = randomBetween(minInterval, maxInterval); // the rate or interval in which messages are selected to be delayed
