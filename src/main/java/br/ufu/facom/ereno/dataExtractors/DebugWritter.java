@@ -45,8 +45,9 @@ public class DebugWritter {
                 String consistencyDebug = f[0] + "," + f[1] + "," + f[2] + "," + f[6] + "," + f[7];
 
                 double delay = goose.getTimestamp() - sv.getTime();
-                double e2eDelayMs = goose.getE2EDelayMs();
-                write(svString + "," + gooseString + "," + consistencyDebug + "," + delay + "," + e2eDelayMs + "," + goose.getLabel());
+                double e2eLatency = goose.getE2ELatencyMs();
+                double receivedTimestamp = goose.getSubscriberRxTs() != null ? goose.getSubscriberRxTs() : goose.getTimestamp();
+                write(svString + "," + gooseString + "," + consistencyDebug + "," + delay + "," + e2eLatency + "," + receivedTimestamp + "," + goose.getLabel());
             }
             previousGoose = goose.copy();
         }
@@ -73,7 +74,7 @@ public class DebugWritter {
         String header = String.join(",", new String[]{
                 "svTime","GooseTimestamp", "t", "SqNum", "StNum", "cbStatus",
                 "stDiff", "sqDiff", "cbStatusDiff",
-                "timestampDiff", "tDiff", "timeFromLastChange", "delay", "e2eDelayMs", "class"
+            "timestampDiff", "tDiff", "timeFromLastChange", "delay", "e2eLatency", "receivedTimestamp", "class"
         });
         write(header);
     }

@@ -39,8 +39,9 @@ public class ARFFWritter {
                 String gooseString = goose.asCSVFull();
                 String gooseConsistency = IntermessageCorrelation.getConsistencyFeaturesAsCSV(goose, previousGoose);
                 double delay = goose.getTimestamp() - sv.getTime();
-                double e2eDelayMs = goose.getE2EDelayMs();
-                write(svString + "," + cycleStrig + "," + gooseString + "," + gooseConsistency + "," + delay + "," + e2eDelayMs + "," + goose.getLabel());
+                double e2eLatency = goose.getE2ELatencyMs();
+                double receivedTimestamp = goose.getSubscriberRxTs() != null ? goose.getSubscriberRxTs() : goose.getTimestamp();
+                write(svString + "," + cycleStrig + "," + gooseString + "," + gooseConsistency + "," + delay + "," + e2eLatency + "," + receivedTimestamp + "," + goose.getLabel());
             }
             previousGoose = goose.copy();
         }
@@ -120,7 +121,8 @@ public class ARFFWritter {
         write("@attribute tDiff numeric"); // temporal consistency 67
         write("@attribute timeFromLastChange numeric"); // temporal consistency 68
         write("@attribute delay numeric"); // temporal consistency 69
-        write("@attribute e2eDelayMs numeric"); // temporal consistency 70
+        write("@attribute e2eLatency numeric"); // temporal consistency 70
+        write("@attribute receivedTimestamp numeric"); // temporal consistency 71
     String classLine = "@attribute class {" + Labels.asArffSet() + "}";
 
         write(classLine);

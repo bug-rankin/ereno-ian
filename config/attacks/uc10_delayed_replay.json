@@ -16,12 +16,11 @@
   "selectionProb": {
     "value": 1.00
   },
-  "delayAmount": {
-    "min": 50,
-    "max": 100
+  "burstMode": false,
+  "networkDelayMs": {
+    "min": 1.0,
+    "max": 31.0
   },
-  "subscriberRxTs": 1000.0,
-  "publisherTxTs": 0.0,
-  "reorderOnly": false,
-  "burstMode": true
+  "shiftSendTimestamp": true,
+  "orderBy": "received"
 }
