@@ -50,8 +50,9 @@ public class CSVWritter {
                 String gooseConsistency = IntermessageCorrelation.getConsistencyFeaturesAsCSV(goose, previousGoose);
 
                 double delay = goose.getTimestamp() - sv.getTime();
-                double e2eDelayMs = goose.getE2EDelayMs();
-                write(svString + "," + cycleStrig + "," + gooseString + "," + gooseConsistency + "," + delay + "," + e2eDelayMs + "," + goose.getLabel());
+                double e2eLatency = goose.getE2ELatencyMs();
+                double receivedTimestamp = goose.getSubscriberRxTs() != null ? goose.getSubscriberRxTs() : goose.getTimestamp();
+                write(svString + "," + cycleStrig + "," + gooseString + "," + gooseConsistency + "," + delay + "," + e2eLatency + "," + receivedTimestamp + "," + goose.getLabel());
             }
             previousGoose = goose.copy();
         }
@@ -87,7 +88,7 @@ public class CSVWritter {
                 "t", "GooseTimestamp", "SqNum", "StNum", "cbStatus", "frameLen", "ethDst", "ethSrc", "ethType",
                 "gooseTimeAllowedtoLive", "gooseAppid", "gooseLen", "TPID", "gocbRef", "datSet", "goID", "test", "confRev", "ndsCom",
                 "numDatSetEntries", "APDUSize", "protocol", "stDiff", "sqDiff", "gooseLengthDiff", "cbStatusDiff",
-                "apduSizeDiff", "frameLengthDiff", "timestampDiff", "tDiff", "timeFromLastChange", "delay", "e2eDelayMs", "class"
+                "apduSizeDiff", "frameLengthDiff", "timestampDiff", "tDiff", "timeFromLastChange", "delay", "e2eLatency", "receivedTimestamp", "class"
         });
         write(header);
     }

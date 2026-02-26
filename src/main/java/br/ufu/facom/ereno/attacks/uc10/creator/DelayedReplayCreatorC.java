@@ -1,17 +1,16 @@
 package br.ufu.facom.ereno.attacks.uc10.creator;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Comparator;
+
+import br.ufu.facom.ereno.benign.uc00.creator.MessageCreator;
 import br.ufu.facom.ereno.config.AttackConfig;
 import br.ufu.facom.ereno.dataExtractors.GSVDatasetWriter;
 import br.ufu.facom.ereno.general.IED;
-import br.ufu.facom.ereno.messages.Goose;
-import br.ufu.facom.ereno.benign.uc00.creator.MessageCreator;
-
-import java.util.ArrayList;
-import java.util.logging.Logger;
-import java.io.FileWriter;
-import java.io.IOException;
-
 import static br.ufu.facom.ereno.general.IED.randomBetween;
+import br.ufu.facom.ereno.messages.Goose;
 
 public class DelayedReplayCreatorC implements MessageCreator {
     ArrayList<Goose> messageStream;
@@ -50,6 +49,14 @@ public class DelayedReplayCreatorC implements MessageCreator {
         burstSize = randomBetween(minBurstSize, maxBurstSize);
         selectionProb = config.getNestedDouble("selectionProb","value",0.5); // determines if a certain messages is delayed or not
         burstMode = config.getBoolean("burstMode", false); // determines if we will do bursts of messages or not
+        double minNetworkDelayMs = config.getRangeMin("networkDelayMs", 1.0);
+        double maxNetworkDelayMs = config.getRangeMax("networkDelayMs", 31.0);
+        if (minNetworkDelayMs <= 0 || maxNetworkDelayMs <= 0 || maxNetworkDelayMs < minNetworkDelayMs) {
+            minNetworkDelayMs = 1.0;
+            maxNetworkDelayMs = 31.0;
+        }
+        boolean shiftSendTimestamp = config.getBoolean("shiftSendTimestamp", true);
+        String orderBy = config.getString("orderBy", "received");
 
         // counter/tracking variables that are not assigned in the config file
         int burstMessageCounter = 0; // keeps track of the amount of messages grabbed before the burst maximum is reached
@@ -58,6 +65,7 @@ public class DelayedReplayCreatorC implements MessageCreator {
         int selectionIntervalCounter = 0;
 
         int faultCounter = 0;
+        ArrayList<Goose> delayedMessages = new ArrayList<>();
 
         // Store the parameter values in some txt file or in the csv file
 
@@ -84,17 +92,13 @@ public class DelayedReplayCreatorC implements MessageCreator {
                     continue;
                 }
 
-                double networkDelay = getNetworkDelay();
-                int currentIndex = i;
+                double attackDelaySeconds = randomBetween(minNetworkDelayMs, maxNetworkDelayMs) / 1000.0;
 
                 //int closestIndex = getClosestIndex(delayMessage, networkDelay, currentIndex);
                 //Goose closestMessage = messageStream.get(closestIndex);
 
-                double delayedTimestamp = delayMessage.getTimestamp() + networkDelay;
-                delayMessage.setTimestamp(delayedTimestamp);
-                delayMessage.setLabel(GSVDatasetWriter.label[9]);
-
-                ied.addMessage(delayMessage);
+                Goose delayedGoose = applyDelay(delayMessage, attackDelaySeconds, shiftSendTimestamp);
+                delayedMessages.add(delayedGoose);
 
                 /*
                 if (delayedTimestamp >= closestMessage.getTimestamp()) {
@@ -139,16 +143,13 @@ public class DelayedReplayCreatorC implements MessageCreator {
                     continue;
                 }
                 
-                double networkDelay = getNetworkDelay();
-                int currentIndex = i;
+                double attackDelaySeconds = randomBetween(minNetworkDelayMs, maxNetworkDelayMs) / 1000.0;
 
                 //int closestIndex = getClosestIndex(delayMessage, networkDelay, currentIndex);
                 //Goose closestMessage = messageStream.get(closestIndex);
 
-                double delayedTimestamp = delayMessage.getTimestamp() + networkDelay;
-                delayMessage.setTimestamp(delayedTimestamp);
-                delayMessage.setLabel(GSVDatasetWriter.label[9]);
-                ied.addMessage(delayMessage);
+                Goose delayedGoose = applyDelay(delayMessage, attackDelaySeconds, shiftSendTimestamp);
+                delayedMessages.add(delayedGoose);
                 /*
                 if (delayedTimestamp >= closestMessage.getTimestamp()) {
                     delayMessage.setTimestamp(delayedTimestamp);
@@ -171,6 +172,17 @@ public class DelayedReplayCreatorC implements MessageCreator {
             }
             // if not faulty, then continue to the next message and check
 
+        }
+
+        if ("send".equalsIgnoreCase(orderBy)) {
+            delayedMessages.sort(Comparator.comparingDouble(Goose::getTimestamp));
+        } else {
+            delayedMessages.sort(Comparator.comparingDouble(g ->
+                    g.getSubscriberRxTs() != null ? g.getSubscriberRxTs() : g.getTimestamp()));
+        }
+
+        for (Goose delayedMessage : delayedMessages) {
+            ied.addMessage(delayedMessage);
         }
 
         writeToFile(faultCounter, messageStream.size());
@@ -234,6 +246,24 @@ public class DelayedReplayCreatorC implements MessageCreator {
     public double getSelectionProb() { return selectionProb; }
 
     public boolean getBurstMode() { return burstMode; }
+
+    private Goose applyDelay(Goose originalMessage, double attackDelaySeconds, boolean shiftSendTimestamp) {
+        Goose delayedGoose = originalMessage.copy();
+        double originalSendTs = delayedGoose.getTimestamp();
+        double originalReceiveTs = delayedGoose.getSubscriberRxTs() != null ? delayedGoose.getSubscriberRxTs() : originalSendTs;
+
+        if (shiftSendTimestamp) {
+            double updatedSendTs = originalSendTs + attackDelaySeconds;
+            delayedGoose.setTimestamp(updatedSendTs);
+            delayedGoose.setPublisherTxTs(updatedSendTs);
+        } else {
+            delayedGoose.setPublisherTxTs(originalSendTs);
+        }
+
+        delayedGoose.setSubscriberRxTs(originalReceiveTs + attackDelaySeconds);
+        delayedGoose.setLabel(GSVDatasetWriter.label[9]);
+        return delayedGoose;
+    }
 
     // add more if more parameters are added to this attack
 

@@ -56,8 +56,9 @@ public class DatasetWriter {
 
         for (Goose gm : gooseMessages) {
             if (prev != null) {
-                double e2eDelayMs = gm.getE2EDelayMs();
-                String gooseString = gm.asCSVFull() + getConsistencyFeaturesAsCSV(gm, prev) + "," + e2eDelayMs + "," + gm.getLabel();
+                double e2eLatency = gm.getE2ELatencyMs();
+                double receivedTimestamp = gm.getSubscriberRxTs() != null ? gm.getSubscriberRxTs() : gm.getTimestamp();
+                String gooseString = gm.asCSVFull() + getConsistencyFeaturesAsCSV(gm, prev) + "," + e2eLatency + "," + receivedTimestamp + "," + gm.getLabel();
                 if (DatasetWriter.Debug.PRINT_SIGNATURES) {
                     System.out.println(gooseString);
                 }
@@ -90,8 +91,9 @@ public class DatasetWriter {
                 String cycleStrig = ProtocolCorrelation.getCorrespondingSVCycle(svMessages, gm, 80).asCsv();
                 String gooseString = gm.asCSVFull() + getConsistencyFeaturesAsCSV(gm, prev) + "," + gm.getLabel();
                 double delay = gm.getTimestamp() - sv.getTime();
-                double e2eDelayMs = gm.getE2EDelayMs();
-                write(svString + "," + cycleStrig + "," + gooseString + "," + delay + "," + e2eDelayMs + "," + gm.getLabel());
+                double e2eLatency = gm.getE2ELatencyMs();
+                double receivedTimestamp = gm.getSubscriberRxTs() != null ? gm.getSubscriberRxTs() : gm.getTimestamp();
+                write(svString + "," + cycleStrig + "," + gooseString + "," + delay + "," + e2eLatency + "," + receivedTimestamp + "," + gm.getLabel());
 
 //                    write(gm.getTimestamp() + "|" + sv.getTime() + "| CBStatus");
             }
@@ -214,7 +216,8 @@ public class DatasetWriter {
         write("@attribute tDiff numeric"); // temporal consistency 67
         write("@attribute timeFromLastChange numeric"); // temporal consistency 68
         write("@attribute delay numeric"); // temporal consistency 69
-        write("@attribute e2eDelayMs numeric"); // temporal consistency 70
+        write("@attribute e2eLatency numeric"); // temporal consistency 70
+        write("@attribute receivedTimestamp numeric"); // temporal consistency 71
     String classLine = binaryClassificationMode ? 
         "@attribute class {" + Labels.asArffSetBinary() + "}" :
         "@attribute class {" + Labels.asArffSet() + "}";
@@ -285,7 +288,8 @@ public class DatasetWriter {
         write("@attribute tDiff numeric"); // temporal consistency 67
         write("@attribute timeFromLastChange numeric"); // temporal consistency 68
         write("@attribute delay numeric"); // temporal consistency 69
-        write("@attribute e2eDelayMs numeric"); // temporal consistency 70
+        write("@attribute e2eLatency numeric"); // temporal consistency 70
+        write("@attribute receivedTimestamp numeric"); // temporal consistency 71
     String classLine = "@attribute class {" + label[0] + ", " + label[1] + ", " + label[2] + ", " + label[3] + ", " + label[4] + ", " + label[5] + ", " + label[6] + ", " + label[7] + ", " + label[8] + ", " + label[9] + "}";
 
         write(classLine);
@@ -324,7 +328,8 @@ public class DatasetWriter {
         write("@attribute timestampDiff numeric"); // temporal consistency 66
         write("@attribute tDiff numeric"); // temporal consistency 67
         write("@attribute timeFromLastChange numeric"); // temporal consistency 68
-        write("@attribute e2eDelayMs numeric"); // temporal consistency 69
+        write("@attribute e2eLatency numeric"); // temporal consistency 69
+        write("@attribute receivedTimestamp numeric"); // temporal consistency 70
     String classLine = "@attribute class {" + label[0] + ", " + label[1] + ", " + label[2] + ", " + label[3] + ", " + label[4] + ", " + label[5] + ", " + label[6] + ", " + label[7] + ", " + label[8] + ", "+ label[9] + "}";
 
         write(classLine);

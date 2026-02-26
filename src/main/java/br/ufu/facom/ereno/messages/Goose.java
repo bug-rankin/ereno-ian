@@ -214,12 +214,17 @@ public class Goose extends EthernetFrame {
         this.subscriberRxTs = subscriberRxTs;
     }
 
-    public double getE2EDelayMs() {
+    public double getE2ELatencyMs() {
         if (publisherTxTs == null || subscriberRxTs == null) {
             return 0.0;
         }
         double seconds = subscriberRxTs - publisherTxTs;
         return Math.max(0.0, seconds * 1000.0);
+    }
+
+    @Deprecated
+    public double getE2EDelayMs() {
+        return getE2ELatencyMs();
     }
 
     public int getGooseTimeAllowedtoLive() {

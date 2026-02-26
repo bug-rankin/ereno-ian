@@ -1,19 +1,13 @@
 package br.ufu.facom.ereno.attacks.uc10.creator;
 
-import br.ufu.facom.ereno.benign.uc00.creator.MessageCreator;
-import br.ufu.facom.ereno.benign.uc00.devices.LegitimateProtectionIED;
-import br.ufu.facom.ereno.api.SetupIED;
-import br.ufu.facom.ereno.general.IED;
-import br.ufu.facom.ereno.general.ProtectionIED;
-import br.ufu.facom.ereno.messages.Goose;
-import br.ufu.facom.ereno.dataExtractors.GSVDatasetWriter;
-import br.ufu.facom.ereno.util.Labels;
-
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Comparator;
 
+import br.ufu.facom.ereno.benign.uc00.creator.MessageCreator;
+import br.ufu.facom.ereno.dataExtractors.GSVDatasetWriter;
+import br.ufu.facom.ereno.general.IED;
 import static br.ufu.facom.ereno.general.IED.randomBetween;
+import br.ufu.facom.ereno.messages.Goose;
 
 /**
  * @author Luke Haidze
@@ -48,6 +42,10 @@ public class DelayedReplayCreator implements MessageCreator {
         //int spacing; // the spacing between delayed messages (might be redundant due to the amount of delay and the timestamps
         double selectionProb = 0.4; // determines if a certain messages is delayed or not
         boolean burstMode = false; // determines if we will do bursts of messages or not
+        double minNetworkDelayMs = 1.0;
+        double maxNetworkDelayMs = 31.0;
+        boolean shiftSendTimestamp = true;
+        String orderBy = "received";
         //int numLegitDelays; // the number of legitimate messages to be delayed // honestly, probably not needed either
         //float delayedFaultProportion; // the proportion of delayed faulty messages to the entirety of the message stream // probably not needed
         //int startOfRange; // start of a specific range to select messages from // may be redundant
@@ -57,6 +55,7 @@ public class DelayedReplayCreator implements MessageCreator {
          int burstIntervalCounter = 0; // ensures that we have separate bursts. Ensures we maintain the burst interval
         double selectionValue = 0.0;
         int selectionIntervalCounter = 0;
+        ArrayList<Goose> delayedMessages = new ArrayList<>();
 
        /* 
         for  (int i = 0; i < numDelayInstances; i++) {
@@ -83,17 +82,13 @@ public class DelayedReplayCreator implements MessageCreator {
                     continue;
                 }
 
-                double networkDelay = getNetworkDelay();
-                int currentIndex = i;
+                double attackDelaySeconds = randomBetween(minNetworkDelayMs, maxNetworkDelayMs) / 1000.0;
 
                 //int closestIndex = getClosestIndex(delayMessage, networkDelay, currentIndex);
                 //Goose closestMessage = messageStream.get(closestIndex);
                 
-                double delayedTimestamp = delayMessage.getTimestamp() + networkDelay;
-                delayMessage.setTimestamp(delayedTimestamp);
-                delayMessage.setLabel(GSVDatasetWriter.label[9]);
-
-                ied.addMessage(delayMessage);
+                Goose delayedGoose = applyDelay(delayMessage, attackDelaySeconds, shiftSendTimestamp);
+                delayedMessages.add(delayedGoose);
 
                 /*
                 if (delayedTimestamp >= closestMessage.getTimestamp()) {
@@ -139,16 +134,13 @@ public class DelayedReplayCreator implements MessageCreator {
                     continue;
                 }*/
 
-                double networkDelay = getNetworkDelay();
-                int currentIndex = i;
+                double attackDelaySeconds = randomBetween(minNetworkDelayMs, maxNetworkDelayMs) / 1000.0;
                 
                 //int closestIndex = getClosestIndex(delayMessage, networkDelay, currentIndex);
                 //Goose closestMessage = messageStream.get(closestIndex);
 
-                double delayedTimestamp = delayMessage.getTimestamp() + networkDelay;
-                delayMessage.setTimestamp(delayedTimestamp);
-                delayMessage.setLabel(GSVDatasetWriter.label[9]);
-                ied.addMessage(delayMessage);
+                Goose delayedGoose = applyDelay(delayMessage, attackDelaySeconds, shiftSendTimestamp);
+                delayedMessages.add(delayedGoose);
                 /*
                 if (delayedTimestamp >= closestMessage.getTimestamp()) {
                     delayMessage.setTimestamp(delayedTimestamp);
@@ -172,9 +164,38 @@ public class DelayedReplayCreator implements MessageCreator {
             // if not faulty, then continue to the next message and check
 
         }
+
+        if ("send".equalsIgnoreCase(orderBy)) {
+            delayedMessages.sort(Comparator.comparingDouble(Goose::getTimestamp));
+        } else {
+            delayedMessages.sort(Comparator.comparingDouble(g ->
+                    g.getSubscriberRxTs() != null ? g.getSubscriberRxTs() : g.getTimestamp()));
+        }
+
+        for (Goose delayedMessage : delayedMessages) {
+            ied.addMessage(delayedMessage);
+        }
         
          
 
+    }
+
+    private Goose applyDelay(Goose originalMessage, double attackDelaySeconds, boolean shiftSendTimestamp) {
+        Goose delayedGoose = originalMessage.copy();
+        double originalSendTs = delayedGoose.getTimestamp();
+        double originalReceiveTs = delayedGoose.getSubscriberRxTs() != null ? delayedGoose.getSubscriberRxTs() : originalSendTs;
+
+        if (shiftSendTimestamp) {
+            double updatedSendTs = originalSendTs + attackDelaySeconds;
+            delayedGoose.setTimestamp(updatedSendTs);
+            delayedGoose.setPublisherTxTs(updatedSendTs);
+        } else {
+            delayedGoose.setPublisherTxTs(originalSendTs);
+        }
+
+        delayedGoose.setSubscriberRxTs(originalReceiveTs + attackDelaySeconds);
+        delayedGoose.setLabel(GSVDatasetWriter.label[9]);
+        return delayedGoose;
     }
 
     private double getNetworkDelay() {

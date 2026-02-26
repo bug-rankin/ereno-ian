@@ -80,8 +80,9 @@ public class BenignDataManager {
             if (prev != null) {
                 String gooseString = gm.asCSVFull();
                 String gooseConsistency = br.ufu.facom.ereno.featureEngineering.IntermessageCorrelation.getConsistencyFeaturesAsCSV(gm, prev);
-                double e2eDelayMs = gm.getE2EDelayMs();
-                String line = gooseString + "," + gooseConsistency + "," + e2eDelayMs + "," + gm.getLabel();
+                double e2eLatency = gm.getE2ELatencyMs();
+                double receivedTimestamp = gm.getSubscriberRxTs() != null ? gm.getSubscriberRxTs() : gm.getTimestamp();
+                String line = gooseString + "," + gooseConsistency + "," + e2eLatency + "," + receivedTimestamp + "," + gm.getLabel();
                 CSVWritter.writeLine(line);
             }
             prev = gm.copy();
@@ -214,12 +215,18 @@ public class BenignDataManager {
             String label = parts.length > 29 ? parts[parts.length - 1].trim() : "normal";
 
             Goose goose = new Goose(cbStatus, stNum, sqNum, timestamp, t, label);
-            int e2eDelayIndex = parts.length - 2;
-            if (e2eDelayIndex >= 0) {
+            int e2eLatencyIndex = parts.length >= 35 ? parts.length - 3 : parts.length - 2;
+            int receivedTimestampIndex = parts.length >= 35 ? parts.length - 2 : -1;
+            if (e2eLatencyIndex >= 0) {
                 try {
-                    double e2eDelayMs = Double.parseDouble(parts[e2eDelayIndex].trim());
+                    double e2eLatency = Double.parseDouble(parts[e2eLatencyIndex].trim());
                     goose.setPublisherTxTs(timestamp);
-                    goose.setSubscriberRxTs(timestamp + (e2eDelayMs / 1000.0));
+                    if (receivedTimestampIndex >= 0) {
+                        double receivedTimestamp = Double.parseDouble(parts[receivedTimestampIndex].trim());
+                        goose.setSubscriberRxTs(receivedTimestamp);
+                    } else {
+                        goose.setSubscriberRxTs(timestamp + (e2eLatency / 1000.0));
+                    }
                 } catch (NumberFormatException ignored) {
                     // Older files or non-e2e schema: keep default/fallback behavior
                 }

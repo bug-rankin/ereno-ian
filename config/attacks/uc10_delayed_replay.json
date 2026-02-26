@@ -16,5 +16,11 @@
   "selectionProb": {
     "value": 1.00
   },
-  "burstMode": false
+  "burstMode": false,
+  "networkDelayMs": {
+    "min": 1.0,
+    "max": 31.0
+  },
+  "shiftSendTimestamp": true,
+  "orderBy": "received"
 }
