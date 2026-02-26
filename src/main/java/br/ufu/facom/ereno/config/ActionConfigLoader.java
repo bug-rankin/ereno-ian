@@ -37,6 +37,14 @@ public class ActionConfigLoader {
         public List<PipelineStep> pipeline;
         // For loop support
         public LoopConfig loop;
+        // Optional parallel execution settings (sequential by default)
+        public ParallelExecutionConfig parallelExecution;
+    }
+
+    public static class ParallelExecutionConfig {
+        public boolean enabled = false;
+        public int workers = 16;
+        public boolean failFast = true;
     }
 
     public static class PipelineStep {

@@ -21,6 +21,8 @@ import br.ufu.facom.ereno.actions.EvaluateAction;
 import br.ufu.facom.ereno.actions.TrainModelAction;
 import br.ufu.facom.ereno.config.ActionConfigLoader;
 import br.ufu.facom.ereno.config.ConfigLoader;
+import br.ufu.facom.ereno.parallel.ParallelPipelineOrchestrator;
+import br.ufu.facom.ereno.parallel.PipelineActionExecutor;
 import br.ufu.facom.ereno.utils.ProgressTracker;
 import br.ufu.facom.ereno.utils.VariableSubstitutor;
 
@@ -106,7 +108,11 @@ public class ActionRunner {
                 case PIPELINE:
                     LOGGER.info("Executing PIPELINE action");
                     if (actionLoader.getMainConfig().loop != null) {
-                        executePipelineWithLoop(actionLoader);
+                        if (shouldUseParallelLoopExecution(actionLoader.getMainConfig())) {
+                            executePipelineWithLoopParallel(actionLoader);
+                        } else {
+                            executePipelineWithLoop(actionLoader);
+                        }
                     } else {
                         executePipeline(actionLoader);
                     }
@@ -129,6 +135,49 @@ public class ActionRunner {
             LOGGER.severe(() -> "Execution error: " + e.getMessage());
             System.exit(3);
         }
+    }
+
+    /**
+     * Determine whether parallel loop execution should be used.
+     */
+    private static boolean shouldUseParallelLoopExecution(ActionConfigLoader.MainConfig mainConfig) {
+        if (!ParallelPipelineOrchestrator.isParallelEnabled(mainConfig)) {
+            return false;
+        }
+
+        // Keep specialized dual attack pipeline on existing sequential path for now.
+        if (mainConfig != null
+                && mainConfig.loop != null
+                && "dualAttackCombinations".equalsIgnoreCase(mainConfig.loop.variationType)) {
+            LOGGER.info("Parallel mode requested, but dualAttackCombinations currently uses sequential specialized handler");
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Execute loop pipeline via isolated parallel orchestrator.
+     */
+    private static void executePipelineWithLoopParallel(ActionConfigLoader actionLoader) throws Exception {
+        ActionConfigLoader.MainConfig mainConfig = actionLoader.getMainConfig();
+
+        ParallelPipelineOrchestrator.executeLoopPipeline(mainConfig, new PipelineActionExecutor() {
+            @Override
+            public void executeActionFromConfigFile(String actionName, String configFile) throws Exception {
+                ActionRunner.executeActionFromConfigFile(actionName, configFile);
+            }
+
+            @Override
+            public void executeActionWithOverrides(
+                    ActionConfigLoader.PipelineStep step,
+                    String variationType,
+                    Object currentValue,
+                    int iterationNumber,
+                    ActionConfigLoader.LoopConfig loopConfig) throws Exception {
+                ActionRunner.executeActionWithOverrides(step, variationType, currentValue, iterationNumber, loopConfig);
+            }
+        });
     }
 
     /**
@@ -828,7 +877,9 @@ public class ActionRunner {
         String tempDir = "target/temp_configs";
         new File(tempDir).mkdirs();
         
-        String tempPath = tempDir + "/" + actionName + "_iter" + iteration + "_" + System.currentTimeMillis() + ".json";
+        long threadId = Thread.currentThread().getId();
+        String tempPath = tempDir + "/" + actionName + "_iter" + iteration + "_"
+                + System.currentTimeMillis() + "_" + threadId + "_" + System.nanoTime() + ".json";
         
         try (FileWriter writer = new FileWriter(tempPath)) {
             Gson gson = new com.google.gson.GsonBuilder().setPrettyPrinting().create();

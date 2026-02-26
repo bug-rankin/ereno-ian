@@ -1,0 +1,65 @@
+{
+  "action": "pipeline",
+  "description": "Loop pipeline with random seed variations (parallel loop iterations)",
+  "commonConfig": {
+    "randomSeed": 42,
+    "outputFormat": "arff"
+  },
+  "parallelExecution": {
+    "enabled": true,
+    "workers": 16,
+    "failFast": true
+  },
+  "pipeline": [
+    {
+      "action": "create_benign",
+      "actionConfigFile": "config/actions/action_create_benign.json",
+      "description": "Generate baseline benign traffic data"
+    },
+    {
+      "action": "create_attack_dataset",
+      "actionConfigFile": "config/actions/action_create_attack_dataset.json",
+      "description": "Create baseline test dataset"
+    }
+  ],
+  "loop": {
+    "variationType": "randomSeed",
+    "values": [42, 24, 23, 25, 26, 27, 28, 29, 31, 32],
+    "baselineDataset": "target/training/training_dataset.arff",
+    "steps": [
+      {
+        "action": "create_attack_dataset",
+        "actionConfigFile": "config/actions/action_create_attack_dataset.json",
+        "description": "Create training dataset with varied random seed",
+        "parameterOverrides": {
+          "output": {
+            "directory": "target/training_variations/seed_${iteration}",
+            "filename": "training_dataset_seed_${iteration}.arff"
+          }
+        }
+      },
+      {
+        "action": "train_model",
+        "actionConfigFile": "config/actions/action_train_model.json",
+        "description": "Train models on varied dataset",
+        "parameterOverrides": {
+          "output": {
+            "directory": "target/models_variations/seed_${iteration}",
+            "filename": "training_metadata_seed_${iteration}.json"
+          }
+        }
+      },
+      {
+        "action": "evaluate",
+        "actionConfigFile": "config/actions/action_evaluate.json",
+        "description": "Evaluate models against baseline test dataset",
+        "parameterOverrides": {
+          "output": {
+            "directory": "target/evaluation_variations/seed_${iteration}",
+            "filename": "evaluation_results_seed_${iteration}.json"
+          }
+        }
+      }
+    ]
+  }
+}

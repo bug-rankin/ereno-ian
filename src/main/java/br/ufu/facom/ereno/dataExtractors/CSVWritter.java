@@ -20,7 +20,7 @@ import br.ufu.facom.ereno.messages.Sv;
  * It generates a GOOSE-oriented dataset (one sample per GOOSE).
  */
 public class CSVWritter {
-    static BufferedWriter bw;
+    private static final ThreadLocal<BufferedWriter> THREAD_WRITER = new ThreadLocal<>();
     
 
     public static void processDataset(PriorityQueue<EthernetFrame> stationBusMessages, ArrayList<EthernetFrame> processBusMessages) throws IOException {
@@ -61,8 +61,12 @@ public class CSVWritter {
     }
 
     private static void write(String line) throws IOException {
-        bw.write(line);
-        bw.newLine();
+        BufferedWriter writer = THREAD_WRITER.get();
+        if (writer == null) {
+            throw new IllegalStateException("CSV writer not initialized for current thread. Call startWriting first.");
+        }
+        writer.write(line);
+        writer.newLine();
     }
 
     public static void startWriting(String filename) throws IOException {
@@ -73,7 +77,7 @@ public class CSVWritter {
         }
         // overwrite by default (no append)
         FileOutputStream fos = new FileOutputStream(fout, true);
-        bw = new BufferedWriter(new OutputStreamWriter(fos));
+        THREAD_WRITER.set(new BufferedWriter(new OutputStreamWriter(fos)));
     }
 
     public static void writeLine(String line) throws IOException {
@@ -94,7 +98,11 @@ public class CSVWritter {
     }
 
     public static void finishWriting() throws IOException {
-        bw.close();
+        BufferedWriter writer = THREAD_WRITER.get();
+        if (writer != null) {
+            writer.close();
+            THREAD_WRITER.remove();
+        }
     }
 
 }

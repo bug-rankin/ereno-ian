@@ -17,7 +17,7 @@ import br.ufu.facom.ereno.util.Labels;
 
 // @TODO: Is this still used? Did CSV and ARFF Writters replaced it?
 public class DatasetWriter {
-    static BufferedWriter bw;
+    private static final ThreadLocal<BufferedWriter> THREAD_WRITER = new ThreadLocal<>();
     public static boolean english = false;
     static boolean replace = true;
     // Backwards-compatible alias used across the codebase. Points to centralized Labels.
@@ -31,8 +31,12 @@ public class DatasetWriter {
     }
 
     public static void write(String line) throws IOException {
-        bw.write(line);
-        bw.newLine();
+        BufferedWriter writer = THREAD_WRITER.get();
+        if (writer == null) {
+            throw new IllegalStateException("Dataset writer not initialized for current thread. Call startWriting first.");
+        }
+        writer.write(line);
+        writer.newLine();
     }
 
     public static void startWriting(String filename) throws IOException {
@@ -42,7 +46,7 @@ public class DatasetWriter {
             System.out.println("Directory created at: " + filename);
         }
         FileOutputStream fos = new FileOutputStream(fout, !replace);
-        bw = new BufferedWriter(new OutputStreamWriter(fos));
+        THREAD_WRITER.set(new BufferedWriter(new OutputStreamWriter(fos)));
     }
 
     public static void writeGooseMessagesToFile(ArrayList<Goose> gooseMessages, boolean printHeader) throws IOException {
@@ -337,7 +341,11 @@ public class DatasetWriter {
     }
 
     public static void finishWriting() throws IOException {
-        bw.close();
+        BufferedWriter writer = THREAD_WRITER.get();
+        if (writer != null) {
+            writer.close();
+            THREAD_WRITER.remove();
+        }
     }
 
     public static String listFiles(File file) throws IOException {

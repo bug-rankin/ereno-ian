@@ -31,6 +31,26 @@ The ActionRunner loads a configuration file that specifies what to execute and o
 - Dispatch execution to appropriate action handlers
 - Manage pipeline and loop execution
 - Handle errors and logging
+- Delegate opt-in parallel loop orchestration to isolated module classes
+
+### Isolated Parallel Module
+
+Parallel loop orchestration is implemented in an isolated package:
+
+- `src/main/java/br/ufu/facom/ereno/parallel/PipelineActionExecutor.java`
+- `src/main/java/br/ufu/facom/ereno/parallel/ParallelPipelineOrchestrator.java`
+
+By default, ActionRunner remains sequential. Parallel execution is enabled only when a pipeline config includes:
+
+```json
+"parallelExecution": {
+  "enabled": true,
+  "workers": 16,
+  "failFast": true
+}
+```
+
+`dualAttackCombinations` continues to use the existing specialized sequential handler in this first implementation slice.
 
 **Entry Point:**
 ```java

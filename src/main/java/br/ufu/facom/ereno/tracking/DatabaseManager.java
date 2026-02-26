@@ -6,11 +6,13 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Random;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
 /**
@@ -28,7 +30,8 @@ import java.util.logging.Logger;
 public class DatabaseManager {
     
     private static final Logger LOGGER = Logger.getLogger(DatabaseManager.class.getName());
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final ConcurrentHashMap<String, ReentrantLock> FILE_LOCKS = new ConcurrentHashMap<>();
     
     private final String databaseDirectory;
     private final String experimentsDbPath;
@@ -97,22 +100,58 @@ public class DatabaseManager {
             throw new RuntimeException("Database initialization failed", e);
         }
     }
+
+    private static ReentrantLock getFileLock(String filePath) {
+        return FILE_LOCKS.computeIfAbsent(filePath, ignored -> new ReentrantLock());
+    }
+
+    @FunctionalInterface
+    private interface IoSupplier<T> {
+        T get() throws IOException;
+    }
+
+    private static <T> T withFileLock(String filePath, IoSupplier<T> supplier) throws IOException {
+        ReentrantLock lock = getFileLock(filePath);
+        lock.lock();
+        try {
+            return supplier.get();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private static void withFileLock(String filePath, RunnableWithIo runnable) throws IOException {
+        withFileLock(filePath, () -> {
+            runnable.run();
+            return null;
+        });
+    }
+
+    @FunctionalInterface
+    private interface RunnableWithIo {
+        void run() throws IOException;
+    }
+
+    private static String nowTimestamp() {
+        return LocalDateTime.now().format(DATE_FORMAT);
+    }
     
     /**
      * Write CSV headers to a new file
      */
     private void writeHeaders(String filePath, String[] headers) throws IOException {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
-            writer.println(String.join(",", headers));
-        }
+        withFileLock(filePath, () -> {
+            try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
+                writer.println(String.join(",", headers));
+            }
+        });
     }
     
     /**
      * Generate a unique ID based on timestamp and random component
      */
     public static String generateUniqueId(String prefix) {
-        return prefix + "_" + System.currentTimeMillis() + "_" + 
-               String.format("%04d", new Random().nextInt(10000));
+        return prefix + "_" + System.currentTimeMillis() + "_" + UUID.randomUUID().toString().substring(0, 8);
     }
     
     /**
@@ -132,13 +171,15 @@ public class DatabaseManager {
      * Append an entry to a CSV database
      */
     private void appendEntry(String dbPath, String[] values) throws IOException {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(dbPath, true))) {
-            String[] escapedValues = new String[values.length];
-            for (int i = 0; i < values.length; i++) {
-                escapedValues[i] = escapeCsv(values[i]);
+        withFileLock(dbPath, () -> {
+            try (PrintWriter writer = new PrintWriter(new FileWriter(dbPath, true))) {
+                String[] escapedValues = new String[values.length];
+                for (int i = 0; i < values.length; i++) {
+                    escapedValues[i] = escapeCsv(values[i]);
+                }
+                writer.println(String.join(",", escapedValues));
             }
-            writer.println(String.join(",", escapedValues));
-        }
+        });
     }
     
     // ==================== EXPERIMENT TRACKING ====================
@@ -180,7 +221,7 @@ public class DatabaseManager {
         
         ExperimentEntry entry = new ExperimentEntry();
         entry.experimentId = experimentId;
-        entry.timestamp = DATE_FORMAT.format(new Date());
+        entry.timestamp = nowTimestamp();
         entry.experimentType = experimentType;
         entry.description = description;
         entry.pipelineConfigPath = pipelineConfigPath;
@@ -197,21 +238,20 @@ public class DatabaseManager {
      * Update experiment status
      */
     public void updateExperimentStatus(String experimentId, String status) throws IOException {
-        // Read all entries
-        List<String> lines = Files.readAllLines(Paths.get(experimentsDbPath));
-        
-        // Update matching entry
-        for (int i = 1; i < lines.size(); i++) {
-            if (lines.get(i).startsWith(experimentId + ",")) {
-                String[] parts = lines.get(i).split(",", -1);
-                parts[5] = status; // status column
-                lines.set(i, String.join(",", parts));
-                break;
+        withFileLock(experimentsDbPath, () -> {
+            List<String> lines = Files.readAllLines(Paths.get(experimentsDbPath));
+
+            for (int i = 1; i < lines.size(); i++) {
+                if (lines.get(i).startsWith(experimentId + ",")) {
+                    String[] parts = lines.get(i).split(",", -1);
+                    parts[5] = status;
+                    lines.set(i, String.join(",", parts));
+                    break;
+                }
             }
-        }
-        
-        // Write back
-        Files.write(Paths.get(experimentsDbPath), lines);
+
+            Files.write(Paths.get(experimentsDbPath), lines);
+        });
         LOGGER.info(() -> "Updated experiment " + experimentId + " status to: " + status);
     }
     
@@ -269,7 +309,7 @@ public class DatabaseManager {
             entry.datasetId = generateUniqueId("DS");
         }
         if (entry.timestamp == null || entry.timestamp.isEmpty()) {
-            entry.timestamp = DATE_FORMAT.format(new Date());
+            entry.timestamp = nowTimestamp();
         }
         
         appendEntry(datasetsDbPath, entry.toValues());
@@ -323,7 +363,7 @@ public class DatabaseManager {
             entry.modelId = generateUniqueId("MDL");
         }
         if (entry.timestamp == null || entry.timestamp.isEmpty()) {
-            entry.timestamp = DATE_FORMAT.format(new Date());
+            entry.timestamp = nowTimestamp();
         }
         
         appendEntry(modelsDbPath, entry.toValues());
@@ -393,7 +433,7 @@ public class DatabaseManager {
             entry.resultId = generateUniqueId("RES");
         }
         if (entry.timestamp == null || entry.timestamp.isEmpty()) {
-            entry.timestamp = DATE_FORMAT.format(new Date());
+            entry.timestamp = nowTimestamp();
         }
         
         appendEntry(resultsDbPath, entry.toValues());
@@ -409,7 +449,7 @@ public class DatabaseManager {
      */
     public List<String[]> queryDatabase(String dbPath, String columnName, String value) throws IOException {
         List<String[]> results = new ArrayList<>();
-        List<String> lines = Files.readAllLines(Paths.get(dbPath));
+        List<String> lines = withFileLock(dbPath, () -> Files.readAllLines(Paths.get(dbPath)));
         
         if (lines.isEmpty()) {
             return results;
@@ -490,14 +530,14 @@ public class DatabaseManager {
     public void exportSummaryReport(String outputPath) throws IOException {
         try (PrintWriter writer = new PrintWriter(new FileWriter(outputPath))) {
             writer.println("=== ERENO Experiment Tracking Database Summary ===");
-            writer.println("Generated: " + DATE_FORMAT.format(new Date()));
+            writer.println("Generated: " + nowTimestamp());
             writer.println();
             
             // Count entries
-            int expCount = Files.readAllLines(Paths.get(experimentsDbPath)).size() - 1;
-            int dsCount = Files.readAllLines(Paths.get(datasetsDbPath)).size() - 1;
-            int mdlCount = Files.readAllLines(Paths.get(modelsDbPath)).size() - 1;
-            int resCount = Files.readAllLines(Paths.get(resultsDbPath)).size() - 1;
+            int expCount = withFileLock(experimentsDbPath, () -> Files.readAllLines(Paths.get(experimentsDbPath))).size() - 1;
+            int dsCount = withFileLock(datasetsDbPath, () -> Files.readAllLines(Paths.get(datasetsDbPath))).size() - 1;
+            int mdlCount = withFileLock(modelsDbPath, () -> Files.readAllLines(Paths.get(modelsDbPath))).size() - 1;
+            int resCount = withFileLock(resultsDbPath, () -> Files.readAllLines(Paths.get(resultsDbPath))).size() - 1;
             
             writer.println("Total Experiments: " + expCount);
             writer.println("Total Datasets: " + dsCount);

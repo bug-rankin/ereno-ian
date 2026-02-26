@@ -186,7 +186,7 @@ public class GSVDatasetWriter extends DatasetWriter {
     }
 
     public static void finishWriting() throws IOException {
-        bw.close();
+        DatasetWriter.finishWriting();
     }
 
     private static String getConsistencyFeaturesAsCSV(Goose gm, Goose prev) {

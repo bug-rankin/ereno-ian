@@ -94,8 +94,27 @@ java -jar target/ERENO-1.0-SNAPSHOT-uber.jar config/pipelines/pipeline_complete.
 - `pipeline_complete.json` - Full workflow (benign → attack → train → evaluate)
 - `pipeline_train_evaluate.json` - Training and evaluation only
 - `pipeline_loop_random_seeds.json` - Multiple iterations with different random seeds
+- `pipeline_loop_random_seeds_parallel.json` - Same random-seed loop with isolated parallel execution enabled
 - `pipeline_loop_attack_segments.json` - Multiple attacks with different segment compositions
 - `pipeline_loop_parameters.json` - Parameter sweep experiments
+
+### Opt-In Parallel Loop Execution
+
+Parallel orchestration is isolated and optional. Existing pipeline configs remain sequential unless `parallelExecution.enabled` is set to `true`.
+
+```json
+"parallelExecution": {
+  "enabled": true,
+  "workers": 16,
+  "failFast": true
+}
+```
+
+Run the sample parallel config:
+
+```bash
+java -jar target/ERENO-1.0-SNAPSHOT-uber.jar config/pipelines/pipeline_loop_random_seeds_parallel.json
+```
 
 ## Attack Types
 
