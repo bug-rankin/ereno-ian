@@ -75,61 +75,25 @@ public class DelayedReplayCreatorC implements MessageCreator {
             // check to see if it is faulty
 
             // if statement to check if we want bursts
-            if (burstMode == true & delayMessage.getCbStatus() == 1) { // condense to having one condition statement once behavior is confirmed
-                // have another condition that grabs a certain amount of faulty messages depending on burst size, checks if the burstIntervalCounter is 0, and checks if the counter is less than burst size
-                // perform further testing to see if we need to account for testing
-
-                faultCounter++;
-
-                if (burstIntervalCounter == burstInterval) { // once we have waited for the set interval, begin the next burst of messages
-                    burstMessageCounter = 0;
-                    burstIntervalCounter = 0;
-                } else if (burstMessageCounter == burstSize) { // once we reach the burst size, ensure that we enact an the set interval until we start the next burst
-                    burstIntervalCounter++;
-                    continue;
-                }
-
-                double networkDelay = randomBetween(minDelayAmount, maxDelayAmount);
-                int currentIndex = i;
-
-                int closestIndex = getClosestIndex(delayMessage, networkDelay, currentIndex);
-                Goose closestMessage = messageStream.get(closestIndex);
-
-                double delayedTimestamp = delayMessage.getTimestamp() + networkDelay;
-                // may replace this with changes to the SubscriberRxTs and PublisherTxTs
-
-                delayMessage.setTimestamp(delayedTimestamp);
-
-                delayMessage.setLabel(GSVDatasetWriter.label[9]);
-                /* 
-                if (delayedTimestamp >= closestMessage.getTimestamp()) {
-                    //delayMessage.setTimestamp(delayedTimestamp);
-                    //delayMessage.setLabel(GSVDatasetWriter.label[9]);
-
-                    messageStream.add(closestIndex+1, delayMessage);
-                } else if (delayedTimestamp < closestMessage.getTimestamp()) {
-                    //delayMessage.setTimestamp(delayedTimestamp);
-                    //delayMessage.setLabel(GSVDatasetWriter.label[9]);
-
-                    messageStream.add(closestIndex-1, delayMessage);
-                }
-                */
-                messageStream.remove(currentIndex);
-                ied.addMessage(delayMessage);
-                
-                numDelayInstances--;
-                burstMessageCounter++;
-
-            } else if (burstMode == false & delayMessage.getCbStatus() == 1) { // if burstmode is false, then grab singular messages
+            if (delayMessage.getCbStatus() == 1) { // if burstmode is false, then grab singular messages
                 // later on potentially include the selection interval in this condition, will check if the interval counter is 0
                 // for the burst, delay each message by a separate amount
 
                 faultCounter++;
 
-                if (selectionIntervalCounter == selectionInterval) {
-                    selectionIntervalCounter = 0;
-                } else if (selectionIntervalCounter < selectionInterval & selectionIntervalCounter >= 1) {
+                if (burstMode == false & selectionIntervalCounter == selectionInterval) {
+                    selectionIntervalCounter = 1;
+                    if (selectionValue > selectionProb) {
+                        continue;
+                    }
+                } else if (burstMode == false & selectionIntervalCounter < selectionInterval & selectionIntervalCounter >= 1) {
                     selectionIntervalCounter++;
+                    continue;
+                } else if (burstMode == true & burstIntervalCounter == burstInterval) { // once we have waited for the set interval, begin the next burst of messages
+                    burstMessageCounter = 0;
+                    burstIntervalCounter = 0;
+                } else if (burstMode == true & burstMessageCounter == burstSize) { // once we reach the burst size, ensure that we enact an the set interval until we start the next burst
+                    burstIntervalCounter++;
                     continue;
                 }
 
@@ -137,9 +101,6 @@ public class DelayedReplayCreatorC implements MessageCreator {
                 // this will ensure the random between is only called for faulty messages
                 selectionValue = randomBetween(0.0, 1.0);
                 
-                if (selectionValue > selectionProb) {
-                    continue;
-                }
                 
                 double networkDelay = randomBetween(minDelayAmount, maxDelayAmount);
                 int currentIndex = i;
@@ -173,13 +134,12 @@ public class DelayedReplayCreatorC implements MessageCreator {
                 ied.addMessage(delayMessage);
                 
                 numDelayInstances--;
-                selectionIntervalCounter++;
+                //selectionIntervalCounter++;
             }
             // if not faulty, then continue to the next message and check
-
         }
 
-        writeToFile(faultCounter, messageStream.size());
+        //writeToFile(faultCounter, messageStream.size());
 
     }
 
