@@ -10,18 +10,18 @@
     "max": 15
   },
   "burstSize": {
-    "min": 25,
-    "max": 50
+    "min": 50,
+    "max": 100
   },
   "selectionProb": {
     "value": 1.00
   },
   "delayAmount": {
-    "min": 100,
-    "max": 600
+    "min": 50,
+    "max": 100
   },
   "subscriberRxTs": 1000.0,
   "publisherTxTs": 0.0,
   "reorderOnly": false,
-  "burstMode": false
+  "burstMode": true
 }

@@ -81,27 +81,26 @@ public class DelayedReplayCreatorC implements MessageCreator {
 
                 faultCounter++;
 
-                if (burstMode == false & selectionIntervalCounter == selectionInterval) {
+                if (!burstMode & selectionIntervalCounter == selectionInterval) {
                     selectionIntervalCounter = 1;
+
+                    // have the randomBetween var here for the selection rate
+                    // this will ensure the random between is only called for faulty messages
+                    selectionValue = randomBetween(0.0, 1.0);
                     if (selectionValue > selectionProb) {
                         continue;
                     }
-                } else if (burstMode == false & selectionIntervalCounter < selectionInterval & selectionIntervalCounter >= 1) {
+                } else if (!burstMode & selectionIntervalCounter < selectionInterval & selectionIntervalCounter >= 1) {
                     selectionIntervalCounter++;
                     continue;
-                } else if (burstMode == true & burstIntervalCounter == burstInterval) { // once we have waited for the set interval, begin the next burst of messages
+                } else if (burstMode & burstIntervalCounter == burstInterval) { // once we have waited for the set interval, begin the next burst of messages
                     burstMessageCounter = 0;
                     burstIntervalCounter = 0;
-                } else if (burstMode == true & burstMessageCounter == burstSize) { // once we reach the burst size, ensure that we enact an the set interval until we start the next burst
+                } else if (burstMode & burstMessageCounter == burstSize) { // once we reach the burst size, ensure that we enact an the set interval until we start the next burst
                     burstIntervalCounter++;
                     continue;
                 }
-
-                // have the randomBetween var here for the selection rate
-                // this will ensure the random between is only called for faulty messages
-                selectionValue = randomBetween(0.0, 1.0);
-                
-                
+                              
                 double networkDelay = randomBetween(minDelayAmount, maxDelayAmount);
                 int currentIndex = i;
 
@@ -134,6 +133,7 @@ public class DelayedReplayCreatorC implements MessageCreator {
                 ied.addMessage(delayMessage);
                 
                 numDelayInstances--;
+                burstMessageCounter++;
                 //selectionIntervalCounter++;
             }
             // if not faulty, then continue to the next message and check
