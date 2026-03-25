@@ -67,6 +67,24 @@
       "name": "uc10_delayed_replay",
       "enabled": true,
       "attackConfig": "config/attacks/uc10_delayed_replay.json"
+    },
+    {
+      "name": "uc10_delayed_replay_batch_dump",
+      "enabled": false,
+      "attackConfig": "config/attacks/uc10_delayed_replay_batch_dump.json",
+      "description": "UC10 batch dump delayed replay"
+    },
+    {
+      "name": "uc10_delayed_replay_backoff",
+      "enabled": false,
+      "attackConfig": "config/attacks/uc10_delayed_replay_backoff.json",
+      "description": "UC10 backoff delayed replay"
+    },
+    {
+      "name": "uc10_delayed_replay_double_drop",
+      "enabled": false,
+      "attackConfig": "config/attacks/uc10_delayed_replay_double_drop.json",
+      "description": "UC10 double drop delayed replay"
     }
   ],
   "gooseFlow": {

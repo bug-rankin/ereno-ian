@@ -57,6 +57,7 @@ public class DelayedReplayCreatorC implements MessageCreator {
         }
         boolean shiftSendTimestamp = config.getBoolean("shiftSendTimestamp", true);
         String orderBy = config.getString("orderBy", "received");
+        boolean replaceWithFake = config.getBoolean("replaceWithFake", false);
 
         // counter/tracking variables that are not assigned in the config file
         int burstMessageCounter = 0; // keeps track of the amount of messages grabbed before the burst maximum is reached
@@ -66,6 +67,7 @@ public class DelayedReplayCreatorC implements MessageCreator {
 
         int faultCounter = 0;
         ArrayList<Goose> delayedMessages = new ArrayList<>();
+        ArrayList<DelayedReplaySelector.FakeReplacement> fakeReplacements = new ArrayList<>();
 
         // Store the parameter values in some txt file or in the csv file
 
@@ -99,6 +101,10 @@ public class DelayedReplayCreatorC implements MessageCreator {
 
                 Goose delayedGoose = applyDelay(delayMessage, attackDelaySeconds, shiftSendTimestamp);
                 delayedMessages.add(delayedGoose);
+                if (replaceWithFake) {
+                    Goose fake = createFakeMessage(i, delayMessage);
+                    fakeReplacements.add(new DelayedReplaySelector.FakeReplacement(i, fake, arrivalTs(delayMessage)));
+                }
 
                 /*
                 if (delayedTimestamp >= closestMessage.getTimestamp()) {
@@ -150,6 +156,10 @@ public class DelayedReplayCreatorC implements MessageCreator {
 
                 Goose delayedGoose = applyDelay(delayMessage, attackDelaySeconds, shiftSendTimestamp);
                 delayedMessages.add(delayedGoose);
+                if (replaceWithFake) {
+                    Goose fake = createFakeMessage(i, delayMessage);
+                    fakeReplacements.add(new DelayedReplaySelector.FakeReplacement(i, fake, arrivalTs(delayMessage)));
+                }
                 /*
                 if (delayedTimestamp >= closestMessage.getTimestamp()) {
                     delayMessage.setTimestamp(delayedTimestamp);
@@ -174,15 +184,21 @@ public class DelayedReplayCreatorC implements MessageCreator {
 
         }
 
+        ArrayList<Goose> combined = new ArrayList<>(delayedMessages.size() + fakeReplacements.size());
+        combined.addAll(delayedMessages);
+        for (DelayedReplaySelector.FakeReplacement fr : fakeReplacements) {
+            combined.add(fr.fake);
+        }
+
         if ("send".equalsIgnoreCase(orderBy)) {
-            delayedMessages.sort(Comparator.comparingDouble(Goose::getTimestamp));
+            combined.sort(Comparator.comparingDouble(Goose::getTimestamp));
         } else {
-            delayedMessages.sort(Comparator.comparingDouble(g ->
+            combined.sort(Comparator.comparingDouble(g ->
                     g.getSubscriberRxTs() != null ? g.getSubscriberRxTs() : g.getTimestamp()));
         }
 
-        for (Goose delayedMessage : delayedMessages) {
-            ied.addMessage(delayedMessage);
+        for (Goose msg : combined) {
+            ied.addMessage(msg);
         }
 
         writeToFile(faultCounter, messageStream.size());
@@ -246,6 +262,22 @@ public class DelayedReplayCreatorC implements MessageCreator {
     public double getSelectionProb() { return selectionProb; }
 
     public boolean getBurstMode() { return burstMode; }
+
+    private Goose createFakeMessage(int index, Goose candidate) {
+        Goose base = index > 0 ? messageStream.get(index - 1) : candidate;
+        Goose fake = base.copy();
+        double ts = arrivalTs(candidate);
+        fake.setCbStatus(0);
+        fake.setLabel(GSVDatasetWriter.label[0]);
+        fake.setTimestamp(ts);
+        fake.setPublisherTxTs(ts);
+        fake.setSubscriberRxTs(ts);
+        return fake;
+    }
+
+    private double arrivalTs(Goose goose) {
+        return goose.getSubscriberRxTs() != null ? goose.getSubscriberRxTs() : goose.getTimestamp();
+    }
 
     private Goose applyDelay(Goose originalMessage, double attackDelaySeconds, boolean shiftSendTimestamp) {
         Goose delayedGoose = originalMessage.copy();

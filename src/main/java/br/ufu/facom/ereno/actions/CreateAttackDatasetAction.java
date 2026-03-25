@@ -29,8 +29,11 @@ import br.ufu.facom.ereno.attacks.uc07.devices.HighRateStNumInjectorIED;
 import br.ufu.facom.ereno.attacks.uc07.devices.HighRateStNumInjectorIEDC;
 import br.ufu.facom.ereno.attacks.uc08.devices.GrayHoleVictimIED;
 import br.ufu.facom.ereno.attacks.uc08.devices.GrayHoleVictimIEDC;
+import br.ufu.facom.ereno.attacks.uc10.devices.BackoffDelayedReplayIEDC;
+import br.ufu.facom.ereno.attacks.uc10.devices.BatchDumpDelayedReplayIEDC;
 import br.ufu.facom.ereno.attacks.uc10.devices.DelayedReplayIED;
 import br.ufu.facom.ereno.attacks.uc10.devices.DelayedReplayIEDC;
+import br.ufu.facom.ereno.attacks.uc10.devices.DoubleDropDelayedReplayIEDC;
 import br.ufu.facom.ereno.benign.uc00.devices.LegitimateProtectionIED;
 import br.ufu.facom.ereno.config.AttackConfig;
 import br.ufu.facom.ereno.config.ConfigLoader;
@@ -495,6 +498,12 @@ public class CreateAttackDatasetAction {
                 }
             case "delayed_replay":
                 return useLegacy ? new DelayedReplayIED(benignIED) : new DelayedReplayIEDC(benignIED, attackConfig);
+            case "delayed_replay_batch_dump":
+                return new BatchDumpDelayedReplayIEDC(benignIED, attackConfig);
+            case "delayed_replay_backoff":
+                return new BackoffDelayedReplayIEDC(benignIED, attackConfig);
+            case "delayed_replay_double_drop":
+                return new DoubleDropDelayedReplayIEDC(benignIED, attackConfig);
                 
             default:
                 throw new IllegalArgumentException("Unknown attack type: " + attackType);

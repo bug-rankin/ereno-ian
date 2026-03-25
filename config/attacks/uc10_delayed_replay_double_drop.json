@@ -1,0 +1,13 @@
+{
+  "attackType": "delayed_replay_double_drop",
+  "enabled": true,
+  "selectionInterval": { "min": 10, "max": 20 },
+  "burstInterval": { "min": 3, "max": 8 },
+  "burstSize": { "min": 3, "max": 6 },
+  "selectionProb": { "value": 1.0 },
+  "burstMode": false,
+  "networkDelayMs": { "min": 4000.0, "max": 4200.0 },
+  "shiftSendTimestamp": true,
+  "orderBy": "received",
+  "replaceWithFake": false
+}
