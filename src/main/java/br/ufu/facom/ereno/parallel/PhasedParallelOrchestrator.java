@@ -11,21 +11,6 @@ import java.util.logging.Logger;
 
 import br.ufu.facom.ereno.config.ActionConfigLoader;
 
-/**
- * Runs a pipeline expressed as ordered <i>phases</i>. All jobs within a phase
- * are submitted to a shared thread pool and executed concurrently; phases are
- * separated by barriers (the orchestrator waits for every job in phase N to
- * finish before submitting phase N+1).
- *
- * <p>Pre-phase steps (declared via {@link ActionConfigLoader.MainConfig#pipeline})
- * run sequentially before the first phase, and are useful for one-off setup
- * (e.g. a single {@code create_benign} job whose output every phase A job
- * consumes).</p>
- *
- * <p>Activation: this orchestrator is invoked when both
- * {@code parallelExecution.enabled} is true and {@code phases} is non-empty.
- * It is mutually exclusive with the legacy single-loop orchestrator.</p>
- */
 public final class PhasedParallelOrchestrator {
 
     private static final Logger LOGGER = Logger.getLogger(PhasedParallelOrchestrator.class.getName());
@@ -33,12 +18,6 @@ public final class PhasedParallelOrchestrator {
     private PhasedParallelOrchestrator() {
     }
 
-    /**
-     * True iff the config declares one or more {@code phases}. Phases run
-     * sequentially as a pipeline regardless of {@code parallelExecution.enabled};
-     * the flag only controls whether the jobs <i>within</i> each phase run
-     * concurrently (enabled=true) or one at a time (enabled=false).
-     */
     public static boolean isPhasedEnabled(ActionConfigLoader.MainConfig mainConfig) {
         return mainConfig != null
                 && mainConfig.phases != null
@@ -135,8 +114,7 @@ public final class PhasedParallelOrchestrator {
     }
 
     private static int resolveWorkers(ActionConfigLoader.ParallelExecutionConfig cfg) {
-        // When parallelExecution is absent or disabled, run jobs within each
-        // phase one at a time. The phase boundary still acts as a barrier.
+
         if (cfg == null || !cfg.enabled) {
             return 1;
         }
@@ -164,7 +142,7 @@ public final class PhasedParallelOrchestrator {
         for (ActionConfigLoader.PipelineStep step : mainConfig.pipeline) {
             String stepDesc = step.description != null ? step.description : step.action;
             LOGGER.info(() -> "Pre-phase step: " + stepDesc);
-            // Pre-phase steps may be inline OR file-based.
+
             if (step.inline != null) {
                 actionExecutor.executeJob(step);
             } else {

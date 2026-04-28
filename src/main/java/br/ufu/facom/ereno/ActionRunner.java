@@ -24,8 +24,8 @@ import br.ufu.facom.ereno.config.ConfigLoader;
 import br.ufu.facom.ereno.parallel.ParallelPipelineOrchestrator;
 import br.ufu.facom.ereno.parallel.PhasedParallelOrchestrator;
 import br.ufu.facom.ereno.parallel.PipelineActionExecutor;
-import br.ufu.facom.ereno.utils.ProgressTracker;
-import br.ufu.facom.ereno.utils.VariableSubstitutor;
+import br.ufu.facom.ereno.util.ProgressTracker;
+import br.ufu.facom.ereno.util.VariableSubstitutor;
 
 /**
  * Main entry point for the new action-based configuration system.

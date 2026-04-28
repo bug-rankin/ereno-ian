@@ -1,4 +1,4 @@
-package br.ufu.facom.ereno.utils;
+package br.ufu.facom.ereno.util;
 
 import java.util.HashMap;
 import java.util.Map;

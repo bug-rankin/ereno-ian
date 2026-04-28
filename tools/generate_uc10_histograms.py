@@ -32,12 +32,7 @@ VARIANT_ORDER = [
     "uc10_doubledrop_real",
     "uc10_doubledrop_fake",
 ]
-# Suffix legend:
-#   /R = replaceWithFake:false  -> captured frames are delayed; their original
-#                                  time slots are left empty (visible gap).
-#   /F = replaceWithFake:true   -> same delay, but the emptied slots are
-#                                  back-filled with synthetic GOOSE so the
-#                                  live flow looks continuous.
+
 SHORT_LABELS = {
     "uc10_replay_real": "replay/R",
     "uc10_replay_fake": "replay/F",
@@ -49,7 +44,6 @@ SHORT_LABELS = {
     "uc10_doubledrop_fake": "double/F",
 }
 METRIC_VMIN, METRIC_VMAX = 0.0, 1.0
-
 
 def load() -> pd.DataFrame:
     if not CSV_PATH.exists():
@@ -63,7 +57,6 @@ def load() -> pd.DataFrame:
         raise SystemExit(f"CSV missing columns: {missing}")
     return df
 
-
 def _annotate(ax, matrix: np.ndarray) -> None:
     rows, cols = matrix.shape
     for i in range(rows):
@@ -72,7 +65,6 @@ def _annotate(ax, matrix: np.ndarray) -> None:
             color = "white" if v < 0.55 else "black"
             ax.text(j, i, f"{v:.2f}", ha="center", va="center",
                     color=color, fontsize=8)
-
 
 def _heatmap(ax, matrix: np.ndarray, title: str, cmap: str,
              vmin: float, vmax: float) -> None:
@@ -88,7 +80,6 @@ def _heatmap(ax, matrix: np.ndarray, title: str, cmap: str,
     _annotate(ax, matrix)
     return im
 
-
 def cell_matrix(df: pd.DataFrame, classifier: str, metric: str,
                 agg: str) -> np.ndarray:
     sub = df[df["modelName"] == classifier]
@@ -97,7 +88,6 @@ def cell_matrix(df: pd.DataFrame, classifier: str, metric: str,
                 .unstack("testAttack"))
     pivot = pivot.reindex(index=VARIANT_ORDER, columns=VARIANT_ORDER)
     return pivot.to_numpy(dtype=float)
-
 
 def plot_mean_heatmaps(df: pd.DataFrame) -> None:
     classifiers = sorted(df["modelName"].unique())
@@ -120,7 +110,6 @@ def plot_mean_heatmaps(df: pd.DataFrame) -> None:
         plt.close(fig)
         print(f"  wrote {out}")
 
-
 def plot_std_heatmaps(df: pd.DataFrame) -> None:
     classifiers = sorted(df["modelName"].unique())
     fig, axes = plt.subplots(1, len(classifiers),
@@ -129,7 +118,7 @@ def plot_std_heatmaps(df: pd.DataFrame) -> None:
         axes = [axes]
     fig.suptitle("UC10 per-cell F1 std-dev across seeds (lower = more stable)",
                  fontsize=13, fontweight="bold")
-    # std colour scale derived from data so small variances stay visible
+
     stacked = np.stack([cell_matrix(df, c, "f1", "std") for c in classifiers])
     vmax = float(np.nanmax(stacked)) if np.isfinite(np.nanmax(stacked)) else 0.1
     vmax = max(vmax, 1e-3)
@@ -143,7 +132,6 @@ def plot_std_heatmaps(df: pd.DataFrame) -> None:
     fig.savefig(out, dpi=150, bbox_inches="tight")
     plt.close(fig)
     print(f"  wrote {out}")
-
 
 def plot_self_vs_cross(df: pd.DataFrame) -> None:
     df = df.copy()
@@ -181,7 +169,6 @@ def plot_self_vs_cross(df: pd.DataFrame) -> None:
     plt.close(fig)
     print(f"  wrote {out}")
 
-
 def plot_generalization_bars(df: pd.DataFrame) -> None:
     cross = df[df["trainingAttack1"] != df["testAttack"]]
     grouped = (cross.groupby(["modelName", "trainingAttack1"])["f1"]
@@ -217,7 +204,6 @@ def plot_generalization_bars(df: pd.DataFrame) -> None:
     plt.close(fig)
     print(f"  wrote {out}")
 
-
 def print_summary(df: pd.DataFrame) -> None:
     print("\n=== UC10 variant evaluation summary ===")
     print(f"Rows: {len(df)}")
@@ -233,7 +219,6 @@ def print_summary(df: pd.DataFrame) -> None:
     print("\nMean F1 (self vs cross):")
     print(by_clf.round(4).to_string())
 
-
 def main() -> None:
     df = load()
     OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -244,7 +229,6 @@ def main() -> None:
     plot_self_vs_cross(df)
     plot_generalization_bars(df)
     print_summary(df)
-
 
 if __name__ == "__main__":
     main()

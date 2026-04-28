@@ -2,10 +2,6 @@ package br.ufu.facom.ereno.config;
 
 import com.google.gson.JsonObject;
 
-/**
- * Configuration holder for attack-specific parameters loaded from config/attacks/*.json
- * This class provides typed access to attack configuration parameters.
- */
 public class AttackConfig {
     private final JsonObject json;
     private final String attackType;
@@ -23,8 +19,6 @@ public class AttackConfig {
         return json;
     }
 
-    // Helper methods for common parameter access patterns
-    
     public double getDouble(String key, double defaultValue) {
         return json.has(key) ? json.get(key).getAsDouble() : defaultValue;
     }
@@ -41,10 +35,8 @@ public class AttackConfig {
         return json.has(key) ? json.get(key).getAsString() : defaultValue;
     }
 
-    // Nested object helpers
-    
     public JsonObject getObject(String key) {
-        return json.has(key) && json.get(key).isJsonObject() ? 
+        return json.has(key) && json.get(key).isJsonObject() ?
             json.getAsJsonObject(key) : new JsonObject();
     }
 
@@ -52,8 +44,6 @@ public class AttackConfig {
         return json.has(key) && json.get(key).isJsonObject();
     }
 
-    // Range helpers (common pattern: {min: X, max: Y})
-    
     public double getRangeMin(String key, double defaultValue) {
         if (json.has(key) && json.get(key).isJsonObject()) {
             JsonObject obj = json.getAsJsonObject(key);
@@ -82,14 +72,9 @@ public class AttackConfig {
         return (int) getRangeMax(key, defaultValue);
     }
 
-    // Specific attack parameter helpers
-    
-    /**
-     * Get delay in milliseconds from config (handles both seconds and milliseconds)
-     */
     public double getDelayMinMs(double defaultMs) {
         double val = getRangeMin("delayMs", defaultMs);
-        // If value is very small (< 10), assume it's in seconds, convert to ms
+
         return val < 10 ? val * 1000 : val;
     }
 
@@ -98,9 +83,6 @@ public class AttackConfig {
         return val < 10 ? val * 1000 : val;
     }
 
-    /**
-     * Get window parameters in seconds
-     */
     public double getWindowMinS(double defaultSeconds) {
         return getRangeMin("windowS", defaultSeconds);
     }
@@ -109,18 +91,12 @@ public class AttackConfig {
         return getRangeMax("windowS", defaultSeconds);
     }
 
-    /**
-     * Get probability value (handles both 0-1 and 0-100 ranges)
-     */
     public double getProbability(String key, double defaultValue) {
         double val = getDouble(key, defaultValue);
-        // Normalize to 0-1 range
+
         return val > 1.0 ? val / 100.0 : val;
     }
 
-    /**
-     * Get nested probability (e.g., burst.prob)
-     */
     public double getNestedProb(String parent, String child, double defaultValue) {
         if (hasObject(parent)) {
             JsonObject obj = getObject(parent);
@@ -204,9 +180,6 @@ public class AttackConfig {
         return defaultValue;
     }
 
-    /**
-     * Get an integer array from config
-     */
     public int[] getIntArray(String key, int[] defaultValue) {
         if (json.has(key) && json.get(key).isJsonArray()) {
             com.google.gson.JsonArray arr = json.getAsJsonArray(key);

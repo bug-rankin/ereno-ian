@@ -6,10 +6,6 @@ import java.io.IOException;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Simple configuration loader for the merged config file `config/configparams.json`.
- * It exposes static fields that the runners can read (and modify at runtime if needed).
- */
 public class ConfigLoader {
 
     public static AttacksConfig attacks = new AttacksConfig();
@@ -20,29 +16,14 @@ public class ConfigLoader {
     public static DevicesConfig devices = new DevicesConfig();
     public static BenignDataConfig benignData = new BenignDataConfig();
 
-    // Per-thread random seed for deterministic, isolated parallel runs.
-    // Access via getSeed() / setSeed(Long).
     private static final ThreadLocal<Long> SEED = new ThreadLocal<>();
 
-    /**
-     * Shared RNG used across the codebase. Backed by a per-thread
-     * {@link java.util.Random} so concurrent jobs get isolated streams.
-     * Reads (e.g. {@code RNG.nextInt(n)}) are unchanged at call sites;
-     * to reseed the current thread, call {@link #setSeed(Long)} or
-     * {@code RNG.setSeed(seed)}.
-     */
     public static final ThreadScopedRandom RNG = new ThreadScopedRandom();
 
-    /** Returns the seed associated with the current thread, or null if unset. */
     public static Long getSeed() {
         return SEED.get();
     }
 
-    /**
-     * Set the seed for the current thread (and reseed the per-thread RNG).
-     * Pass {@code null} to clear the thread's seed; the RNG will lazily
-     * re-seed itself from {@code System.nanoTime()} on next use.
-     */
     public static void setSeed(Long seed) {
         if (seed == null) {
             SEED.remove();
@@ -67,11 +48,11 @@ public class ConfigLoader {
                 if (h.setupIED != null) setupIED = h.setupIED;
                 if (h.output != null) output = h.output;
                 if (h.attacksParams != null) attacksParams = h.attacksParams;
-                // sanitize and fill sensible defaults for any ranges that may be missing
+
                 sanitizeDefaults();
                 if (h.devices != null) devices = h.devices;
                 if (h.benignData != null) benignData = h.benignData;
-                // load optional global seed (applies to the loading thread)
+
                 if (h.randomSeed != null) {
                     setSeed(h.randomSeed);
                 } else {
@@ -81,28 +62,21 @@ public class ConfigLoader {
         }
     }
 
-    /**
-     * Defensive post-processing after JSON load: some older/partial configs may omit
-     * the legacy UC* fields or leave numeric ranges at zero. Ensure we have sensible
-     * non-zero ranges to avoid runtime exceptions (e.g. IED.randomBetween).
-     */
     private static void sanitizeDefaults() {
         if (attacksParams == null) return;
         StringBuilder applied = new StringBuilder();
 
-        // UC02 time range used by inverse-replay creators. Ensure min < max.
         if (attacksParams.uc02 == null) attacksParams.uc02 = new AttacksParams.UC02Config();
         if (attacksParams.uc02.timeTakenMinMs == null) attacksParams.uc02.timeTakenMinMs = new AttacksParams.RangeMs();
         int uc02min = attacksParams.uc02.timeTakenMinMs.minMs;
         int uc02max = attacksParams.uc02.timeTakenMinMs.maxMs;
         if (uc02min <= 0 || uc02max <= 0 || uc02min >= uc02max) {
-            attacksParams.uc02.timeTakenMinMs.minMs = 300;   // 0.3s
-            attacksParams.uc02.timeTakenMinMs.maxMs = 5000;  // 5s
+            attacksParams.uc02.timeTakenMinMs.minMs = 300;
+            attacksParams.uc02.timeTakenMinMs.maxMs = 5000;
             attacksParams.uc02.timeTakenMinMs.defaultMs = 1000;
             applied.append("uc02.timeTakenMinMs set to 300..5000 ms; ");
         }
 
-        // UC01: short/long attacker time ranges
         if (attacksParams.uc01 == null) attacksParams.uc01 = new AttacksParams.UC01Config();
         if (attacksParams.uc01.timeTakenShort == null) attacksParams.uc01.timeTakenShort = new AttacksParams.RangeMs();
         if (attacksParams.uc01.timeTakenLong == null) attacksParams.uc01.timeTakenLong = new AttacksParams.RangeMs();
@@ -129,7 +103,6 @@ public class ConfigLoader {
             applied.append("uc01.longChancePercent set to 5..50%; ");
         }
 
-        // UC03: masquerade fault defaults
         if (attacksParams.uc03 == null) attacksParams.uc03 = new AttacksParams.UC03Config();
         if (attacksParams.uc03.faultProbability == null) attacksParams.uc03.faultProbability = new AttacksParams.RangeInt();
         if (attacksParams.uc03.networkDelayMs == null) attacksParams.uc03.networkDelayMs = new AttacksParams.RangeMs();
@@ -148,7 +121,6 @@ public class ConfigLoader {
             applied.append("uc03.networkDelayMs set to 10..1000 ms; ");
         }
 
-        // UC05 / UC06: stNum jump ranges
         if (attacksParams.uc05 == null) attacksParams.uc05 = new AttacksParams.UC05Config();
         if (attacksParams.uc05.stNumMin == null) attacksParams.uc05.stNumMin = new AttacksParams.RangeInt();
         if (attacksParams.uc05.stNumMax == null) attacksParams.uc05.stNumMax = new AttacksParams.RangeInt();
@@ -169,7 +141,6 @@ public class ConfigLoader {
             applied.append("uc06.stNum set to 1..200; ");
         }
 
-        // UC07: multiplier
         if (attacksParams.uc07 == null) attacksParams.uc07 = new AttacksParams.UC07Config();
         if (attacksParams.uc07.minTimeMultiplier == null) attacksParams.uc07.minTimeMultiplier = new AttacksParams.RangeDouble();
         if (attacksParams.uc07.minTimeMultiplier.min <= 0 || attacksParams.uc07.minTimeMultiplier.max <= 0 ||
@@ -180,7 +151,6 @@ public class ConfigLoader {
             applied.append("uc07.minTimeMultiplier set to 0.1..5.0; ");
         }
 
-        // UC08: selection rate
         if (attacksParams.uc08 == null) attacksParams.uc08 = new AttacksParams.UC08Config();
         if (attacksParams.uc08.selectionRate == null) attacksParams.uc08.selectionRate = new AttacksParams.RangeInt();
         if (attacksParams.uc08.selectionRate.min <= 0 || attacksParams.uc08.selectionRate.max <= 0 ||
@@ -203,8 +173,6 @@ public class ConfigLoader {
             attacksParams.uc10.burstMax = 6;
         }
 
-
-        // Log applied defaults (if any) to help auditing and debugging of config migrations
         if (applied.length() > 0) {
             java.util.logging.Logger.getLogger("ConfigLoader").info(() -> "Applied config defaults: " + applied.toString());
         } else {
@@ -226,7 +194,7 @@ public class ConfigLoader {
     }
 
     public static class AttacksParams {
-        // Backwards-compatible UC* slots (kept to avoid breaking older code)
+
         public UC01Config uc01 = new UC01Config();
         public UC02Config uc02 = new UC02Config();
         public UC03Config uc03 = new UC03Config();
@@ -236,7 +204,6 @@ public class ConfigLoader {
         public UC08Config uc08 = new UC08Config();
         public UC10Config uc10 = new UC10Config();
 
-        // New, descriptive attack parameter sections (match keys in config/configparams.json)
         public RandomReplayConfig randomReplay = new RandomReplayConfig();
         public InverseReplayConfig inverseReplay = new InverseReplayConfig();
         public MasqFaultConfig masqFault = new MasqFaultConfig();
@@ -250,7 +217,6 @@ public class ConfigLoader {
         public static class RangeMs { public int minMs; public int maxMs; public int defaultMs; }
         public static class RangeDouble { public double min; public double max; public double defaultValue; }
 
-        // --- old UC* configs (unchanged) ---
         public static class UC01Config {
             public RangeMs timeTakenShort = new RangeMs();
             public RangeMs timeTakenLong = new RangeMs();
@@ -260,7 +226,7 @@ public class ConfigLoader {
         public static class UC02Config {
             public RangeMs timeTakenMinMs = new RangeMs();
             public UC02Config() {
-                // sensible defaults: 0.3s .. 5s (expressed in ms)
+
                 this.timeTakenMinMs.minMs = 300;
                 this.timeTakenMinMs.maxMs = 5000;
                 this.timeTakenMinMs.defaultMs = 1000;
@@ -277,13 +243,12 @@ public class ConfigLoader {
 
         public static class UC08Config { public RangeInt selectionRate = new RangeInt(); }
 
-        public static class UC10Config { // burst-only delayed replay
+        public static class UC10Config {
             public RangeInt burstInterval = new RangeInt();
             public int burstMax = 6;
             public double selectionProb = 1.0;
         }
 
-        // --- new descriptive configs ---
         public static class RandomReplayConfig {
             public boolean enabled = true;
             public CountConfig count = new CountConfig();
@@ -369,7 +334,7 @@ public class ConfigLoader {
             public RangeDouble delayBurstLen = new RangeDouble();
         }
 
-        public static class DelayedReplayConfig { // burst-only delayed replay
+        public static class DelayedReplayConfig {
             public boolean enabled = false;
             public RangeInt burstInterval = new RangeInt();
             public int burstMax = 6;
@@ -379,9 +344,9 @@ public class ConfigLoader {
     }
 
     public static class OutputConfig {
-        /** "arff" or "csv" (case-insensitive). Defaults to arff. */
+
         public String format = "arff";
-        /** Optional filename. If null, the runner will choose a sane default inside target/. */
+
         public String filename = null;
     }
 
@@ -425,18 +390,18 @@ public class ConfigLoader {
     }
 
     public static class DevicesConfig {
-        /** If true, instantiate the non-destructive C-variant devices (default true). If false, instantiate legacy device classes. */
+
         public boolean useCVariants = true;
     }
 
     public static class BenignDataConfig {
-        /** Directory where benign datasets are saved (default: target/benign_data). */
+
         public String benignDataDir = "target/benign_data";
-        /** If true, save generated benign data to a file before generating attacks. */
+
         public boolean saveBenignData = false;
-        /** If specified, import benign data from this file instead of generating new data. */
+
         public String importBenignDataPath = null;
-        /** Fault probability percentage used in benign data generation (for filename). Default is 5. */
+
         public int faultProbability = 5;
     }
 }
