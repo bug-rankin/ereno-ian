@@ -1,0 +1,800 @@
+{
+  "action": "comprehensive_evaluate",
+  "description": "UC10 variant cross-evaluation: 48 models x 80 test datasets = 3840 evaluations",
+  "input": {
+    "models": [
+      {
+        "trainingAttack1": "uc10_replay_real",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "J48",
+        "trainingSeed": "42",
+        "modelPath": "target/uc10_variants/models/uc10_replay_real_seed42/uc10_replay_real_seed42_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_replay_real",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "RandomForest",
+        "trainingSeed": "42",
+        "modelPath": "target/uc10_variants/models/uc10_replay_real_seed42/uc10_replay_real_seed42_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_replay_real",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "J48",
+        "trainingSeed": "43",
+        "modelPath": "target/uc10_variants/models/uc10_replay_real_seed43/uc10_replay_real_seed43_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_replay_real",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "RandomForest",
+        "trainingSeed": "43",
+        "modelPath": "target/uc10_variants/models/uc10_replay_real_seed43/uc10_replay_real_seed43_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_replay_real",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "J48",
+        "trainingSeed": "44",
+        "modelPath": "target/uc10_variants/models/uc10_replay_real_seed44/uc10_replay_real_seed44_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_replay_real",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "RandomForest",
+        "trainingSeed": "44",
+        "modelPath": "target/uc10_variants/models/uc10_replay_real_seed44/uc10_replay_real_seed44_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_replay_fake",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "J48",
+        "trainingSeed": "42",
+        "modelPath": "target/uc10_variants/models/uc10_replay_fake_seed42/uc10_replay_fake_seed42_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_replay_fake",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "RandomForest",
+        "trainingSeed": "42",
+        "modelPath": "target/uc10_variants/models/uc10_replay_fake_seed42/uc10_replay_fake_seed42_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_replay_fake",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "J48",
+        "trainingSeed": "43",
+        "modelPath": "target/uc10_variants/models/uc10_replay_fake_seed43/uc10_replay_fake_seed43_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_replay_fake",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "RandomForest",
+        "trainingSeed": "43",
+        "modelPath": "target/uc10_variants/models/uc10_replay_fake_seed43/uc10_replay_fake_seed43_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_replay_fake",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "J48",
+        "trainingSeed": "44",
+        "modelPath": "target/uc10_variants/models/uc10_replay_fake_seed44/uc10_replay_fake_seed44_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_replay_fake",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "RandomForest",
+        "trainingSeed": "44",
+        "modelPath": "target/uc10_variants/models/uc10_replay_fake_seed44/uc10_replay_fake_seed44_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_backoff_real",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "J48",
+        "trainingSeed": "42",
+        "modelPath": "target/uc10_variants/models/uc10_backoff_real_seed42/uc10_backoff_real_seed42_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_backoff_real",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "RandomForest",
+        "trainingSeed": "42",
+        "modelPath": "target/uc10_variants/models/uc10_backoff_real_seed42/uc10_backoff_real_seed42_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_backoff_real",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "J48",
+        "trainingSeed": "43",
+        "modelPath": "target/uc10_variants/models/uc10_backoff_real_seed43/uc10_backoff_real_seed43_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_backoff_real",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "RandomForest",
+        "trainingSeed": "43",
+        "modelPath": "target/uc10_variants/models/uc10_backoff_real_seed43/uc10_backoff_real_seed43_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_backoff_real",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "J48",
+        "trainingSeed": "44",
+        "modelPath": "target/uc10_variants/models/uc10_backoff_real_seed44/uc10_backoff_real_seed44_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_backoff_real",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "RandomForest",
+        "trainingSeed": "44",
+        "modelPath": "target/uc10_variants/models/uc10_backoff_real_seed44/uc10_backoff_real_seed44_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_backoff_fake",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "J48",
+        "trainingSeed": "42",
+        "modelPath": "target/uc10_variants/models/uc10_backoff_fake_seed42/uc10_backoff_fake_seed42_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_backoff_fake",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "RandomForest",
+        "trainingSeed": "42",
+        "modelPath": "target/uc10_variants/models/uc10_backoff_fake_seed42/uc10_backoff_fake_seed42_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_backoff_fake",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "J48",
+        "trainingSeed": "43",
+        "modelPath": "target/uc10_variants/models/uc10_backoff_fake_seed43/uc10_backoff_fake_seed43_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_backoff_fake",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "RandomForest",
+        "trainingSeed": "43",
+        "modelPath": "target/uc10_variants/models/uc10_backoff_fake_seed43/uc10_backoff_fake_seed43_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_backoff_fake",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "J48",
+        "trainingSeed": "44",
+        "modelPath": "target/uc10_variants/models/uc10_backoff_fake_seed44/uc10_backoff_fake_seed44_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_backoff_fake",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "RandomForest",
+        "trainingSeed": "44",
+        "modelPath": "target/uc10_variants/models/uc10_backoff_fake_seed44/uc10_backoff_fake_seed44_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_batchdump_real",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "J48",
+        "trainingSeed": "42",
+        "modelPath": "target/uc10_variants/models/uc10_batchdump_real_seed42/uc10_batchdump_real_seed42_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_batchdump_real",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "RandomForest",
+        "trainingSeed": "42",
+        "modelPath": "target/uc10_variants/models/uc10_batchdump_real_seed42/uc10_batchdump_real_seed42_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_batchdump_real",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "J48",
+        "trainingSeed": "43",
+        "modelPath": "target/uc10_variants/models/uc10_batchdump_real_seed43/uc10_batchdump_real_seed43_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_batchdump_real",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "RandomForest",
+        "trainingSeed": "43",
+        "modelPath": "target/uc10_variants/models/uc10_batchdump_real_seed43/uc10_batchdump_real_seed43_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_batchdump_real",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "J48",
+        "trainingSeed": "44",
+        "modelPath": "target/uc10_variants/models/uc10_batchdump_real_seed44/uc10_batchdump_real_seed44_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_batchdump_real",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "RandomForest",
+        "trainingSeed": "44",
+        "modelPath": "target/uc10_variants/models/uc10_batchdump_real_seed44/uc10_batchdump_real_seed44_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_batchdump_fake",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "J48",
+        "trainingSeed": "42",
+        "modelPath": "target/uc10_variants/models/uc10_batchdump_fake_seed42/uc10_batchdump_fake_seed42_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_batchdump_fake",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "RandomForest",
+        "trainingSeed": "42",
+        "modelPath": "target/uc10_variants/models/uc10_batchdump_fake_seed42/uc10_batchdump_fake_seed42_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_batchdump_fake",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "J48",
+        "trainingSeed": "43",
+        "modelPath": "target/uc10_variants/models/uc10_batchdump_fake_seed43/uc10_batchdump_fake_seed43_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_batchdump_fake",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "RandomForest",
+        "trainingSeed": "43",
+        "modelPath": "target/uc10_variants/models/uc10_batchdump_fake_seed43/uc10_batchdump_fake_seed43_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_batchdump_fake",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "J48",
+        "trainingSeed": "44",
+        "modelPath": "target/uc10_variants/models/uc10_batchdump_fake_seed44/uc10_batchdump_fake_seed44_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_batchdump_fake",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "RandomForest",
+        "trainingSeed": "44",
+        "modelPath": "target/uc10_variants/models/uc10_batchdump_fake_seed44/uc10_batchdump_fake_seed44_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_doubledrop_real",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "J48",
+        "trainingSeed": "42",
+        "modelPath": "target/uc10_variants/models/uc10_doubledrop_real_seed42/uc10_doubledrop_real_seed42_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_doubledrop_real",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "RandomForest",
+        "trainingSeed": "42",
+        "modelPath": "target/uc10_variants/models/uc10_doubledrop_real_seed42/uc10_doubledrop_real_seed42_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_doubledrop_real",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "J48",
+        "trainingSeed": "43",
+        "modelPath": "target/uc10_variants/models/uc10_doubledrop_real_seed43/uc10_doubledrop_real_seed43_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_doubledrop_real",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "RandomForest",
+        "trainingSeed": "43",
+        "modelPath": "target/uc10_variants/models/uc10_doubledrop_real_seed43/uc10_doubledrop_real_seed43_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_doubledrop_real",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "J48",
+        "trainingSeed": "44",
+        "modelPath": "target/uc10_variants/models/uc10_doubledrop_real_seed44/uc10_doubledrop_real_seed44_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_doubledrop_real",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "RandomForest",
+        "trainingSeed": "44",
+        "modelPath": "target/uc10_variants/models/uc10_doubledrop_real_seed44/uc10_doubledrop_real_seed44_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_doubledrop_fake",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "J48",
+        "trainingSeed": "42",
+        "modelPath": "target/uc10_variants/models/uc10_doubledrop_fake_seed42/uc10_doubledrop_fake_seed42_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_doubledrop_fake",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "RandomForest",
+        "trainingSeed": "42",
+        "modelPath": "target/uc10_variants/models/uc10_doubledrop_fake_seed42/uc10_doubledrop_fake_seed42_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_doubledrop_fake",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "J48",
+        "trainingSeed": "43",
+        "modelPath": "target/uc10_variants/models/uc10_doubledrop_fake_seed43/uc10_doubledrop_fake_seed43_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_doubledrop_fake",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "RandomForest",
+        "trainingSeed": "43",
+        "modelPath": "target/uc10_variants/models/uc10_doubledrop_fake_seed43/uc10_doubledrop_fake_seed43_RandomForest_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_doubledrop_fake",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "J48",
+        "trainingSeed": "44",
+        "modelPath": "target/uc10_variants/models/uc10_doubledrop_fake_seed44/uc10_doubledrop_fake_seed44_J48_model.model"
+      },
+      {
+        "trainingAttack1": "uc10_doubledrop_fake",
+        "trainingAttack2": "",
+        "trainingPattern": "uc10_variant",
+        "modelName": "RandomForest",
+        "trainingSeed": "44",
+        "modelPath": "target/uc10_variants/models/uc10_doubledrop_fake_seed44/uc10_doubledrop_fake_seed44_RandomForest_model.model"
+      }
+    ],
+    "testDatasets": [
+      {
+        "testAttack": "uc10_replay_real",
+        "testSeed": "100",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_replay_real_seed100.arff"
+      },
+      {
+        "testAttack": "uc10_replay_real",
+        "testSeed": "101",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_replay_real_seed101.arff"
+      },
+      {
+        "testAttack": "uc10_replay_real",
+        "testSeed": "102",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_replay_real_seed102.arff"
+      },
+      {
+        "testAttack": "uc10_replay_real",
+        "testSeed": "103",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_replay_real_seed103.arff"
+      },
+      {
+        "testAttack": "uc10_replay_real",
+        "testSeed": "104",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_replay_real_seed104.arff"
+      },
+      {
+        "testAttack": "uc10_replay_real",
+        "testSeed": "105",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_replay_real_seed105.arff"
+      },
+      {
+        "testAttack": "uc10_replay_real",
+        "testSeed": "106",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_replay_real_seed106.arff"
+      },
+      {
+        "testAttack": "uc10_replay_real",
+        "testSeed": "107",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_replay_real_seed107.arff"
+      },
+      {
+        "testAttack": "uc10_replay_real",
+        "testSeed": "108",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_replay_real_seed108.arff"
+      },
+      {
+        "testAttack": "uc10_replay_real",
+        "testSeed": "109",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_replay_real_seed109.arff"
+      },
+      {
+        "testAttack": "uc10_replay_fake",
+        "testSeed": "100",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_replay_fake_seed100.arff"
+      },
+      {
+        "testAttack": "uc10_replay_fake",
+        "testSeed": "101",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_replay_fake_seed101.arff"
+      },
+      {
+        "testAttack": "uc10_replay_fake",
+        "testSeed": "102",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_replay_fake_seed102.arff"
+      },
+      {
+        "testAttack": "uc10_replay_fake",
+        "testSeed": "103",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_replay_fake_seed103.arff"
+      },
+      {
+        "testAttack": "uc10_replay_fake",
+        "testSeed": "104",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_replay_fake_seed104.arff"
+      },
+      {
+        "testAttack": "uc10_replay_fake",
+        "testSeed": "105",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_replay_fake_seed105.arff"
+      },
+      {
+        "testAttack": "uc10_replay_fake",
+        "testSeed": "106",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_replay_fake_seed106.arff"
+      },
+      {
+        "testAttack": "uc10_replay_fake",
+        "testSeed": "107",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_replay_fake_seed107.arff"
+      },
+      {
+        "testAttack": "uc10_replay_fake",
+        "testSeed": "108",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_replay_fake_seed108.arff"
+      },
+      {
+        "testAttack": "uc10_replay_fake",
+        "testSeed": "109",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_replay_fake_seed109.arff"
+      },
+      {
+        "testAttack": "uc10_backoff_real",
+        "testSeed": "100",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_backoff_real_seed100.arff"
+      },
+      {
+        "testAttack": "uc10_backoff_real",
+        "testSeed": "101",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_backoff_real_seed101.arff"
+      },
+      {
+        "testAttack": "uc10_backoff_real",
+        "testSeed": "102",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_backoff_real_seed102.arff"
+      },
+      {
+        "testAttack": "uc10_backoff_real",
+        "testSeed": "103",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_backoff_real_seed103.arff"
+      },
+      {
+        "testAttack": "uc10_backoff_real",
+        "testSeed": "104",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_backoff_real_seed104.arff"
+      },
+      {
+        "testAttack": "uc10_backoff_real",
+        "testSeed": "105",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_backoff_real_seed105.arff"
+      },
+      {
+        "testAttack": "uc10_backoff_real",
+        "testSeed": "106",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_backoff_real_seed106.arff"
+      },
+      {
+        "testAttack": "uc10_backoff_real",
+        "testSeed": "107",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_backoff_real_seed107.arff"
+      },
+      {
+        "testAttack": "uc10_backoff_real",
+        "testSeed": "108",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_backoff_real_seed108.arff"
+      },
+      {
+        "testAttack": "uc10_backoff_real",
+        "testSeed": "109",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_backoff_real_seed109.arff"
+      },
+      {
+        "testAttack": "uc10_backoff_fake",
+        "testSeed": "100",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_backoff_fake_seed100.arff"
+      },
+      {
+        "testAttack": "uc10_backoff_fake",
+        "testSeed": "101",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_backoff_fake_seed101.arff"
+      },
+      {
+        "testAttack": "uc10_backoff_fake",
+        "testSeed": "102",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_backoff_fake_seed102.arff"
+      },
+      {
+        "testAttack": "uc10_backoff_fake",
+        "testSeed": "103",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_backoff_fake_seed103.arff"
+      },
+      {
+        "testAttack": "uc10_backoff_fake",
+        "testSeed": "104",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_backoff_fake_seed104.arff"
+      },
+      {
+        "testAttack": "uc10_backoff_fake",
+        "testSeed": "105",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_backoff_fake_seed105.arff"
+      },
+      {
+        "testAttack": "uc10_backoff_fake",
+        "testSeed": "106",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_backoff_fake_seed106.arff"
+      },
+      {
+        "testAttack": "uc10_backoff_fake",
+        "testSeed": "107",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_backoff_fake_seed107.arff"
+      },
+      {
+        "testAttack": "uc10_backoff_fake",
+        "testSeed": "108",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_backoff_fake_seed108.arff"
+      },
+      {
+        "testAttack": "uc10_backoff_fake",
+        "testSeed": "109",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_backoff_fake_seed109.arff"
+      },
+      {
+        "testAttack": "uc10_batchdump_real",
+        "testSeed": "100",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_batchdump_real_seed100.arff"
+      },
+      {
+        "testAttack": "uc10_batchdump_real",
+        "testSeed": "101",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_batchdump_real_seed101.arff"
+      },
+      {
+        "testAttack": "uc10_batchdump_real",
+        "testSeed": "102",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_batchdump_real_seed102.arff"
+      },
+      {
+        "testAttack": "uc10_batchdump_real",
+        "testSeed": "103",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_batchdump_real_seed103.arff"
+      },
+      {
+        "testAttack": "uc10_batchdump_real",
+        "testSeed": "104",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_batchdump_real_seed104.arff"
+      },
+      {
+        "testAttack": "uc10_batchdump_real",
+        "testSeed": "105",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_batchdump_real_seed105.arff"
+      },
+      {
+        "testAttack": "uc10_batchdump_real",
+        "testSeed": "106",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_batchdump_real_seed106.arff"
+      },
+      {
+        "testAttack": "uc10_batchdump_real",
+        "testSeed": "107",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_batchdump_real_seed107.arff"
+      },
+      {
+        "testAttack": "uc10_batchdump_real",
+        "testSeed": "108",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_batchdump_real_seed108.arff"
+      },
+      {
+        "testAttack": "uc10_batchdump_real",
+        "testSeed": "109",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_batchdump_real_seed109.arff"
+      },
+      {
+        "testAttack": "uc10_batchdump_fake",
+        "testSeed": "100",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_batchdump_fake_seed100.arff"
+      },
+      {
+        "testAttack": "uc10_batchdump_fake",
+        "testSeed": "101",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_batchdump_fake_seed101.arff"
+      },
+      {
+        "testAttack": "uc10_batchdump_fake",
+        "testSeed": "102",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_batchdump_fake_seed102.arff"
+      },
+      {
+        "testAttack": "uc10_batchdump_fake",
+        "testSeed": "103",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_batchdump_fake_seed103.arff"
+      },
+      {
+        "testAttack": "uc10_batchdump_fake",
+        "testSeed": "104",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_batchdump_fake_seed104.arff"
+      },
+      {
+        "testAttack": "uc10_batchdump_fake",
+        "testSeed": "105",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_batchdump_fake_seed105.arff"
+      },
+      {
+        "testAttack": "uc10_batchdump_fake",
+        "testSeed": "106",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_batchdump_fake_seed106.arff"
+      },
+      {
+        "testAttack": "uc10_batchdump_fake",
+        "testSeed": "107",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_batchdump_fake_seed107.arff"
+      },
+      {
+        "testAttack": "uc10_batchdump_fake",
+        "testSeed": "108",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_batchdump_fake_seed108.arff"
+      },
+      {
+        "testAttack": "uc10_batchdump_fake",
+        "testSeed": "109",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_batchdump_fake_seed109.arff"
+      },
+      {
+        "testAttack": "uc10_doubledrop_real",
+        "testSeed": "100",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_doubledrop_real_seed100.arff"
+      },
+      {
+        "testAttack": "uc10_doubledrop_real",
+        "testSeed": "101",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_doubledrop_real_seed101.arff"
+      },
+      {
+        "testAttack": "uc10_doubledrop_real",
+        "testSeed": "102",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_doubledrop_real_seed102.arff"
+      },
+      {
+        "testAttack": "uc10_doubledrop_real",
+        "testSeed": "103",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_doubledrop_real_seed103.arff"
+      },
+      {
+        "testAttack": "uc10_doubledrop_real",
+        "testSeed": "104",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_doubledrop_real_seed104.arff"
+      },
+      {
+        "testAttack": "uc10_doubledrop_real",
+        "testSeed": "105",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_doubledrop_real_seed105.arff"
+      },
+      {
+        "testAttack": "uc10_doubledrop_real",
+        "testSeed": "106",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_doubledrop_real_seed106.arff"
+      },
+      {
+        "testAttack": "uc10_doubledrop_real",
+        "testSeed": "107",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_doubledrop_real_seed107.arff"
+      },
+      {
+        "testAttack": "uc10_doubledrop_real",
+        "testSeed": "108",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_doubledrop_real_seed108.arff"
+      },
+      {
+        "testAttack": "uc10_doubledrop_real",
+        "testSeed": "109",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_doubledrop_real_seed109.arff"
+      },
+      {
+        "testAttack": "uc10_doubledrop_fake",
+        "testSeed": "100",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_doubledrop_fake_seed100.arff"
+      },
+      {
+        "testAttack": "uc10_doubledrop_fake",
+        "testSeed": "101",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_doubledrop_fake_seed101.arff"
+      },
+      {
+        "testAttack": "uc10_doubledrop_fake",
+        "testSeed": "102",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_doubledrop_fake_seed102.arff"
+      },
+      {
+        "testAttack": "uc10_doubledrop_fake",
+        "testSeed": "103",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_doubledrop_fake_seed103.arff"
+      },
+      {
+        "testAttack": "uc10_doubledrop_fake",
+        "testSeed": "104",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_doubledrop_fake_seed104.arff"
+      },
+      {
+        "testAttack": "uc10_doubledrop_fake",
+        "testSeed": "105",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_doubledrop_fake_seed105.arff"
+      },
+      {
+        "testAttack": "uc10_doubledrop_fake",
+        "testSeed": "106",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_doubledrop_fake_seed106.arff"
+      },
+      {
+        "testAttack": "uc10_doubledrop_fake",
+        "testSeed": "107",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_doubledrop_fake_seed107.arff"
+      },
+      {
+        "testAttack": "uc10_doubledrop_fake",
+        "testSeed": "108",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_doubledrop_fake_seed108.arff"
+      },
+      {
+        "testAttack": "uc10_doubledrop_fake",
+        "testSeed": "109",
+        "testDatasetPath": "target/uc10_variants/test_datasets/test_uc10_doubledrop_fake_seed109.arff"
+      }
+    ],
+    "verifyFiles": false
+  },
+  "output": {
+    "csvFilePath": "target/uc10_variants/comprehensive_results.csv",
+    "appendMode": false,
+    "includeHeaders": true
+  }
+}

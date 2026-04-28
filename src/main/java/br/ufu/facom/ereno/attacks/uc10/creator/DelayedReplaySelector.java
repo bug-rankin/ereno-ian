@@ -1,7 +1,9 @@
 package br.ufu.facom.ereno.attacks.uc10.creator;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import br.ufu.facom.ereno.config.AttackConfig;
 import br.ufu.facom.ereno.dataExtractors.GSVDatasetWriter;
@@ -10,6 +12,29 @@ import br.ufu.facom.ereno.messages.Goose;
 
 /**
  * Helper to select and delay messages according to UC10 config knobs.
+ *
+ * <p>UC10 delayed-replay attacks operate on a captured legitimate stream:
+ * a subset of fault frames is "captured" by the attacker, removed from
+ * on-time delivery, and replayed later. With {@code replaceWithFake=true}
+ * the void left by the captured frame is back-filled with a synthetic
+ * GOOSE that is intended to be indistinguishable from what the network
+ * would otherwise have observed.
+ *
+ * <p>This selector returns:
+ * <ul>
+ *   <li>{@link SelectionResult#getCapturedIndices()} - indices into
+ *       {@code messageStream} whose original frames were captured by the
+ *       attacker. Creators must remove these from the on-time stream.</li>
+ *   <li>{@link SelectionResult#getDelayedMessages()} - replayed copies
+ *       (label {@code delayed_replay}) carrying the original payload but
+ *       with timestamps shifted forward by the attack delay.</li>
+ *   <li>{@link SelectionResult#getFakeReplacements()} - when
+ *       {@code replaceWithFake=true}, one fake-filler per captured index.
+ *       The fake is a faithful copy of the captured frame (same
+ *       cbStatus / stNum / sqNum / payload) with the captured frame's
+ *       on-time arrival timestamp. It is labelled {@code delayed_replay}
+ *       so binary-mode evaluation tags it as part of the attack.</li>
+ * </ul>
  */
 public final class DelayedReplaySelector {
 
@@ -21,18 +46,11 @@ public final class DelayedReplaySelector {
                                                       int numDelayInstances,
                                                       boolean shiftSendTimestamp,
                                                       boolean replaceWithFake) {
-        int minInterval = config.getNestedInt("selectionInterval", "min", 5);
-        int maxInterval = config.getNestedInt("selectionInterval", "max", 25);
         int minBurstInterval = config.getNestedInt("burstInterval", "min", 5);
         int maxBurstInterval = config.getNestedInt("burstInterval", "max", 25);
-        int minBurstSize = config.getNestedInt("burstSize", "min", 5);
-        int maxBurstSize = config.getNestedInt("burstSize", "max", 25);
-
-        int selectionInterval = randomBetween(minInterval, maxInterval);
-        int burstInterval = randomBetween(minBurstInterval, maxBurstInterval);
-        int burstSize = randomBetween(minBurstSize, maxBurstSize);
-        double selectionProb = config.getNestedDouble("selectionProb", "value", 0.5);
-        boolean burstMode = config.getBoolean("burstMode", false);
+        int burstMax = config.getInt("burstMax", 6);
+        if (burstMax < 1) burstMax = 1;
+        double selectionProb = config.getNestedDouble("selectionProb", "value", 1.0);
 
         double minNetworkDelayMs = config.getRangeMin("networkDelayMs", 1.0);
         double maxNetworkDelayMs = config.getRangeMax("networkDelayMs", 31.0);
@@ -41,73 +59,84 @@ public final class DelayedReplaySelector {
             maxNetworkDelayMs = 31.0;
         }
 
-        int burstMessageCounter = 0;
-        int burstIntervalCounter = 0;
-        int selectionIntervalCounter = 0;
         ArrayList<Goose> delayedMessages = new ArrayList<>();
         ArrayList<FakeReplacement> fakeReplacements = new ArrayList<>();
+        HashSet<Integer> capturedIndices = new HashSet<>();
 
-        for (int i = 0; numDelayInstances > 0 && i < messageStream.size(); i++) {
-            Goose candidate = messageStream.get(i);
-            if (candidate.getCbStatus() != 1) {
+        // Walk the stream, treating each maximal run of consecutive cbStatus==1 messages
+        // as one fault-burst. After a delayed fault, require `cooldownTarget` non-fault
+        // (cbStatus==0) messages to elapse before another fault becomes eligible.
+        int nonFaultSinceLastDelay = 0;
+        int cooldownTarget = 0; // 0 = no cooldown active; eligible immediately
+        int i = 0;
+        while (numDelayInstances > 0 && i < messageStream.size()) {
+            Goose msg = messageStream.get(i);
+            if (msg.getCbStatus() != 1) {
+                if (cooldownTarget > 0) nonFaultSinceLastDelay++;
+                i++;
                 continue;
             }
 
-            if (burstMode) {
-                if (burstIntervalCounter == burstInterval) {
-                    burstMessageCounter = 0;
-                    burstIntervalCounter = 0;
-                } else if (burstMessageCounter == burstSize) {
-                    burstIntervalCounter++;
-                    continue;
-                }
+            // detect fault-run boundaries
+            int runStart = i;
+            int runEnd = i;
+            while (runEnd < messageStream.size() && messageStream.get(runEnd).getCbStatus() == 1) {
+                runEnd++;
+            }
+            i = runEnd;
 
+            // honor non-fault cooldown
+            if (cooldownTarget > 0 && nonFaultSinceLastDelay < cooldownTarget) {
+                continue;
+            }
+
+            if (selectionProb < 1.0 && randomBetween(0.0, 1.0) > selectionProb) {
+                continue; // fault skipped; cooldown state unchanged
+            }
+
+            int runLength = runEnd - runStart;
+            int delayCount = Math.min(runLength, burstMax);
+            delayCount = Math.min(delayCount, numDelayInstances);
+
+            for (int k = 0; k < delayCount; k++) {
+                int captureIdx = runStart + k;
+                Goose candidate = messageStream.get(captureIdx);
                 Goose delayed = applyDelay(candidate, minNetworkDelayMs, maxNetworkDelayMs, shiftSendTimestamp);
                 delayedMessages.add(delayed);
+                capturedIndices.add(captureIdx);
                 if (replaceWithFake) {
-                    Goose fake = createFakeMessage(messageStream, i, candidate);
-                    fakeReplacements.add(new FakeReplacement(i, fake, arrivalTs(candidate)));
+                    Goose fake = createFakeMessage(candidate);
+                    fakeReplacements.add(new FakeReplacement(captureIdx, fake, arrivalTs(candidate)));
                 }
                 numDelayInstances--;
-                burstMessageCounter++;
-                continue;
             }
 
-            // non-burst path
-            if (selectionIntervalCounter == selectionInterval) {
-                selectionIntervalCounter = 0;
-            } else if (selectionIntervalCounter < selectionInterval && selectionIntervalCounter >= 1) {
-                selectionIntervalCounter++;
-                continue;
-            }
-
-            double selectionValue = randomBetween(0.0, 1.0);
-            if (selectionValue > selectionProb) {
-                continue;
-            }
-
-            Goose delayed = applyDelay(candidate, minNetworkDelayMs, maxNetworkDelayMs, shiftSendTimestamp);
-            delayedMessages.add(delayed);
-            if (replaceWithFake) {
-                Goose fake = createFakeMessage(messageStream, i, candidate);
-                fakeReplacements.add(new FakeReplacement(i, fake, arrivalTs(candidate)));
-            }
-            numDelayInstances--;
-            selectionIntervalCounter++;
+            // arm a fresh cooldown counted in non-fault messages
+            cooldownTarget = randomBetween(minBurstInterval, maxBurstInterval);
+            nonFaultSinceLastDelay = 0;
         }
 
-        return new SelectionResult(delayedMessages, fakeReplacements);
+        return new SelectionResult(delayedMessages, fakeReplacements, capturedIndices);
     }
 
-    private static Goose createFakeMessage(ArrayList<Goose> stream, int index, Goose candidate) {
-        Goose base = index > 0 ? stream.get(index - 1) : candidate;
-        Goose fake = base.copy();
-        double ts = arrivalTs(candidate);
-        fake.setCbStatus(0);
-        fake.setLabel(GSVDatasetWriter.label[0]);
+    /**
+     * Builds a synthetic GOOSE intended to back-fill the void left by a
+     * captured frame. The fake mirrors the captured frame's payload (so
+     * the on-time observation appears unchanged to a passive observer)
+     * but is labelled {@code delayed_replay} as ground truth: the frame
+     * is part of the attacker's cover traffic, not legitimate output.
+     */
+    private static Goose createFakeMessage(Goose captured) {
+        Goose fake = captured.copy();
+        // Preserve cbStatus, stNum, sqNum, payload - fake is a faithful
+        // cover for the captured frame on the wire.
+        // Timestamps: fake arrives at the captured frame's original
+        // on-time slot, since the original is being held back.
+        double ts = arrivalTs(captured);
         fake.setTimestamp(ts);
         fake.setPublisherTxTs(ts);
         fake.setSubscriberRxTs(ts);
+        fake.setLabel(GSVDatasetWriter.label[9]); // "delayed_replay" - attack ground truth
         return fake;
     }
 
@@ -152,10 +181,14 @@ public final class DelayedReplaySelector {
     public static class SelectionResult {
         private final List<Goose> delayedMessages;
         private final List<FakeReplacement> fakeReplacements;
+        private final Set<Integer> capturedIndices;
 
-        public SelectionResult(List<Goose> delayedMessages, List<FakeReplacement> fakeReplacements) {
+        public SelectionResult(List<Goose> delayedMessages,
+                               List<FakeReplacement> fakeReplacements,
+                               Set<Integer> capturedIndices) {
             this.delayedMessages = delayedMessages;
             this.fakeReplacements = fakeReplacements;
+            this.capturedIndices = capturedIndices;
         }
 
         public List<Goose> getDelayedMessages() {
@@ -164,6 +197,11 @@ public final class DelayedReplaySelector {
 
         public List<FakeReplacement> getFakeReplacements() {
             return fakeReplacements;
+        }
+
+        /** Indices in the original messageStream that were captured by the attacker. */
+        public Set<Integer> getCapturedIndices() {
+            return capturedIndices;
         }
 
         public List<Goose> getFakeMessages() {

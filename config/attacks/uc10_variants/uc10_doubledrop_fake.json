@@ -7,6 +7,6 @@
   "networkDelayMs": { "min": 50.0, "max": 200.0 },
   "shiftSendTimestamp": true,
   "orderBy": "received",
-  "replaceWithFake": false
+  "replaceWithFake": true
 }
 

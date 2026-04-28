@@ -1,26 +1,10 @@
 {
   "attackType": "delayed_replay",
   "enabled": true,
-  "selectionInterval": {
-    "min": 25,
-    "max": 50
-  },
-  "burstInterval": {
-    "min": 3,
-    "max": 15
-  },
-  "burstSize": {
-    "min": 25,
-    "max": 50
-  },
-  "selectionProb": {
-    "value": 1.00
-  },
-  "burstMode": false,
-  "networkDelayMs": {
-    "min": 1.0,
-    "max": 31.0
-  },
+  "burstInterval": { "min": 200, "max": 500 },
+  "burstMax": 100,
+  "selectionProb": { "value": 0.5 },
+  "networkDelayMs": { "min": 50.0, "max": 200.0 },
   "shiftSendTimestamp": true,
   "orderBy": "received",
   "replaceWithFake": false

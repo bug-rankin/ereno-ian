@@ -15,6 +15,8 @@ import java.util.logging.Logger;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import br.ufu.facom.ereno.actions.TrainModelAction.Config;
+import br.ufu.facom.ereno.config.ConfigLoader;
 import br.ufu.facom.ereno.tracking.ExperimentTracker;
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.NaiveBayes;
@@ -25,8 +27,6 @@ import weka.classifiers.trees.RandomForest;
 import weka.core.Instances;
 import weka.core.SerializationHelper;
 import weka.core.converters.ConverterUtils.DataSource;
-
-import br.ufu.facom.ereno.actions.TrainModelAction.Config;
 
 /**
  * Action handler for training machine learning models.
@@ -203,6 +203,13 @@ public class TrainModelAction {
     }
     
     private static Classifier createClassifier(String name, Config.ClassifierParameters params) {
+        // Derive a per-classifier seed from the global random seed (if set) so that
+        // classifiers with internal randomness (RandomForest, REPTree) produce
+        // distinct models across seed-varied training runs.
+        Integer seed = (ConfigLoader.randomSeed != null)
+                ? (int) ConfigLoader.randomSeed.longValue()
+                : null;
+
         switch (name.toUpperCase()) {
             case "J48":
                 J48 j48 = new J48();
@@ -218,13 +225,20 @@ public class TrainModelAction {
                     rf.setNumIterations(params.randomForest.numIterations);
                     rf.setNumFeatures(params.randomForest.numFeatures);
                 }
+                if (seed != null) {
+                    rf.setSeed(seed);
+                }
                 return rf;
                 
             case "NAIVEBAYES":
                 return new NaiveBayes();
                 
             case "REPTREE":
-                return new REPTree();
+                REPTree repTree = new REPTree();
+                if (seed != null) {
+                    repTree.setSeed(seed);
+                }
+                return repTree;
                 
             case "KNN":
             case "IBK":

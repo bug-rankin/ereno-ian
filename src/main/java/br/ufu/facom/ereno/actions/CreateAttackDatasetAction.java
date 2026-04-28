@@ -85,6 +85,8 @@ public class CreateAttackDatasetAction {
         
         public static class DatasetStructureConfig {
             public int messagesPerSegment = 1000;
+            // Optional override for the benign segment size; if 0/unset, falls back to messagesPerSegment.
+            public int benignMessagesPerSegment = 0;
             public boolean includeBenignSegment = true;
             public boolean shuffleSegments = false;
             public boolean binaryClassification = false; // If true, map all attacks to "attack" label
@@ -157,9 +159,12 @@ public class CreateAttackDatasetAction {
         
         // Add benign segment if configured
         if (config.datasetStructure.includeBenignSegment) {
+            int benignSize = config.datasetStructure.benignMessagesPerSegment > 0
+                    ? config.datasetStructure.benignMessagesPerSegment
+                    : config.datasetStructure.messagesPerSegment;
             SegmentData benignSegment = new SegmentData();
             benignSegment.name = "benign";
-            benignSegment.messages = extractMessages(benignIED, config.datasetStructure.messagesPerSegment);
+            benignSegment.messages = extractMessages(benignIED, benignSize);
             segments.add(benignSegment);
             LOGGER.info(() -> "Added benign segment with " + benignSegment.messages.size() + " messages");
         }

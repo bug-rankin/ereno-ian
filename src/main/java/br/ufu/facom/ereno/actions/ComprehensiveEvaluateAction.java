@@ -43,11 +43,13 @@ public class ComprehensiveEvaluateAction {
                 public String trainingPattern;
                 public String modelName; // J48, RandomForest, etc.
                 public String modelPath;
+                public String trainingSeed; // optional; empty when not seed-varied
             }
             
             public static class TestDatasetSpec {
                 public String testAttack; // e.g., "uc01_random_replay" or "uc01_uc02"
                 public String testDatasetPath;
+                public String testSeed; // optional; empty when not seed-varied
             }
         }
         
@@ -63,7 +65,9 @@ public class ComprehensiveEvaluateAction {
         public String trainingAttack2;
         public String trainingPattern;
         public String modelName;
+        public String trainingSeed;
         public String testAttack;
+        public String testSeed;
         public double accuracy;
         public double precision;
         public double recall;
@@ -76,16 +80,22 @@ public class ComprehensiveEvaluateAction {
             double cleanRecall = Double.isNaN(recall) ? 0.0 : recall;
             double cleanF1 = Double.isNaN(f1) ? 0.0 : f1;
             
-            return String.format("%s,%s,%s,%s,%s,%.4f,%.4f,%.4f,%.4f",
-                trainingAttack1,
-                trainingAttack2,
-                trainingPattern,
-                modelName,
-                testAttack,
+            return String.format("%s,%s,%s,%s,%s,%s,%s,%.4f,%.4f,%.4f,%.4f",
+                nullToEmpty(trainingAttack1),
+                nullToEmpty(trainingAttack2),
+                nullToEmpty(trainingPattern),
+                nullToEmpty(modelName),
+                nullToEmpty(trainingSeed),
+                nullToEmpty(testAttack),
+                nullToEmpty(testSeed),
                 cleanAccuracy,
                 cleanPrecision,
                 cleanRecall,
                 cleanF1);
+        }
+        
+        private static String nullToEmpty(String value) {
+            return value == null ? "" : value;
         }
     }
     
@@ -111,7 +121,7 @@ public class ComprehensiveEvaluateAction {
             
             // Write CSV header if needed
             if (writeHeaders) {
-                csvWriter.println("trainingAttack1,trainingAttack2,trainingPattern,modelName,testAttack,accuracy,precision,recall,f1");
+                csvWriter.println("trainingAttack1,trainingAttack2,trainingPattern,modelName,trainingSeed,testAttack,testSeed,accuracy,precision,recall,f1");
             }
             
             int totalEvaluations = config.input.models.size() * config.input.testDatasets.size();
@@ -145,7 +155,9 @@ public class ComprehensiveEvaluateAction {
                         row.trainingAttack2 = model.trainingAttack2;
                         row.trainingPattern = model.trainingPattern;
                         row.modelName = model.modelName;
+                        row.trainingSeed = model.trainingSeed;
                         row.testAttack = testDataset.testAttack;
+                        row.testSeed = testDataset.testSeed;
                         row.accuracy = resultado.getAcuracia();
                         row.precision = resultado.getPrecision();
                         row.recall = resultado.getRecall();

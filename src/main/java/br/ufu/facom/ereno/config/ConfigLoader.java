@@ -165,14 +165,6 @@ public class ConfigLoader {
         }
 
         if (attacksParams.uc10 == null) attacksParams.uc10 = new AttacksParams.UC10Config();
-        // add stuff here after asking Ian what the heck this does.
-        if (attacksParams.uc10.selectionInterval == null) attacksParams.uc10.selectionInterval = new AttacksParams.RangeInt();
-        if (attacksParams.uc10.selectionInterval.min <= 0 || attacksParams.uc10.selectionInterval.max <= 0 ||
-        attacksParams.uc10.selectionInterval.min >= attacksParams.uc10.selectionInterval.max) {
-            attacksParams.uc10.selectionInterval.min = 5;
-            attacksParams.uc10.selectionInterval.max = 25;
-            attacksParams.uc10.selectionInterval.defaultValue = 15;
-        }
         if (attacksParams.uc10.burstInterval == null)  attacksParams.uc10.burstInterval = new AttacksParams.RangeInt();
         if (attacksParams.uc10.burstInterval.min <= 0 || attacksParams.uc10.burstInterval.max <= 0 ||
         attacksParams.uc10.burstInterval.min >= attacksParams.uc10.burstInterval.max) {
@@ -180,12 +172,8 @@ public class ConfigLoader {
             attacksParams.uc10.burstInterval.max = 25;
             attacksParams.uc10.burstInterval.defaultValue = 15;
         }
-        if (attacksParams.uc10.burstSize == null)  attacksParams.uc10.burstSize = new AttacksParams.RangeInt();
-        if (attacksParams.uc10.burstSize.min <= 0 || attacksParams.uc10.burstSize.max <= 0 ||
-        attacksParams.uc10.burstSize.min >= attacksParams.uc10.burstSize.max) {
-            attacksParams.uc10.burstSize.min = 5;
-            attacksParams.uc10.burstSize.max = 25;
-            attacksParams.uc10.burstSize.defaultValue = 15;
+        if (attacksParams.uc10.burstMax <= 0) {
+            attacksParams.uc10.burstMax = 6;
         }
 
 
@@ -262,12 +250,10 @@ public class ConfigLoader {
 
         public static class UC08Config { public RangeInt selectionRate = new RangeInt(); }
 
-        public static class UC10Config { // adjust the config if necessary
-            public double selectionProb = 0.5;
-            public RangeInt selectionInterval = new RangeInt();
+        public static class UC10Config { // burst-only delayed replay
             public RangeInt burstInterval = new RangeInt();
-            public RangeInt burstSize = new RangeInt();
-            public boolean burstMode = false;
+            public int burstMax = 6;
+            public double selectionProb = 1.0;
         }
 
         // --- new descriptive configs ---
@@ -356,13 +342,11 @@ public class ConfigLoader {
             public RangeDouble delayBurstLen = new RangeDouble();
         }
 
-        public static class DelayedReplayConfig { // adjust if necessary
+        public static class DelayedReplayConfig { // burst-only delayed replay
             public boolean enabled = false;
-            public RangeInt selectionInterval = new RangeInt();
             public RangeInt burstInterval = new RangeInt();
-            public RangeInt burstSize = new RangeInt();
-            public double selectionProb = 0.5;
-            public boolean burstMode = false;
+            public int burstMax = 6;
+            public double selectionProb = 1.0;
         }
 
     }

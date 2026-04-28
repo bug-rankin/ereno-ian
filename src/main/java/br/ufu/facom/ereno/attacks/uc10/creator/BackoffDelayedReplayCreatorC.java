@@ -2,7 +2,9 @@ package br.ufu.facom.ereno.attacks.uc10.creator;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import br.ufu.facom.ereno.benign.uc00.creator.MessageCreator;
 import br.ufu.facom.ereno.config.AttackConfig;
@@ -11,8 +13,13 @@ import br.ufu.facom.ereno.messages.Goose;
 
 /**
  * UC10 variant: backoff delayed replay.
- * Delayed messages are flushed faster than normal (configurable multiplier);
- * legitimate messages that would have been emitted during the flush are queued and sent in the accelerated stream.
+ *
+ * <p>Captured frames are held back from the on-time stream (R) or
+ * replaced by synthetic fillers (F). Once the flush window opens,
+ * delayed copies are released at an accelerated rate (rateMultiplier x
+ * the median periodic interval), and any legitimate frames that would
+ * have been emitted during the flush are queued and dispatched after
+ * the burst at the same accelerated cadence.
  */
 public class BackoffDelayedReplayCreatorC implements MessageCreator {
 
@@ -33,33 +40,51 @@ public class BackoffDelayedReplayCreatorC implements MessageCreator {
 
         DelayedReplaySelector.SelectionResult selection = DelayedReplaySelector.selectDelayedCopies(
                 messageStream, config, numDelayInstances, shiftSendTimestamp, replaceWithFake);
+
+        Set<Integer> capturedIndices = selection.getCapturedIndices();
         List<Goose> delayedMessages = selection.getDelayedMessages();
+        List<DelayedReplaySelector.FakeReplacement> fakeReplacements = selection.getFakeReplacements();
+
         if (delayedMessages.isEmpty()) {
+            // No attacks scheduled - emit the legit stream untouched.
+            for (Goose g : messageStream) {
+                ied.addMessage(g.copy());
+            }
             return;
         }
 
         delayedMessages.sort(Comparator.comparingDouble(this::arrivalTs));
         double flushStart = delayedMessages.stream().mapToDouble(this::arrivalTs).min().orElse(0.0);
 
-        ArrayList<Goose> preFlush = new ArrayList<>();
-        ArrayList<Goose> queuedLegit = new ArrayList<>();
-
-        for (Goose message : messageStream) {
-            double ts = arrivalTs(message);
-            if (ts < flushStart) {
-                preFlush.add(message.copy());
-            } else {
-                queuedLegit.add(message.copy());
+        // Build the on-time view excluding captured frames; in F mode, substitute
+        // each captured index with the corresponding fake.
+        HashMap<Integer, Goose> fakeByIndex = new HashMap<>();
+        if (replaceWithFake) {
+            for (DelayedReplaySelector.FakeReplacement fr : fakeReplacements) {
+                fakeByIndex.put(fr.index, fr.fake);
             }
         }
 
-        // classify fake replacements alongside legit
-        for (DelayedReplaySelector.FakeReplacement fr : selection.getFakeReplacements()) {
-            double ts = arrivalTs(fr.fake);
-            if (ts < flushStart) {
-                preFlush.add(fr.fake);
+        ArrayList<Goose> preFlush = new ArrayList<>();
+        ArrayList<Goose> queuedLegit = new ArrayList<>();
+        for (int i = 0; i < messageStream.size(); i++) {
+            Goose source;
+            if (capturedIndices.contains(i)) {
+                if (!replaceWithFake) {
+                    continue; // R mode: captured frame is dropped from on-time stream
+                }
+                source = fakeByIndex.get(i);
+                if (source == null) {
+                    continue;
+                }
             } else {
-                queuedLegit.add(fr.fake);
+                source = messageStream.get(i).copy();
+            }
+            double ts = arrivalTs(source);
+            if (ts < flushStart) {
+                preFlush.add(source);
+            } else {
+                queuedLegit.add(source);
             }
         }
 
@@ -81,9 +106,7 @@ public class BackoffDelayedReplayCreatorC implements MessageCreator {
             currentTs += flushInterval;
         }
 
-        // keep queued messages in arrival order before accelerated flush
         queuedLegit.sort(Comparator.comparingDouble(this::arrivalTs));
-
         for (Goose legit : queuedLegit) {
             retime(legit, currentTs, shiftSendTimestamp);
             ied.addMessage(legit);

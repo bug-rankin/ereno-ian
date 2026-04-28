@@ -362,6 +362,15 @@ public class ActionRunner {
             
             if ("singleAttacks".equalsIgnoreCase(loop.variationType)) {
                 variables.put("attackName", currentValue.toString());
+            } else if ("randomSeed".equalsIgnoreCase(loop.variationType)) {
+                // Propagate seed to ConfigLoader so attack generation uses it
+                Long seed = convertToLong(currentValue);
+                if (seed != null) {
+                    ConfigLoader.randomSeed = seed;
+                    ConfigLoader.RNG = new java.util.Random(seed);
+                    variables.put("seed", String.valueOf(seed));
+                    LOGGER.info(() -> "Nested loop: applied randomSeed override: " + seed);
+                }
             } else if (currentValue instanceof List) {
                 @SuppressWarnings("unchecked")
                 List<String> pair = (List<String>) currentValue;

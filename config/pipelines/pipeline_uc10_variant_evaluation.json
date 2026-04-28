@@ -1,0 +1,1036 @@
+{
+  "action": "pipeline",
+  "description": "UC10 delayed-replay variant cross-evaluation: 8 variants x 3 train seeds x 2 classifiers vs 8 variants x 10 test seeds",
+  "commonConfig": {
+    "randomSeed": 42,
+    "outputFormat": "arff"
+  },
+  "pipeline": [
+    {
+      "action": "create_benign",
+      "actionConfigFile": "config/actions/action_create_benign.json",
+      "description": "Generate baseline benign traffic data"
+    },
+    {
+      "action": "create_attack_dataset",
+      "description": "Train models for variant uc10_replay_real (loop over training seeds)",
+      "loop": {
+        "variationType": "randomSeed",
+        "values": [
+          42,
+          43,
+          44
+        ],
+        "steps": [
+          {
+            "action": "create_attack_dataset",
+            "description": "Generate training data for uc10_replay_real seed=${seed}",
+            "inline": {
+              "action": "create_attack_dataset",
+              "input": {
+                "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+                "verifyBenignData": true
+              },
+              "output": {
+                "directory": "target/uc10_variants/training/uc10_replay_real_seed${seed}",
+                "filename": "training.arff",
+                "format": "arff"
+              },
+              "datasetStructure": {
+                "messagesPerSegment": 100000,
+                "benignMessagesPerSegment": 150000,
+                "includeBenignSegment": true,
+                "shuffleSegments": false,
+                "binaryClassification": true
+              },
+              "attackSegments": [
+                {
+                  "name": "uc10_replay_real",
+                  "enabled": true,
+                  "attackConfig": "config/attacks/uc10_variants/uc10_replay_real.json",
+                  "description": "UC10 variant: uc10_replay_real"
+                }
+              ]
+            }
+          },
+          {
+            "action": "train_model",
+            "description": "Train J48+RandomForest on uc10_replay_real seed=${seed}",
+            "inline": {
+              "action": "train_model",
+              "input": {
+                "trainingDatasetPath": "target/uc10_variants/training/uc10_replay_real_seed${seed}/training.arff",
+                "verifyDataset": true
+              },
+              "output": {
+                "modelDirectory": "target/uc10_variants/models/uc10_replay_real_seed${seed}",
+                "saveMetadata": true,
+                "metadataFilename": "training_metadata.json"
+              },
+              "classifiers": [
+                "J48",
+                "RandomForest"
+              ],
+              "classifierParameters": {
+                "j48": {
+                  "confidenceFactor": 0.25,
+                  "minNumObj": 2
+                },
+                "randomForest": {
+                  "numIterations": 100,
+                  "numFeatures": 0
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "action": "create_attack_dataset",
+      "description": "Train models for variant uc10_replay_fake (loop over training seeds)",
+      "loop": {
+        "variationType": "randomSeed",
+        "values": [
+          42,
+          43,
+          44
+        ],
+        "steps": [
+          {
+            "action": "create_attack_dataset",
+            "description": "Generate training data for uc10_replay_fake seed=${seed}",
+            "inline": {
+              "action": "create_attack_dataset",
+              "input": {
+                "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+                "verifyBenignData": true
+              },
+              "output": {
+                "directory": "target/uc10_variants/training/uc10_replay_fake_seed${seed}",
+                "filename": "training.arff",
+                "format": "arff"
+              },
+              "datasetStructure": {
+                "messagesPerSegment": 100000,
+                "benignMessagesPerSegment": 150000,
+                "includeBenignSegment": true,
+                "shuffleSegments": false,
+                "binaryClassification": true
+              },
+              "attackSegments": [
+                {
+                  "name": "uc10_replay_fake",
+                  "enabled": true,
+                  "attackConfig": "config/attacks/uc10_variants/uc10_replay_fake.json",
+                  "description": "UC10 variant: uc10_replay_fake"
+                }
+              ]
+            }
+          },
+          {
+            "action": "train_model",
+            "description": "Train J48+RandomForest on uc10_replay_fake seed=${seed}",
+            "inline": {
+              "action": "train_model",
+              "input": {
+                "trainingDatasetPath": "target/uc10_variants/training/uc10_replay_fake_seed${seed}/training.arff",
+                "verifyDataset": true
+              },
+              "output": {
+                "modelDirectory": "target/uc10_variants/models/uc10_replay_fake_seed${seed}",
+                "saveMetadata": true,
+                "metadataFilename": "training_metadata.json"
+              },
+              "classifiers": [
+                "J48",
+                "RandomForest"
+              ],
+              "classifierParameters": {
+                "j48": {
+                  "confidenceFactor": 0.25,
+                  "minNumObj": 2
+                },
+                "randomForest": {
+                  "numIterations": 100,
+                  "numFeatures": 0
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "action": "create_attack_dataset",
+      "description": "Train models for variant uc10_backoff_real (loop over training seeds)",
+      "loop": {
+        "variationType": "randomSeed",
+        "values": [
+          42,
+          43,
+          44
+        ],
+        "steps": [
+          {
+            "action": "create_attack_dataset",
+            "description": "Generate training data for uc10_backoff_real seed=${seed}",
+            "inline": {
+              "action": "create_attack_dataset",
+              "input": {
+                "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+                "verifyBenignData": true
+              },
+              "output": {
+                "directory": "target/uc10_variants/training/uc10_backoff_real_seed${seed}",
+                "filename": "training.arff",
+                "format": "arff"
+              },
+              "datasetStructure": {
+                "messagesPerSegment": 100000,
+                "benignMessagesPerSegment": 150000,
+                "includeBenignSegment": true,
+                "shuffleSegments": false,
+                "binaryClassification": true
+              },
+              "attackSegments": [
+                {
+                  "name": "uc10_backoff_real",
+                  "enabled": true,
+                  "attackConfig": "config/attacks/uc10_variants/uc10_backoff_real.json",
+                  "description": "UC10 variant: uc10_backoff_real"
+                }
+              ]
+            }
+          },
+          {
+            "action": "train_model",
+            "description": "Train J48+RandomForest on uc10_backoff_real seed=${seed}",
+            "inline": {
+              "action": "train_model",
+              "input": {
+                "trainingDatasetPath": "target/uc10_variants/training/uc10_backoff_real_seed${seed}/training.arff",
+                "verifyDataset": true
+              },
+              "output": {
+                "modelDirectory": "target/uc10_variants/models/uc10_backoff_real_seed${seed}",
+                "saveMetadata": true,
+                "metadataFilename": "training_metadata.json"
+              },
+              "classifiers": [
+                "J48",
+                "RandomForest"
+              ],
+              "classifierParameters": {
+                "j48": {
+                  "confidenceFactor": 0.25,
+                  "minNumObj": 2
+                },
+                "randomForest": {
+                  "numIterations": 100,
+                  "numFeatures": 0
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "action": "create_attack_dataset",
+      "description": "Train models for variant uc10_backoff_fake (loop over training seeds)",
+      "loop": {
+        "variationType": "randomSeed",
+        "values": [
+          42,
+          43,
+          44
+        ],
+        "steps": [
+          {
+            "action": "create_attack_dataset",
+            "description": "Generate training data for uc10_backoff_fake seed=${seed}",
+            "inline": {
+              "action": "create_attack_dataset",
+              "input": {
+                "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+                "verifyBenignData": true
+              },
+              "output": {
+                "directory": "target/uc10_variants/training/uc10_backoff_fake_seed${seed}",
+                "filename": "training.arff",
+                "format": "arff"
+              },
+              "datasetStructure": {
+                "messagesPerSegment": 100000,
+                "benignMessagesPerSegment": 150000,
+                "includeBenignSegment": true,
+                "shuffleSegments": false,
+                "binaryClassification": true
+              },
+              "attackSegments": [
+                {
+                  "name": "uc10_backoff_fake",
+                  "enabled": true,
+                  "attackConfig": "config/attacks/uc10_variants/uc10_backoff_fake.json",
+                  "description": "UC10 variant: uc10_backoff_fake"
+                }
+              ]
+            }
+          },
+          {
+            "action": "train_model",
+            "description": "Train J48+RandomForest on uc10_backoff_fake seed=${seed}",
+            "inline": {
+              "action": "train_model",
+              "input": {
+                "trainingDatasetPath": "target/uc10_variants/training/uc10_backoff_fake_seed${seed}/training.arff",
+                "verifyDataset": true
+              },
+              "output": {
+                "modelDirectory": "target/uc10_variants/models/uc10_backoff_fake_seed${seed}",
+                "saveMetadata": true,
+                "metadataFilename": "training_metadata.json"
+              },
+              "classifiers": [
+                "J48",
+                "RandomForest"
+              ],
+              "classifierParameters": {
+                "j48": {
+                  "confidenceFactor": 0.25,
+                  "minNumObj": 2
+                },
+                "randomForest": {
+                  "numIterations": 100,
+                  "numFeatures": 0
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "action": "create_attack_dataset",
+      "description": "Train models for variant uc10_batchdump_real (loop over training seeds)",
+      "loop": {
+        "variationType": "randomSeed",
+        "values": [
+          42,
+          43,
+          44
+        ],
+        "steps": [
+          {
+            "action": "create_attack_dataset",
+            "description": "Generate training data for uc10_batchdump_real seed=${seed}",
+            "inline": {
+              "action": "create_attack_dataset",
+              "input": {
+                "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+                "verifyBenignData": true
+              },
+              "output": {
+                "directory": "target/uc10_variants/training/uc10_batchdump_real_seed${seed}",
+                "filename": "training.arff",
+                "format": "arff"
+              },
+              "datasetStructure": {
+                "messagesPerSegment": 100000,
+                "benignMessagesPerSegment": 150000,
+                "includeBenignSegment": true,
+                "shuffleSegments": false,
+                "binaryClassification": true
+              },
+              "attackSegments": [
+                {
+                  "name": "uc10_batchdump_real",
+                  "enabled": true,
+                  "attackConfig": "config/attacks/uc10_variants/uc10_batchdump_real.json",
+                  "description": "UC10 variant: uc10_batchdump_real"
+                }
+              ]
+            }
+          },
+          {
+            "action": "train_model",
+            "description": "Train J48+RandomForest on uc10_batchdump_real seed=${seed}",
+            "inline": {
+              "action": "train_model",
+              "input": {
+                "trainingDatasetPath": "target/uc10_variants/training/uc10_batchdump_real_seed${seed}/training.arff",
+                "verifyDataset": true
+              },
+              "output": {
+                "modelDirectory": "target/uc10_variants/models/uc10_batchdump_real_seed${seed}",
+                "saveMetadata": true,
+                "metadataFilename": "training_metadata.json"
+              },
+              "classifiers": [
+                "J48",
+                "RandomForest"
+              ],
+              "classifierParameters": {
+                "j48": {
+                  "confidenceFactor": 0.25,
+                  "minNumObj": 2
+                },
+                "randomForest": {
+                  "numIterations": 100,
+                  "numFeatures": 0
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "action": "create_attack_dataset",
+      "description": "Train models for variant uc10_batchdump_fake (loop over training seeds)",
+      "loop": {
+        "variationType": "randomSeed",
+        "values": [
+          42,
+          43,
+          44
+        ],
+        "steps": [
+          {
+            "action": "create_attack_dataset",
+            "description": "Generate training data for uc10_batchdump_fake seed=${seed}",
+            "inline": {
+              "action": "create_attack_dataset",
+              "input": {
+                "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+                "verifyBenignData": true
+              },
+              "output": {
+                "directory": "target/uc10_variants/training/uc10_batchdump_fake_seed${seed}",
+                "filename": "training.arff",
+                "format": "arff"
+              },
+              "datasetStructure": {
+                "messagesPerSegment": 100000,
+                "benignMessagesPerSegment": 150000,
+                "includeBenignSegment": true,
+                "shuffleSegments": false,
+                "binaryClassification": true
+              },
+              "attackSegments": [
+                {
+                  "name": "uc10_batchdump_fake",
+                  "enabled": true,
+                  "attackConfig": "config/attacks/uc10_variants/uc10_batchdump_fake.json",
+                  "description": "UC10 variant: uc10_batchdump_fake"
+                }
+              ]
+            }
+          },
+          {
+            "action": "train_model",
+            "description": "Train J48+RandomForest on uc10_batchdump_fake seed=${seed}",
+            "inline": {
+              "action": "train_model",
+              "input": {
+                "trainingDatasetPath": "target/uc10_variants/training/uc10_batchdump_fake_seed${seed}/training.arff",
+                "verifyDataset": true
+              },
+              "output": {
+                "modelDirectory": "target/uc10_variants/models/uc10_batchdump_fake_seed${seed}",
+                "saveMetadata": true,
+                "metadataFilename": "training_metadata.json"
+              },
+              "classifiers": [
+                "J48",
+                "RandomForest"
+              ],
+              "classifierParameters": {
+                "j48": {
+                  "confidenceFactor": 0.25,
+                  "minNumObj": 2
+                },
+                "randomForest": {
+                  "numIterations": 100,
+                  "numFeatures": 0
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "action": "create_attack_dataset",
+      "description": "Train models for variant uc10_doubledrop_real (loop over training seeds)",
+      "loop": {
+        "variationType": "randomSeed",
+        "values": [
+          42,
+          43,
+          44
+        ],
+        "steps": [
+          {
+            "action": "create_attack_dataset",
+            "description": "Generate training data for uc10_doubledrop_real seed=${seed}",
+            "inline": {
+              "action": "create_attack_dataset",
+              "input": {
+                "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+                "verifyBenignData": true
+              },
+              "output": {
+                "directory": "target/uc10_variants/training/uc10_doubledrop_real_seed${seed}",
+                "filename": "training.arff",
+                "format": "arff"
+              },
+              "datasetStructure": {
+                "messagesPerSegment": 100000,
+                "benignMessagesPerSegment": 150000,
+                "includeBenignSegment": true,
+                "shuffleSegments": false,
+                "binaryClassification": true
+              },
+              "attackSegments": [
+                {
+                  "name": "uc10_doubledrop_real",
+                  "enabled": true,
+                  "attackConfig": "config/attacks/uc10_variants/uc10_doubledrop_real.json",
+                  "description": "UC10 variant: uc10_doubledrop_real"
+                }
+              ]
+            }
+          },
+          {
+            "action": "train_model",
+            "description": "Train J48+RandomForest on uc10_doubledrop_real seed=${seed}",
+            "inline": {
+              "action": "train_model",
+              "input": {
+                "trainingDatasetPath": "target/uc10_variants/training/uc10_doubledrop_real_seed${seed}/training.arff",
+                "verifyDataset": true
+              },
+              "output": {
+                "modelDirectory": "target/uc10_variants/models/uc10_doubledrop_real_seed${seed}",
+                "saveMetadata": true,
+                "metadataFilename": "training_metadata.json"
+              },
+              "classifiers": [
+                "J48",
+                "RandomForest"
+              ],
+              "classifierParameters": {
+                "j48": {
+                  "confidenceFactor": 0.25,
+                  "minNumObj": 2
+                },
+                "randomForest": {
+                  "numIterations": 100,
+                  "numFeatures": 0
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "action": "create_attack_dataset",
+      "description": "Train models for variant uc10_doubledrop_fake (loop over training seeds)",
+      "loop": {
+        "variationType": "randomSeed",
+        "values": [
+          42,
+          43,
+          44
+        ],
+        "steps": [
+          {
+            "action": "create_attack_dataset",
+            "description": "Generate training data for uc10_doubledrop_fake seed=${seed}",
+            "inline": {
+              "action": "create_attack_dataset",
+              "input": {
+                "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+                "verifyBenignData": true
+              },
+              "output": {
+                "directory": "target/uc10_variants/training/uc10_doubledrop_fake_seed${seed}",
+                "filename": "training.arff",
+                "format": "arff"
+              },
+              "datasetStructure": {
+                "messagesPerSegment": 100000,
+                "benignMessagesPerSegment": 150000,
+                "includeBenignSegment": true,
+                "shuffleSegments": false,
+                "binaryClassification": true
+              },
+              "attackSegments": [
+                {
+                  "name": "uc10_doubledrop_fake",
+                  "enabled": true,
+                  "attackConfig": "config/attacks/uc10_variants/uc10_doubledrop_fake.json",
+                  "description": "UC10 variant: uc10_doubledrop_fake"
+                }
+              ]
+            }
+          },
+          {
+            "action": "train_model",
+            "description": "Train J48+RandomForest on uc10_doubledrop_fake seed=${seed}",
+            "inline": {
+              "action": "train_model",
+              "input": {
+                "trainingDatasetPath": "target/uc10_variants/training/uc10_doubledrop_fake_seed${seed}/training.arff",
+                "verifyDataset": true
+              },
+              "output": {
+                "modelDirectory": "target/uc10_variants/models/uc10_doubledrop_fake_seed${seed}",
+                "saveMetadata": true,
+                "metadataFilename": "training_metadata.json"
+              },
+              "classifiers": [
+                "J48",
+                "RandomForest"
+              ],
+              "classifierParameters": {
+                "j48": {
+                  "confidenceFactor": 0.25,
+                  "minNumObj": 2
+                },
+                "randomForest": {
+                  "numIterations": 100,
+                  "numFeatures": 0
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "action": "create_attack_dataset",
+      "description": "Generate test datasets for variant uc10_replay_real (loop over test seeds)",
+      "loop": {
+        "variationType": "randomSeed",
+        "values": [
+          100,
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109
+        ],
+        "steps": [
+          {
+            "action": "create_attack_dataset",
+            "description": "Generate test dataset for uc10_replay_real seed=${seed}",
+            "inline": {
+              "action": "create_attack_dataset",
+              "input": {
+                "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+                "verifyBenignData": true
+              },
+              "output": {
+                "directory": "target/uc10_variants/test_datasets",
+                "filename": "test_uc10_replay_real_seed${seed}.arff",
+                "format": "arff"
+              },
+              "datasetStructure": {
+                "messagesPerSegment": 100000,
+                "benignMessagesPerSegment": 150000,
+                "includeBenignSegment": true,
+                "shuffleSegments": false,
+                "binaryClassification": true
+              },
+              "attackSegments": [
+                {
+                  "name": "uc10_replay_real",
+                  "enabled": true,
+                  "attackConfig": "config/attacks/uc10_variants/uc10_replay_real.json",
+                  "description": "UC10 variant: uc10_replay_real"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "action": "create_attack_dataset",
+      "description": "Generate test datasets for variant uc10_replay_fake (loop over test seeds)",
+      "loop": {
+        "variationType": "randomSeed",
+        "values": [
+          100,
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109
+        ],
+        "steps": [
+          {
+            "action": "create_attack_dataset",
+            "description": "Generate test dataset for uc10_replay_fake seed=${seed}",
+            "inline": {
+              "action": "create_attack_dataset",
+              "input": {
+                "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+                "verifyBenignData": true
+              },
+              "output": {
+                "directory": "target/uc10_variants/test_datasets",
+                "filename": "test_uc10_replay_fake_seed${seed}.arff",
+                "format": "arff"
+              },
+              "datasetStructure": {
+                "messagesPerSegment": 100000,
+                "benignMessagesPerSegment": 150000,
+                "includeBenignSegment": true,
+                "shuffleSegments": false,
+                "binaryClassification": true
+              },
+              "attackSegments": [
+                {
+                  "name": "uc10_replay_fake",
+                  "enabled": true,
+                  "attackConfig": "config/attacks/uc10_variants/uc10_replay_fake.json",
+                  "description": "UC10 variant: uc10_replay_fake"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "action": "create_attack_dataset",
+      "description": "Generate test datasets for variant uc10_backoff_real (loop over test seeds)",
+      "loop": {
+        "variationType": "randomSeed",
+        "values": [
+          100,
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109
+        ],
+        "steps": [
+          {
+            "action": "create_attack_dataset",
+            "description": "Generate test dataset for uc10_backoff_real seed=${seed}",
+            "inline": {
+              "action": "create_attack_dataset",
+              "input": {
+                "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+                "verifyBenignData": true
+              },
+              "output": {
+                "directory": "target/uc10_variants/test_datasets",
+                "filename": "test_uc10_backoff_real_seed${seed}.arff",
+                "format": "arff"
+              },
+              "datasetStructure": {
+                "messagesPerSegment": 100000,
+                "benignMessagesPerSegment": 150000,
+                "includeBenignSegment": true,
+                "shuffleSegments": false,
+                "binaryClassification": true
+              },
+              "attackSegments": [
+                {
+                  "name": "uc10_backoff_real",
+                  "enabled": true,
+                  "attackConfig": "config/attacks/uc10_variants/uc10_backoff_real.json",
+                  "description": "UC10 variant: uc10_backoff_real"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "action": "create_attack_dataset",
+      "description": "Generate test datasets for variant uc10_backoff_fake (loop over test seeds)",
+      "loop": {
+        "variationType": "randomSeed",
+        "values": [
+          100,
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109
+        ],
+        "steps": [
+          {
+            "action": "create_attack_dataset",
+            "description": "Generate test dataset for uc10_backoff_fake seed=${seed}",
+            "inline": {
+              "action": "create_attack_dataset",
+              "input": {
+                "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+                "verifyBenignData": true
+              },
+              "output": {
+                "directory": "target/uc10_variants/test_datasets",
+                "filename": "test_uc10_backoff_fake_seed${seed}.arff",
+                "format": "arff"
+              },
+              "datasetStructure": {
+                "messagesPerSegment": 100000,
+                "benignMessagesPerSegment": 150000,
+                "includeBenignSegment": true,
+                "shuffleSegments": false,
+                "binaryClassification": true
+              },
+              "attackSegments": [
+                {
+                  "name": "uc10_backoff_fake",
+                  "enabled": true,
+                  "attackConfig": "config/attacks/uc10_variants/uc10_backoff_fake.json",
+                  "description": "UC10 variant: uc10_backoff_fake"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "action": "create_attack_dataset",
+      "description": "Generate test datasets for variant uc10_batchdump_real (loop over test seeds)",
+      "loop": {
+        "variationType": "randomSeed",
+        "values": [
+          100,
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109
+        ],
+        "steps": [
+          {
+            "action": "create_attack_dataset",
+            "description": "Generate test dataset for uc10_batchdump_real seed=${seed}",
+            "inline": {
+              "action": "create_attack_dataset",
+              "input": {
+                "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+                "verifyBenignData": true
+              },
+              "output": {
+                "directory": "target/uc10_variants/test_datasets",
+                "filename": "test_uc10_batchdump_real_seed${seed}.arff",
+                "format": "arff"
+              },
+              "datasetStructure": {
+                "messagesPerSegment": 100000,
+                "benignMessagesPerSegment": 150000,
+                "includeBenignSegment": true,
+                "shuffleSegments": false,
+                "binaryClassification": true
+              },
+              "attackSegments": [
+                {
+                  "name": "uc10_batchdump_real",
+                  "enabled": true,
+                  "attackConfig": "config/attacks/uc10_variants/uc10_batchdump_real.json",
+                  "description": "UC10 variant: uc10_batchdump_real"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "action": "create_attack_dataset",
+      "description": "Generate test datasets for variant uc10_batchdump_fake (loop over test seeds)",
+      "loop": {
+        "variationType": "randomSeed",
+        "values": [
+          100,
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109
+        ],
+        "steps": [
+          {
+            "action": "create_attack_dataset",
+            "description": "Generate test dataset for uc10_batchdump_fake seed=${seed}",
+            "inline": {
+              "action": "create_attack_dataset",
+              "input": {
+                "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+                "verifyBenignData": true
+              },
+              "output": {
+                "directory": "target/uc10_variants/test_datasets",
+                "filename": "test_uc10_batchdump_fake_seed${seed}.arff",
+                "format": "arff"
+              },
+              "datasetStructure": {
+                "messagesPerSegment": 100000,
+                "benignMessagesPerSegment": 150000,
+                "includeBenignSegment": true,
+                "shuffleSegments": false,
+                "binaryClassification": true
+              },
+              "attackSegments": [
+                {
+                  "name": "uc10_batchdump_fake",
+                  "enabled": true,
+                  "attackConfig": "config/attacks/uc10_variants/uc10_batchdump_fake.json",
+                  "description": "UC10 variant: uc10_batchdump_fake"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "action": "create_attack_dataset",
+      "description": "Generate test datasets for variant uc10_doubledrop_real (loop over test seeds)",
+      "loop": {
+        "variationType": "randomSeed",
+        "values": [
+          100,
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109
+        ],
+        "steps": [
+          {
+            "action": "create_attack_dataset",
+            "description": "Generate test dataset for uc10_doubledrop_real seed=${seed}",
+            "inline": {
+              "action": "create_attack_dataset",
+              "input": {
+                "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+                "verifyBenignData": true
+              },
+              "output": {
+                "directory": "target/uc10_variants/test_datasets",
+                "filename": "test_uc10_doubledrop_real_seed${seed}.arff",
+                "format": "arff"
+              },
+              "datasetStructure": {
+                "messagesPerSegment": 100000,
+                "benignMessagesPerSegment": 150000,
+                "includeBenignSegment": true,
+                "shuffleSegments": false,
+                "binaryClassification": true
+              },
+              "attackSegments": [
+                {
+                  "name": "uc10_doubledrop_real",
+                  "enabled": true,
+                  "attackConfig": "config/attacks/uc10_variants/uc10_doubledrop_real.json",
+                  "description": "UC10 variant: uc10_doubledrop_real"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "action": "create_attack_dataset",
+      "description": "Generate test datasets for variant uc10_doubledrop_fake (loop over test seeds)",
+      "loop": {
+        "variationType": "randomSeed",
+        "values": [
+          100,
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109
+        ],
+        "steps": [
+          {
+            "action": "create_attack_dataset",
+            "description": "Generate test dataset for uc10_doubledrop_fake seed=${seed}",
+            "inline": {
+              "action": "create_attack_dataset",
+              "input": {
+                "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+                "verifyBenignData": true
+              },
+              "output": {
+                "directory": "target/uc10_variants/test_datasets",
+                "filename": "test_uc10_doubledrop_fake_seed${seed}.arff",
+                "format": "arff"
+              },
+              "datasetStructure": {
+                "messagesPerSegment": 100000,
+                "benignMessagesPerSegment": 150000,
+                "includeBenignSegment": true,
+                "shuffleSegments": false,
+                "binaryClassification": true
+              },
+              "attackSegments": [
+                {
+                  "name": "uc10_doubledrop_fake",
+                  "enabled": true,
+                  "attackConfig": "config/attacks/uc10_variants/uc10_doubledrop_fake.json",
+                  "description": "UC10 variant: uc10_doubledrop_fake"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "action": "comprehensive_evaluate",
+      "actionConfigFile": "config/actions/action_uc10_variant_evaluate.json",
+      "description": "Cross-evaluate 48 models x 80 test datasets"
+    }
+  ]
+}
