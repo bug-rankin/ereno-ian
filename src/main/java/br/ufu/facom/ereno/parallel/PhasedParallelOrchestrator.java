@@ -33,10 +33,14 @@ public final class PhasedParallelOrchestrator {
     private PhasedParallelOrchestrator() {
     }
 
+    /**
+     * True iff the config declares one or more {@code phases}. Phases run
+     * sequentially as a pipeline regardless of {@code parallelExecution.enabled};
+     * the flag only controls whether the jobs <i>within</i> each phase run
+     * concurrently (enabled=true) or one at a time (enabled=false).
+     */
     public static boolean isPhasedEnabled(ActionConfigLoader.MainConfig mainConfig) {
         return mainConfig != null
-                && mainConfig.parallelExecution != null
-                && mainConfig.parallelExecution.enabled
                 && mainConfig.phases != null
                 && !mainConfig.phases.isEmpty();
     }
@@ -131,7 +135,12 @@ public final class PhasedParallelOrchestrator {
     }
 
     private static int resolveWorkers(ActionConfigLoader.ParallelExecutionConfig cfg) {
-        if (cfg == null || cfg.workers <= 0) {
+        // When parallelExecution is absent or disabled, run jobs within each
+        // phase one at a time. The phase boundary still acts as a barrier.
+        if (cfg == null || !cfg.enabled) {
+            return 1;
+        }
+        if (cfg.workers <= 0) {
             return 16;
         }
         return cfg.workers;

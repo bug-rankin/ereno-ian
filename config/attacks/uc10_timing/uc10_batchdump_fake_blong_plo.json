@@ -1,0 +1,20 @@
+{
+  "attackType": "delayed_replay_batch_dump",
+  "enabled": true,
+  "burstInterval": {
+    "min": 600,
+    "max": 1200
+  },
+  "burstMax": 100,
+  "selectionProb": {
+    "value": 0.25
+  },
+  "networkDelayMs": {
+    "min": 100.0,
+    "max": 300.0
+  },
+  "microGapMs": 5.0,
+  "shiftSendTimestamp": true,
+  "orderBy": "received",
+  "replaceWithFake": true
+}

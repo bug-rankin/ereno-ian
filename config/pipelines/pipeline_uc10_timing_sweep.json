@@ -1,0 +1,118 @@
+{
+  "action": "pipeline",
+  "description": "UC10 timing sweep: measure how burstInterval, selectionProb, and messagesPerSegment affect dataset-creation and per-classifier training time. Phased + parallel execution; per-job timings are persisted to target/tracking/{datasets,models}.csv via the existing ExperimentTracker.",
+  "commonConfig": {
+    "randomSeed": 42,
+    "outputFormat": "arff"
+  },
+  "parallelExecution": {
+    "enabled": true,
+    "workers": 8,
+    "failFast": false
+  },
+  "pipeline": [
+    {
+      "action": "create_benign",
+      "actionConfigFile": "config/actions/action_create_benign.json",
+      "description": "Generate baseline benign traffic data (sequential, runs once before phases)"
+    }
+  ],
+  "phases": [
+    {
+      "name": "create_training_datasets",
+      "expand": {
+        "axes": {
+          "variant": [
+            "uc10_replay_real",
+            "uc10_backoff_real"
+          ],
+          "burst": ["short", "mid", "long"],
+          "prob":  ["lo", "mid", "hi"],
+          "msgs":  [25000, 50000, 100000],
+          "seed":  [42, 43]
+        },
+        "template": {
+          "action": "create_attack_dataset",
+          "description": "Training dataset variant=${variant} burst=${burst} prob=${prob} msgs=${msgs} seed=${seed}",
+          "parameterOverrides": {
+            "randomSeed": "${seed}"
+          },
+          "inline": {
+            "action": "create_attack_dataset",
+            "input": {
+              "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+              "verifyBenignData": true
+            },
+            "output": {
+              "directory": "target/uc10_timing/training/${variant}_b${burst}_p${prob}_m${msgs}_s${seed}",
+              "filename": "training.arff",
+              "format": "arff",
+              "enableTracking": true
+            },
+            "datasetStructure": {
+              "messagesPerSegment": "${msgs}",
+              "benignMessagesPerSegment": "${msgs}",
+              "includeBenignSegment": true,
+              "shuffleSegments": false,
+              "binaryClassification": true
+            },
+            "attackSegments": [
+              {
+                "name": "${variant}_b${burst}_p${prob}",
+                "enabled": true,
+                "attackConfig": "config/attacks/uc10_timing/${variant}_b${burst}_p${prob}.json",
+                "description": "UC10 timing-sweep variant ${variant} burst=${burst} prob=${prob}"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "train_models",
+      "expand": {
+        "axes": {
+          "variant": [
+            "uc10_replay_real",
+            "uc10_backoff_real"
+          ],
+          "burst": ["short", "mid", "long"],
+          "prob":  ["lo", "mid", "hi"],
+          "msgs":  [25000, 50000, 100000],
+          "seed":  [42, 43]
+        },
+        "template": {
+          "action": "train_model",
+          "description": "Train J48+RandomForest variant=${variant} burst=${burst} prob=${prob} msgs=${msgs} seed=${seed}",
+          "parameterOverrides": {
+            "randomSeed": "${seed}"
+          },
+          "inline": {
+            "action": "train_model",
+            "input": {
+              "trainingDatasetPath": "target/uc10_timing/training/${variant}_b${burst}_p${prob}_m${msgs}_s${seed}/training.arff",
+              "verifyDataset": true
+            },
+            "output": {
+              "modelDirectory": "target/uc10_timing/models/${variant}_b${burst}_p${prob}_m${msgs}_s${seed}",
+              "saveMetadata": true,
+              "metadataFilename": "training_metadata.json",
+              "enableTracking": true
+            },
+            "classifiers": ["J48", "RandomForest"],
+            "classifierParameters": {
+              "j48": {
+                "confidenceFactor": 0.25,
+                "minNumObj": 2
+              },
+              "randomForest": {
+                "numIterations": 100,
+                "numFeatures": 0
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

@@ -213,6 +213,59 @@ public class PhasedOrchestratorTest {
         assertEquals("create_benign", mc.pipeline.get(0).action);
     }
 
+    @Test
+    public void disablingParallelExecutionStillRunsAllPhasesSequentially() throws Exception {
+        // Same shape as the multi-thread test but with parallelExecution.enabled=false.
+        // Every job must still execute, but all on a single thread (workers=1).
+        String json = "{\n" +
+                "  \"action\": \"pipeline\",\n" +
+                "  \"parallelExecution\": { \"enabled\": false, \"workers\": 8, \"failFast\": true },\n" +
+                "  \"phases\": [\n" +
+                "    { \"name\": \"A\", \"expand\": { \"axes\": { \"i\":[1,2,3,4] },\n" +
+                "        \"template\": { \"action\": \"train_model\", \"description\": \"A-${i}\", \"inline\": { \"k\":\"v\" } } } },\n" +
+                "    { \"name\": \"B\", \"expand\": { \"axes\": { \"j\":[1,2,3] },\n" +
+                "        \"template\": { \"action\": \"evaluate\",  \"description\": \"B-${j}\", \"inline\": { \"k\":\"v\" } } } }\n" +
+                "  ]\n" +
+                "}\n";
+        File tmp = writeTempJson(json);
+        ActionConfigLoader loader = new ActionConfigLoader();
+        loader.load(tmp.getAbsolutePath());
+
+        // Phases activation must not depend on the parallelExecution flag.
+        assertTrue(PhasedParallelOrchestrator.isPhasedEnabled(loader.getMainConfig()),
+                "phases must run regardless of parallelExecution.enabled");
+
+        RecordingExecutor exec = new RecordingExecutor();
+        PhasedParallelOrchestrator.executePhasedPipeline(loader.getMainConfig(), exec);
+
+        assertEquals(7, exec.labels.size(), "all jobs from both phases must run when parallel disabled");
+        long uniqueThreads = exec.threads.stream().distinct().count();
+        assertEquals(1, uniqueThreads,
+                "with parallelExecution.enabled=false, expected jobs to run on a single worker thread; got " + uniqueThreads);
+    }
+
+    @Test
+    public void phasesWithoutParallelExecutionBlockStillRun() throws Exception {
+        // No parallelExecution declared at all -> still treated as sequential phased pipeline.
+        String json = "{\n" +
+                "  \"action\": \"pipeline\",\n" +
+                "  \"phases\": [\n" +
+                "    { \"name\": \"only\", \"jobs\": [\n" +
+                "      { \"action\": \"train_model\", \"description\": \"x\", \"inline\": { \"k\":\"v\" } },\n" +
+                "      { \"action\": \"train_model\", \"description\": \"y\", \"inline\": { \"k\":\"v\" } }\n" +
+                "    ] }\n" +
+                "  ]\n" +
+                "}\n";
+        File tmp = writeTempJson(json);
+        ActionConfigLoader loader = new ActionConfigLoader();
+        loader.load(tmp.getAbsolutePath());
+
+        assertTrue(PhasedParallelOrchestrator.isPhasedEnabled(loader.getMainConfig()));
+        RecordingExecutor exec = new RecordingExecutor();
+        PhasedParallelOrchestrator.executePhasedPipeline(loader.getMainConfig(), exec);
+        assertEquals(2, exec.labels.size());
+    }
+
     private static File writeTempJson(String json) throws Exception {
         File tmp = Files.createTempFile("phased_test_", ".json").toFile();
         tmp.deleteOnExit();
