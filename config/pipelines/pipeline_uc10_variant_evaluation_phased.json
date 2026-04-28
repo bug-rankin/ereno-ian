@@ -1,0 +1,184 @@
+{
+  "action": "pipeline",
+  "description": "UC10 delayed-replay variant cross-evaluation (PHASED PARALLEL): 8 variants x 3 train seeds x 2 classifiers vs 8 variants x 10 test seeds. Equivalent to pipeline_uc10_variant_evaluation.json but expressed as ordered phases of independent jobs that fan out to a shared worker pool.",
+  "commonConfig": {
+    "randomSeed": 42,
+    "outputFormat": "arff"
+  },
+  "parallelExecution": {
+    "enabled": true,
+    "workers": 24,
+    "failFast": false
+  },
+  "pipeline": [
+    {
+      "action": "create_benign",
+      "actionConfigFile": "config/actions/action_create_benign.json",
+      "description": "Generate baseline benign traffic data (sequential, runs once before phases)"
+    }
+  ],
+  "phases": [
+    {
+      "name": "create_training_datasets",
+      "expand": {
+        "axes": {
+          "variant": [
+            "uc10_replay_real",
+            "uc10_replay_fake",
+            "uc10_backoff_real",
+            "uc10_backoff_fake",
+            "uc10_batchdump_real",
+            "uc10_batchdump_fake",
+            "uc10_doubledrop_real",
+            "uc10_doubledrop_fake"
+          ],
+          "seed": [42, 43, 44]
+        },
+        "template": {
+          "action": "create_attack_dataset",
+          "description": "Training dataset variant=${variant} seed=${seed}",
+          "parameterOverrides": {
+            "randomSeed": "${seed}"
+          },
+          "inline": {
+            "action": "create_attack_dataset",
+            "input": {
+              "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+              "verifyBenignData": true
+            },
+            "output": {
+              "directory": "target/uc10_variants/training/${variant}_seed${seed}",
+              "filename": "training.arff",
+              "format": "arff"
+            },
+            "datasetStructure": {
+              "messagesPerSegment": 100000,
+              "benignMessagesPerSegment": 150000,
+              "includeBenignSegment": true,
+              "shuffleSegments": false,
+              "binaryClassification": true
+            },
+            "attackSegments": [
+              {
+                "name": "${variant}",
+                "enabled": true,
+                "attackConfig": "config/attacks/uc10_variants/${variant}.json",
+                "description": "UC10 variant: ${variant}"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "train_models",
+      "expand": {
+        "axes": {
+          "variant": [
+            "uc10_replay_real",
+            "uc10_replay_fake",
+            "uc10_backoff_real",
+            "uc10_backoff_fake",
+            "uc10_batchdump_real",
+            "uc10_batchdump_fake",
+            "uc10_doubledrop_real",
+            "uc10_doubledrop_fake"
+          ],
+          "seed": [42, 43, 44]
+        },
+        "template": {
+          "action": "train_model",
+          "description": "Train J48+RandomForest variant=${variant} seed=${seed}",
+          "parameterOverrides": {
+            "randomSeed": "${seed}"
+          },
+          "inline": {
+            "action": "train_model",
+            "input": {
+              "trainingDatasetPath": "target/uc10_variants/training/${variant}_seed${seed}/training.arff",
+              "verifyDataset": true
+            },
+            "output": {
+              "modelDirectory": "target/uc10_variants/models/${variant}_seed${seed}",
+              "saveMetadata": true,
+              "metadataFilename": "training_metadata.json"
+            },
+            "classifiers": ["J48", "RandomForest"],
+            "classifierParameters": {
+              "j48": {
+                "confidenceFactor": 0.25,
+                "minNumObj": 2
+              },
+              "randomForest": {
+                "numIterations": 100,
+                "numFeatures": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "create_test_datasets",
+      "expand": {
+        "axes": {
+          "variant": [
+            "uc10_replay_real",
+            "uc10_replay_fake",
+            "uc10_backoff_real",
+            "uc10_backoff_fake",
+            "uc10_batchdump_real",
+            "uc10_batchdump_fake",
+            "uc10_doubledrop_real",
+            "uc10_doubledrop_fake"
+          ],
+          "seed": [100, 101, 102, 103, 104, 105, 106, 107, 108, 109]
+        },
+        "template": {
+          "action": "create_attack_dataset",
+          "description": "Test dataset variant=${variant} seed=${seed}",
+          "parameterOverrides": {
+            "randomSeed": "${seed}"
+          },
+          "inline": {
+            "action": "create_attack_dataset",
+            "input": {
+              "benignDataPath": "target/benign_data/42_5%fault_benign_data.arff",
+              "verifyBenignData": true
+            },
+            "output": {
+              "directory": "target/uc10_variants/test_datasets",
+              "filename": "test_${variant}_seed${seed}.arff",
+              "format": "arff"
+            },
+            "datasetStructure": {
+              "messagesPerSegment": 100000,
+              "benignMessagesPerSegment": 150000,
+              "includeBenignSegment": true,
+              "shuffleSegments": false,
+              "binaryClassification": true
+            },
+            "attackSegments": [
+              {
+                "name": "${variant}",
+                "enabled": true,
+                "attackConfig": "config/attacks/uc10_variants/${variant}.json",
+                "description": "UC10 variant: ${variant}"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "comprehensive_evaluate",
+      "jobs": [
+        {
+          "action": "comprehensive_evaluate",
+          "actionConfigFile": "config/actions/action_uc10_variant_evaluate.json",
+          "description": "Cross-evaluate every (variant, train_seed, classifier) model against every (variant, test_seed) dataset"
+        }
+      ]
+    }
+  ]
+}

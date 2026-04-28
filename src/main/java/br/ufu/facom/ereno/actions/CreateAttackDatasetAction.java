@@ -148,8 +148,8 @@ public class CreateAttackDatasetAction {
         if (csvMode) {
             CSVWritter.startWriting(outputPath);
         } else {
-            // Set binary classification mode if configured
-            DatasetWriter.binaryClassificationMode = config.datasetStructure.binaryClassification;
+            // Set binary classification mode if configured (per-thread)
+            DatasetWriter.setBinaryClassificationMode(config.datasetStructure.binaryClassification);
             startWriting(outputPath);
             write("@relation ereno_attack_dataset");
         }

@@ -27,7 +27,8 @@ public class BenignDataManager {
      * Format: {randomSeed}_{faultProbability}%fault_benign_data.{ext}
      */
     public static String generateBenignDataFilename(String format) {
-        long seed = ConfigLoader.randomSeed != null ? ConfigLoader.randomSeed : System.nanoTime();
+        Long seedBoxed = ConfigLoader.getSeed();
+        long seed = (seedBoxed != null) ? seedBoxed : System.nanoTime();
         int faultProb = ConfigLoader.benignData.faultProbability;
         String ext = "csv".equalsIgnoreCase(format) ? "csv" : "arff";
         return seed + "_" + faultProb + "%fault_benign_data." + ext;

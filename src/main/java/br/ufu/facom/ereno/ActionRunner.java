@@ -22,6 +22,7 @@ import br.ufu.facom.ereno.actions.TrainModelAction;
 import br.ufu.facom.ereno.config.ActionConfigLoader;
 import br.ufu.facom.ereno.config.ConfigLoader;
 import br.ufu.facom.ereno.parallel.ParallelPipelineOrchestrator;
+import br.ufu.facom.ereno.parallel.PhasedParallelOrchestrator;
 import br.ufu.facom.ereno.parallel.PipelineActionExecutor;
 import br.ufu.facom.ereno.utils.ProgressTracker;
 import br.ufu.facom.ereno.utils.VariableSubstitutor;
@@ -107,7 +108,9 @@ public class ActionRunner {
 
                 case PIPELINE:
                     LOGGER.info("Executing PIPELINE action");
-                    if (actionLoader.getMainConfig().loop != null) {
+                    if (PhasedParallelOrchestrator.isPhasedEnabled(actionLoader.getMainConfig())) {
+                        executePipelinePhased(actionLoader);
+                    } else if (actionLoader.getMainConfig().loop != null) {
                         if (shouldUseParallelLoopExecution(actionLoader.getMainConfig())) {
                             executePipelineWithLoopParallel(actionLoader);
                         } else {
@@ -178,6 +181,64 @@ public class ActionRunner {
                 ActionRunner.executeActionWithOverrides(step, variationType, currentValue, iterationNumber, loopConfig);
             }
         });
+    }
+
+    /**
+     * Execute a phased parallel pipeline. Each phase fans its jobs out to a
+     * shared worker pool; phases are separated by barriers.
+     */
+    private static void executePipelinePhased(ActionConfigLoader actionLoader) throws Exception {
+        ActionConfigLoader.MainConfig mainConfig = actionLoader.getMainConfig();
+        PhasedParallelOrchestrator.executePhasedPipeline(mainConfig, new PipelineActionExecutor() {
+            @Override
+            public void executeActionFromConfigFile(String actionName, String configFile) throws Exception {
+                ActionRunner.executeActionFromConfigFile(actionName, configFile);
+            }
+
+            @Override
+            public void executeActionWithOverrides(
+                    ActionConfigLoader.PipelineStep step,
+                    String variationType,
+                    Object currentValue,
+                    int iterationNumber,
+                    ActionConfigLoader.LoopConfig loopConfig) throws Exception {
+                ActionRunner.executeActionWithOverrides(step, variationType, currentValue, iterationNumber, loopConfig);
+            }
+
+            @Override
+            public void executeJob(ActionConfigLoader.PipelineStep job) throws Exception {
+                ActionRunner.executeJob(job);
+            }
+        });
+    }
+
+    /**
+     * Execute a single self-contained pipeline step on the current worker thread.
+     * Honours per-job seed overrides (writes to per-thread RNG via {@link ConfigLoader#setSeed})
+     * and supports both inline JSON and external config files.
+     */
+    private static void executeJob(ActionConfigLoader.PipelineStep job) throws Exception {
+        if (job == null) {
+            throw new IllegalArgumentException("executeJob: null job");
+        }
+        if (job.action == null || job.action.trim().isEmpty()) {
+            throw new IllegalArgumentException("executeJob: missing action");
+        }
+
+        // Apply per-job seed (per-thread; safe under parallel execution).
+        if (job.parameterOverrides != null && job.parameterOverrides.randomSeed != null) {
+            ConfigLoader.setSeed(job.parameterOverrides.randomSeed);
+        }
+
+        if (job.inline != null) {
+            String tempPath = createTempConfigFile(job.inline, job.action, 0);
+            executeActionFromConfigFile(job.action, tempPath);
+        } else if (job.actionConfigFile != null) {
+            executeActionFromConfigFile(job.action, job.actionConfigFile);
+        } else {
+            throw new IllegalArgumentException(
+                    "executeJob: action '" + job.action + "' has neither inline nor actionConfigFile");
+        }
     }
 
     /**
@@ -366,8 +427,7 @@ public class ActionRunner {
                 // Propagate seed to ConfigLoader so attack generation uses it
                 Long seed = convertToLong(currentValue);
                 if (seed != null) {
-                    ConfigLoader.randomSeed = seed;
-                    ConfigLoader.RNG = new java.util.Random(seed);
+                    ConfigLoader.setSeed(seed);
                     variables.put("seed", String.valueOf(seed));
                     LOGGER.info(() -> "Nested loop: applied randomSeed override: " + seed);
                 }
@@ -707,10 +767,9 @@ public class ActionRunner {
         if (seed != null) {
             config.addProperty("randomSeed", seed);
             LOGGER.info(() -> "Applied randomSeed override: " + seed);
-            
-            // Also update ConfigLoader for attack generation
-            ConfigLoader.randomSeed = seed;
-            ConfigLoader.RNG = new java.util.Random(seed);
+
+            // Also update ConfigLoader for attack generation (per-thread)
+            ConfigLoader.setSeed(seed);
         }
     }
     

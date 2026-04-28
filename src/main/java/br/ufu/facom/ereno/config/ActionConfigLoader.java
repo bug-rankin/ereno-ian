@@ -39,6 +39,42 @@ public class ActionConfigLoader {
         public LoopConfig loop;
         // Optional parallel execution settings (sequential by default)
         public ParallelExecutionConfig parallelExecution;
+        // Optional phased parallel execution (jobs within a phase run concurrently;
+        // phases are separated by barriers). Mutually exclusive with `loop`.
+        public List<Phase> phases;
+    }
+
+    /**
+     * A group of independent jobs that run concurrently when
+     * {@code parallelExecution.enabled} is true. Phases execute in order
+     * with a barrier between them.
+     */
+    public static class Phase {
+        public String name;
+        // Explicit job list. May be authored directly OR populated by
+        // expanding the {@link #expand} block at load time.
+        public List<PipelineStep> jobs;
+        // Optional sugar: cartesian product of named axes applied to a
+        // template step. Substituted variables use ${axisName} syntax.
+        public Expansion expand;
+    }
+
+    /**
+     * Cartesian-product expansion of a template step. Each axis is a
+     * named list of values; one job is generated per combination.
+     *
+     * <p>The template is parsed as a raw {@link JsonObject} so that
+     * <code>${var}</code> placeholders may appear inside fields that are
+     * statically typed (e.g. {@code parameterOverrides.randomSeed: Long}).
+     * Substitution runs on the raw JSON, and Gson then coerces the resulting
+     * strings into the target types when deserializing into a {@link PipelineStep}.</p>
+     */
+    public static class Expansion {
+        // Map of axis name -> list of values (e.g. {"variant": ["a","b"], "seed": [42,43]}).
+        public java.util.Map<String, List<Object>> axes;
+        // Template step as raw JSON. Rendered with ${axisName} placeholders
+        // for each combination, then deserialized to PipelineStep.
+        public JsonObject template;
     }
 
     public static class ParallelExecutionConfig {
@@ -124,9 +160,126 @@ public class ActionConfigLoader {
 
         // Initialize RNG if seed is provided
         if (mainConfig.commonConfig != null && mainConfig.commonConfig.randomSeed != null) {
-            ConfigLoader.randomSeed = mainConfig.commonConfig.randomSeed;
-            ConfigLoader.RNG = new java.util.Random(mainConfig.commonConfig.randomSeed);
+            ConfigLoader.setSeed(mainConfig.commonConfig.randomSeed);
             LOGGER.info(() -> "Random seed set to: " + mainConfig.commonConfig.randomSeed);
+        }
+
+        // Expand any phase.expand sugar into explicit jobs.
+        expandPhases();
+        validatePhasesAndLoop();
+    }
+
+    /**
+     * If a phase has an {@code expand} block, take the cartesian product of
+     * its axes, render the template via {@link VariableSubstitutor}, and
+     * append the resulting jobs to {@code phase.jobs}.
+     */
+    private void expandPhases() {
+        if (mainConfig == null || mainConfig.phases == null) return;
+        for (Phase phase : mainConfig.phases) {
+            if (phase == null || phase.expand == null) continue;
+            Expansion ex = phase.expand;
+            if (ex.template == null) {
+                throw new IllegalArgumentException(
+                        "Phase '" + phase.name + "' has expand without template");
+            }
+            if (ex.axes == null || ex.axes.isEmpty()) {
+                throw new IllegalArgumentException(
+                        "Phase '" + phase.name + "' expand must declare at least one axis");
+            }
+            if (phase.jobs == null) {
+                phase.jobs = new java.util.ArrayList<>();
+            }
+            List<java.util.Map<String, String>> combos = cartesianProduct(ex.axes);
+            Gson gson = new Gson();
+            for (java.util.Map<String, String> vars : combos) {
+                // Substitute on the raw JSON object first, then deserialize.
+                // This lets ${var} placeholders appear inside statically typed
+                // fields (e.g. parameterOverrides.randomSeed: Long).
+                JsonObject rendered = br.ufu.facom.ereno.utils.VariableSubstitutor.substitute(ex.template, vars);
+                PipelineStep cloned = gson.fromJson(rendered, PipelineStep.class);
+                phase.jobs.add(cloned);
+            }
+            LOGGER.info(() -> "Phase '" + phase.name + "' expanded to " + phase.jobs.size() + " jobs");
+        }
+    }
+
+    /**
+     * Cartesian product over a map of axis -> values. Each output entry is a
+     * variable map suitable for {@link VariableSubstitutor#substitute}.
+     */
+    private static List<java.util.Map<String, String>> cartesianProduct(
+            java.util.Map<String, List<Object>> axes) {
+        List<java.util.Map<String, String>> result = new java.util.ArrayList<>();
+        result.add(new java.util.LinkedHashMap<>());
+        for (java.util.Map.Entry<String, List<Object>> entry : axes.entrySet()) {
+            String axis = entry.getKey();
+            List<Object> values = entry.getValue();
+            if (values == null || values.isEmpty()) {
+                throw new IllegalArgumentException("Axis '" + axis + "' has no values");
+            }
+            List<java.util.Map<String, String>> next = new java.util.ArrayList<>();
+            for (java.util.Map<String, String> partial : result) {
+                for (Object v : values) {
+                    java.util.Map<String, String> copy = new java.util.LinkedHashMap<>(partial);
+                    copy.put(axis, formatAxisValue(v));
+                    next.add(copy);
+                }
+            }
+            result = next;
+        }
+        return result;
+    }
+
+    /**
+     * Render an axis value as a string for placeholder substitution. Gson
+     * deserializes {@code List<Object>} numbers as {@code Double}; for
+     * whole numbers we strip the trailing ".0" so that values like 42 don't
+     * become "42.0" (which then fails to coerce back into Long fields).
+     */
+    private static String formatAxisValue(Object v) {
+        if (v instanceof Double) {
+            double d = (Double) v;
+            if (!Double.isInfinite(d) && !Double.isNaN(d) && d == Math.floor(d)) {
+                return Long.toString((long) d);
+            }
+        }
+        if (v instanceof Float) {
+            float f = (Float) v;
+            if (!Float.isInfinite(f) && !Float.isNaN(f) && f == Math.floor(f)) {
+                return Long.toString((long) f);
+            }
+        }
+        return String.valueOf(v);
+    }
+
+    /** Reject configs that mix phases with loop-style execution. */
+    private void validatePhasesAndLoop() {
+        if (mainConfig == null) return;
+        boolean hasPhases = mainConfig.phases != null && !mainConfig.phases.isEmpty();
+        boolean hasLoop = mainConfig.loop != null;
+        if (hasPhases && hasLoop) {
+            throw new IllegalArgumentException(
+                    "Pipeline config cannot declare both 'phases' and 'loop'. Use one or the other.");
+        }
+        if (hasPhases) {
+            for (Phase phase : mainConfig.phases) {
+                if (phase.jobs == null || phase.jobs.isEmpty()) {
+                    throw new IllegalArgumentException(
+                            "Phase '" + phase.name + "' has no jobs (after expansion).");
+                }
+                for (PipelineStep job : phase.jobs) {
+                    if (job.action == null || job.action.trim().isEmpty()) {
+                        throw new IllegalArgumentException(
+                                "Phase '" + phase.name + "' contains a job without 'action'");
+                    }
+                    if (job.inline == null && (job.actionConfigFile == null || job.actionConfigFile.trim().isEmpty())) {
+                        throw new IllegalArgumentException(
+                                "Phase '" + phase.name + "' job '" + job.action
+                                        + "' must declare 'inline' or 'actionConfigFile'");
+                    }
+                }
+            }
         }
     }
 

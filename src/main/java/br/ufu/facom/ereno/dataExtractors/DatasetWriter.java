@@ -22,8 +22,18 @@ public class DatasetWriter {
     static boolean replace = true;
     // Backwards-compatible alias used across the codebase. Points to centralized Labels.
     public static String[] label = br.ufu.facom.ereno.util.Labels.LABELS;
-    // Binary classification mode: if true, use {normal, attack} instead of multi-class labels
-    public static boolean binaryClassificationMode = false;
+    // Binary classification mode: per-thread so concurrent jobs don't race.
+    private static final ThreadLocal<Boolean> BINARY_MODE = ThreadLocal.withInitial(() -> Boolean.FALSE);
+
+    /** Returns the binary-classification flag for the current thread. */
+    public static boolean isBinaryClassificationMode() {
+        return Boolean.TRUE.equals(BINARY_MODE.get());
+    }
+
+    /** Sets the binary-classification flag for the current thread. */
+    public static void setBinaryClassificationMode(boolean enabled) {
+        BINARY_MODE.set(enabled);
+    }
 
     public static class Debug {
         public static boolean gooseMessages = false;
@@ -222,7 +232,7 @@ public class DatasetWriter {
         write("@attribute delay numeric"); // temporal consistency 69
         write("@attribute e2eLatency numeric"); // temporal consistency 70
         write("@attribute receivedTimestamp numeric"); // temporal consistency 71
-    String classLine = binaryClassificationMode ? 
+    String classLine = isBinaryClassificationMode() ? 
         "@attribute class {" + Labels.asArffSetBinary() + "}" :
         "@attribute class {" + Labels.asArffSet() + "}";
 
@@ -334,7 +344,7 @@ public class DatasetWriter {
         write("@attribute timeFromLastChange numeric"); // temporal consistency 68
         write("@attribute e2eLatency numeric"); // temporal consistency 69
         write("@attribute receivedTimestamp numeric"); // temporal consistency 70
-    String classLine = binaryClassificationMode
+    String classLine = isBinaryClassificationMode()
         ? "@attribute class {" + Labels.asArffSetBinary() + "}"
         : "@attribute class {" + label[0] + ", " + label[1] + ", " + label[2] + ", " + label[3] + ", " + label[4] + ", " + label[5] + ", " + label[6] + ", " + label[7] + ", " + label[8] + ", "+ label[9] + "}";
 

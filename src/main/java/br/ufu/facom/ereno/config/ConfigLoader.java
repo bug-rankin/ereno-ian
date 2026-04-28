@@ -19,11 +19,39 @@ public class ConfigLoader {
     public static OutputConfig output = new OutputConfig();
     public static DevicesConfig devices = new DevicesConfig();
     public static BenignDataConfig benignData = new BenignDataConfig();
-    // optional global seed for deterministic runs (null -> use system time)
-    public static Long randomSeed = null;
-    // shared RNG used across the codebase
-    //public static java.util.Random RNG = new java.util.Random(System.nanoTime());
-    public static java.util.Random RNG;
+
+    // Per-thread random seed for deterministic, isolated parallel runs.
+    // Access via getSeed() / setSeed(Long).
+    private static final ThreadLocal<Long> SEED = new ThreadLocal<>();
+
+    /**
+     * Shared RNG used across the codebase. Backed by a per-thread
+     * {@link java.util.Random} so concurrent jobs get isolated streams.
+     * Reads (e.g. {@code RNG.nextInt(n)}) are unchanged at call sites;
+     * to reseed the current thread, call {@link #setSeed(Long)} or
+     * {@code RNG.setSeed(seed)}.
+     */
+    public static final ThreadScopedRandom RNG = new ThreadScopedRandom();
+
+    /** Returns the seed associated with the current thread, or null if unset. */
+    public static Long getSeed() {
+        return SEED.get();
+    }
+
+    /**
+     * Set the seed for the current thread (and reseed the per-thread RNG).
+     * Pass {@code null} to clear the thread's seed; the RNG will lazily
+     * re-seed itself from {@code System.nanoTime()} on next use.
+     */
+    public static void setSeed(Long seed) {
+        if (seed == null) {
+            SEED.remove();
+            RNG.clearCurrentThread();
+        } else {
+            SEED.set(seed);
+            RNG.setSeed(seed);
+        }
+    }
 
     public static void load() throws IOException {
         load("config/configparams.json");
@@ -43,12 +71,11 @@ public class ConfigLoader {
                 sanitizeDefaults();
                 if (h.devices != null) devices = h.devices;
                 if (h.benignData != null) benignData = h.benignData;
-                // load optional global seed
+                // load optional global seed (applies to the loading thread)
                 if (h.randomSeed != null) {
-                    randomSeed = h.randomSeed;
-                    RNG = new java.util.Random(randomSeed);
+                    setSeed(h.randomSeed);
                 } else {
-                    RNG = new java.util.Random(System.nanoTime());
+                    setSeed(null);
                 }
             }
         }

@@ -203,12 +203,11 @@ public class TrainModelAction {
     }
     
     private static Classifier createClassifier(String name, Config.ClassifierParameters params) {
-        // Derive a per-classifier seed from the global random seed (if set) so that
+        // Derive a per-classifier seed from the per-thread random seed (if set) so that
         // classifiers with internal randomness (RandomForest, REPTree) produce
         // distinct models across seed-varied training runs.
-        Integer seed = (ConfigLoader.randomSeed != null)
-                ? (int) ConfigLoader.randomSeed.longValue()
-                : null;
+        Long seedLong = ConfigLoader.getSeed();
+        Integer seed = (seedLong != null) ? seedLong.intValue() : null;
 
         switch (name.toUpperCase()) {
             case "J48":
