@@ -35,7 +35,10 @@ public class ConfigLoader {
     }
 
     public static void load() throws IOException {
-        load("config/configparams.json");
+        java.io.File f = new java.io.File("config/configparams.json");
+        if (f.exists()) {
+            load(f.getPath());
+        }
     }
 
     public static void load(String path) throws IOException {
